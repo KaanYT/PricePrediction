@@ -22,13 +22,44 @@ Master Thesis Application
     * Environment Name : `MScThesis`
 * Programming Language : `Python 3.6`
 * Database : `MongoDB 4.x`
-* IDEA : `IntelliJ - PyCharm`
+* IDEA (Recomended) : `IntelliJ - PyCharm`
 
 ### Package List
 * pymongo
+    * MongoDB Access
+* mongolog 
+    * Centralized Logging 
 * keras
+* feedparser
+* configparser
+* newspaper3k
+    *  Info 
+        * Use [NLTK - Natural Language Toolkit](https://www.nltk.org/data.html)
+        * Download Corpora ` curl https://raw.githubusercontent.com/codelucas/newspaper/master/download_corpora.py | python3`
+        * Corpora List
+            * brown - Required for FastNPExtractor
+            * punkt - Required for WordTokenizer
+            * maxent_treebank_pos_tagger - Required for NLTKTagger
+            * movie_reviews - Required for NaiveBayesAnalyzer
+            * wordnet - Required for lemmatization and Wordnet
+            * stopwords
+    * `brew install libxml2 libxslt`
+    * `brew install libtiff libjpeg webp little-cms2`
+    * `pip3 install newspaper3k` 
+        * `conda install -c conda-forge newspaper3k`
+        
+    
+* archivecdx
+    * archive-cdx
 
 ## Test Environment
 
 * Test Dependency
     * Run `mnist_cnn.py`
+
+### Helpers
+
+1. MongoDB 
+    * Python Examples : `https://github.com/janbodnar/pymongo-examples`
+    * 
+2. 
