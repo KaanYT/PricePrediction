@@ -47,7 +47,6 @@ class AC(object):
                                                      url=post.link,
                                                      iaurl=('http://web.archive.org/web/%sid_/%s' % (history.timestamp, post.link)),
                                                      article=article))
-                        print("URL :" + post.link)
                     except Exception as exception:
                         Logger().get_logger().error(type(exception).__name__, exc_info=True)
                 pool = NewsPool()

@@ -47,7 +47,7 @@ Master Thesis Application
     * `brew install libtiff libjpeg webp little-cms2`
     * `pip3 install newspaper3k` 
         * `conda install -c conda-forge newspaper3k`
-        
+        * `import nltk; nltk.download()`
     
 * archivecdx
     * archive-cdx
