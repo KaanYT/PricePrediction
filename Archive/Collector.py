@@ -11,12 +11,14 @@ from Logger.Log import Logger
 
 
 class AC(object):
+    Pass_List = ["", "", "", "", ""]
 
     def collect(self):
         sites = self.read_website_collection()
         db=Mongo()
         count = 0
-        for site in sites:
+        for info in sites:
+            (site, category) = info.split(" ")
             siteHistory = archivecdx.Listing(site,
                                              fl=["original", "timestamp", "digest", "statuscode"],
                                              filter=["statuscode:200"])
@@ -25,6 +27,8 @@ class AC(object):
                 timestamp = datetime.strptime(history.timestamp, "%Y%m%d%H%M%S")
                 link = 'http://web.archive.org/web/%sid_/%s' % (history.timestamp, history.original)
                 print('(%d) - Archive Link : %s ' % (count, link))
+                if history.timestamp in self.Pass_List: #Control
+                    continue
                 d = feedparser.parse(link)
                 newslist = []
                 for post in d.entries:
@@ -43,6 +47,7 @@ class AC(object):
                         newslist.append(News.RssNews(title=post.title,
                                                      time=dt,
                                                      summery=post.summary,
+                                                     category=category,
                                                      tags='',
                                                      url=post.link,
                                                      iaurl=('http://web.archive.org/web/%sid_/%s' % (history.timestamp, post.link)),

@@ -8,16 +8,18 @@ class RssNews(object):
 
     """News objects abstract an online news article page
     """
-    def __init__(self, title='', time='', summery='', url='', iaurl='', tags=[], article=Article('')):
+    def __init__(self, title='', time='', summery='', category='', url='', iaurl='', tags=[], article=Article('')):
         self.RssTitle = title
         self.RssTime = time
         self.RssSummery = summery
         self.RssTags = tags
+        self.RssCategory = category
         self.URL = url
         self.IA_URL = iaurl
         self.article = article
         self.row = ''
         self.selected_url = ''
+
 
     def download(self):
         self.selected_url = self.check_url()
@@ -42,6 +44,7 @@ class RssNews(object):
             'RSS_Title': self.RssTitle,
             'RSS_Date': self.RssTime,
             'RSS_Summery': self.RssSummery,
+            'RSS_Category': self.RssCategory,
             'URL': self.selected_url,
             'Title': self.article.title,
             'Date': self.article.publish_date,

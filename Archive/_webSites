@@ -1,68 +1,68 @@
-http://feeds.bbci.co.uk/news/business/rss.xml
-http://feeds.bbci.co.uk/news/world/rss.xml
-http://feeds.bbci.co.uk/news/rss.xml
-https://www.huffpost.com/section/business/feed
-https://www.huffpost.com/section/money/feed
-https://www.huffpost.com/section/politics/feed
-https://tradingeconomics.com/rss/news.aspx?i=gdp
-https://tradingeconomics.com/rss/news.aspx?i=private+sector+credit
-https://tradingeconomics.com/rss/
-http://www.forbes.com/technology/feed/
-http://www.forbes.com/business/feed/
-http://www.forbes.com/politics/feed/
-http://www.forbes.com/money/feed/
-https://time.com/tech/feed/
-https://time.com/business/feed/
-https://time.com/politics/feed/
-https://rss.nytimes.com/services/xml/rss/nyt/Business.xml
-https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml
-https://news.yahoo.com/rss/business
-https://news.yahoo.com/rss/politic
-http://www.politico.com/rss/economy.xml
-http://www.politico.com/rss/politics08.xml
-http://rss.cnn.com/rss/cnn_allpolitics.rss
-http://rss.cnn.com/rss/edition_world.rss
-http://rss.cnn.com/rss/money_news_international.rss
-https://www.economist.com/business/rss.xml
-https://www.economist.com/international/rss.xml
-https://www.economist.com/finance-and-economics/rss.xml
-http://www.buzzfeed.com/politics.xml
-http://www.buzzfeed.com/business.xml
-http://feeds.foxnews.com/foxnews/politics
-http://feeds.foxnews.com/foxnews/business
-http://rss.nytimes.com/services/xml/rss/nyt/Politics.xml
-http://rss.nytimes.com/services/xml/rss/nyt/Business.xml
-http://rss.nytimes.com/services/xml/rss/nyt/World.xml
-http://feeds.reuters.com/Reuters/PoliticsNews
-http://feeds.reuters.com/Reuters/BusinessNews
-http://feeds.reuters.com/news/wealth
-http://feeds.reuters.com/reuters/technologyNews
-http://feeds.reuters.com/reuters/topNews
-http://www.washingtontimes.com/rss/headlines/news/politics/
-http://www.washingtontimes.com/rss/headlines/news/business-economy/
-http://www.washingtontimes.com/rss/headlines/news/world/
-https://feeds.a.dj.com/rss/RSSWorldNews.xml
-https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml
-https://feeds.a.dj.com/rss/RSSMarketsMain.xml
-https://feeds.a.dj.com/rss/RSSWSJD.xml
-http://feeds.washingtonpost.com/rss/politics
-http://feeds.washingtonpost.com/rss/business
-http://feeds.washingtonpost.com/rss/world
-https://www.newyorker.com/feed/news
-https://www.newyorker.com/feed/business
-https://www.newyorker.com/feed/tech
-http://feeds.reuters.com/reuters/businessNews
-https://www.theatlantic.com/feed/channel/politics/
-https://www.theatlantic.com/feed/channel/technology/
-https://www.theatlantic.com/feed/channel/business/
-https://www.theatlantic.com/feed/channel/international/
-http://www.bloomberg.com/feed/podcast/on-the-economy.xml
-https://www.bloombergquint.com/frontend-api/stories?offset=265&section-id=1509&sort=latest-published
-http://www.bloomberg.com/news/rss/politics.xml
-http://www.bloomberg.com/news/rss/economy.xml
-http://www.bloomberg.com/news/rss/stocks.xml
-http://www.bloomberg.com/news/rss/bonds.xml
-http://www.bloomberg.com/news/rss/commodities.xml
-http://www.bloomberg.com/news/rss/energy.xml
-http://www.bloomberg.com/news/rss/exclusive.xml
-http://www.bloomberg.com/news/rss/topworldwide.xml
+http://feeds.bbci.co.uk/news/business/rss.xml Business
+http://feeds.bbci.co.uk/news/world/rss.xml World
+http://feeds.bbci.co.uk/news/rss.xml News
+https://www.huffpost.com/section/business/feed Business
+https://www.huffpost.com/section/money/feed Money
+https://www.huffpost.com/section/politics/feed Politics
+https://tradingeconomics.com/rss/news.aspx?i=gdp Business
+https://tradingeconomics.com/rss/news.aspx?i=private+sector+credit Business
+https://tradingeconomics.com/rss/ Business
+http://www.forbes.com/technology/feed/ Technology
+http://www.forbes.com/business/feed/ Business
+http://www.forbes.com/politics/feed/ Politics
+http://www.forbes.com/money/feed/ Money
+https://time.com/tech/feed/ Tech
+https://time.com/business/feed/ Business
+https://time.com/politics/feed/ Politics
+https://rss.nytimes.com/services/xml/rss/nyt/Business.xml Business
+https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml Politics
+https://news.yahoo.com/rss/business Business
+https://news.yahoo.com/rss/politic Politics
+http://www.politico.com/rss/economy.xml Business
+http://www.politico.com/rss/politics08.xml Politics
+http://rss.cnn.com/rss/cnn_allpolitics.rss Politics
+http://rss.cnn.com/rss/edition_world.rss World
+http://rss.cnn.com/rss/money_news_international.rss Money
+https://www.economist.com/business/rss.xml Business
+https://www.economist.com/international/rss.xml International
+https://www.economist.com/finance-and-economics/rss.xml Economics
+http://www.buzzfeed.com/politics.xml Politics
+http://www.buzzfeed.com/business.xml Business
+http://feeds.foxnews.com/foxnews/politics Politics
+http://feeds.foxnews.com/foxnews/business Business
+http://rss.nytimes.com/services/xml/rss/nyt/Politics.xml Politics
+http://rss.nytimes.com/services/xml/rss/nyt/Business.xml Business
+http://rss.nytimes.com/services/xml/rss/nyt/World.xml World
+http://feeds.reuters.com/Reuters/PoliticsNews Politics
+http://feeds.reuters.com/Reuters/BusinessNews Business
+http://feeds.reuters.com/news/wealth Wealth
+http://feeds.reuters.com/reuters/technologyNews Tech
+http://feeds.reuters.com/reuters/topNews News
+http://www.washingtontimes.com/rss/headlines/news/politics/ Politics
+http://www.washingtontimes.com/rss/headlines/news/business-economy/ Business
+http://www.washingtontimes.com/rss/headlines/news/world/ World
+https://feeds.a.dj.com/rss/RSSWorldNews.xml News
+https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml Business
+https://feeds.a.dj.com/rss/RSSMarketsMain.xml Market
+https://feeds.a.dj.com/rss/RSSWSJD.xml Business
+http://feeds.washingtonpost.com/rss/politics Politics
+http://feeds.washingtonpost.com/rss/business Business
+http://feeds.washingtonpost.com/rss/world World
+https://www.newyorker.com/feed/news News
+https://www.newyorker.com/feed/business Business
+https://www.newyorker.com/feed/tech Tech
+http://feeds.reuters.com/reuters/businessNews Business
+https://www.theatlantic.com/feed/channel/politics/ Politics
+https://www.theatlantic.com/feed/channel/technology/ Tech
+https://www.theatlantic.com/feed/channel/business/ Business
+https://www.theatlantic.com/feed/channel/international/ International
+http://www.bloomberg.com/feed/podcast/on-the-economy.xml Business
+https://www.bloombergquint.com/frontend-api/stories?offset=265&section-id=1509&sort=latest-published Business
+http://www.bloomberg.com/news/rss/politics.xml Politics
+http://www.bloomberg.com/news/rss/economy.xml Economy
+http://www.bloomberg.com/news/rss/stocks.xml Stocks
+http://www.bloomberg.com/news/rss/bonds.xml Bonds
+http://www.bloomberg.com/news/rss/commodities.xml Commodities
+http://www.bloomberg.com/news/rss/energy.xml Energy
+http://www.bloomberg.com/news/rss/exclusive.xml Exclusive
+http://www.bloomberg.com/news/rss/topworldwide.xml World
