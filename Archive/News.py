@@ -22,7 +22,11 @@ class RssNews(object):
     def download(self):
         self.selected_url = self.check_url()
         self.article.url = self.selected_url
-        self.article.build()
+        self.article.config.request_timeout = 180
+        try:
+            self.article.build()
+        except Exception:
+            Logger().get_logger().error('Article Build Error', exc_info=True)
         self.create_database_object()
         self.save_to_db()
 
@@ -42,13 +46,15 @@ class RssNews(object):
             'Title': self.article.title,
             'Date': self.article.publish_date,
             'HTML': self.article.html,
+            'Article': self.article.text,
             'Summery_Generated': self.article.summary,
             'Keywords_Generated': self.article.keywords,
             'Authors': self.article.authors,
             'Meta_Lang': self.article.meta_lang,
+            'Meta_Data': self.article.meta_data,
+            'Meta_Desc': self.article.meta_description,
             'Canonical_Link': self.article.canonical_link
         }
-        print(self.article.source_url)
 
     def check_url(self):
         try:

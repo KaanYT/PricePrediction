@@ -2,17 +2,20 @@ import os
 import feedparser
 import archivecdx
 from newspaper import Article
-
+from Database.MongoDB import Mongo
 from datetime import datetime
 from time import mktime
 from Archive import News
 from Archive.MultiThreadHelper import NewsPool  #Multi Thread
+from Logger.Log import Logger
 
 
 class AC(object):
 
     def collect(self):
         sites = self.read_website_collection()
+        db=Mongo()
+        count = 0
         for site in sites:
             siteHistory = archivecdx.Listing(site,
                                              fl=["original", "timestamp", "digest", "statuscode"],
@@ -21,22 +24,32 @@ class AC(object):
             for history in siteHistory:
                 timestamp = datetime.strptime(history.timestamp, "%Y%m%d%H%M%S")
                 link = 'http://web.archive.org/web/%sid_/%s' % (history.timestamp, history.original)
+                print('(%d) - Archive Link : %s ' % (count, link))
                 d = feedparser.parse(link)
                 newslist = []
                 for post in d.entries:
-                    if post.published_parsed:
-                        dt = datetime.fromtimestamp(mktime(post.published_parsed))
-                    else:
-                        dt = ''
-                    article = Article(post.link)
-                    print(post.link)
-                    newslist.append(News.RssNews(title=post.title,
-                                                 time=dt,
-                                                 summery=post.summary,
-                                                 tags='',
-                                                 url=post.link,
-                                                 iaurl=('http://web.archive.org/web/%sid_/%s' % (history.timestamp, post.link)),
-                                                 article=article))
+                    try:
+                        count = count+1
+                        if db.already_exists(post.link):
+                            continue
+                        if post.published_parsed:
+                            try:
+                                dt = datetime.fromtimestamp(mktime(post.published_parsed))
+                            except AttributeError:
+                                dt = ''
+                        else:
+                            dt = ''
+                        article = Article(post.link)
+                        newslist.append(News.RssNews(title=post.title,
+                                                     time=dt,
+                                                     summery=post.summary,
+                                                     tags='',
+                                                     url=post.link,
+                                                     iaurl=('http://web.archive.org/web/%sid_/%s' % (history.timestamp, post.link)),
+                                                     article=article))
+                        print("URL :" + post.link)
+                    except Exception as exception:
+                        Logger().get_logger().error(type(exception).__name__, exc_info=True)
                 pool = NewsPool()
                 pool.set(newslist)
                 pool.join()
