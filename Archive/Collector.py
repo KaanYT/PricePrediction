@@ -11,7 +11,7 @@ from Logger.Log import Logger
 
 
 class AC(object):
-    Pass_List = ["", "", "", "", ""]
+    #Pass_List = ["", "", "", "", ""]
 
     def collect(self):
         sites = self.read_website_collection()
@@ -26,9 +26,10 @@ class AC(object):
             for history in siteHistory:
                 timestamp = datetime.strptime(history.timestamp, "%Y%m%d%H%M%S")
                 link = 'http://web.archive.org/web/%sid_/%s' % (history.timestamp, history.original)
-                print('(%d) - Archive Link : %s ' % (count, link))
-                if history.timestamp in self.Pass_List: #Control
-                    continue
+                print('(%d) - Archive Link : %s - %s' % (count, link, str(datetime.today())))
+                #if site == "http://feeds.bbci.co.uk/news/business/rss.xml":
+                #    if history.timestamp in self.Pass_List: #Control
+                #        continue
                 d = feedparser.parse(link)
                 newslist = []
                 for post in d.entries:
