@@ -27,10 +27,10 @@ class RssNews(object):
         self.article.config.request_timeout = 180
         try:
             self.article.build()
+            self.create_database_object()
+            self.save_to_db()
         except Exception:
             Logger().get_logger().error('Article Build Error', exc_info=True)
-        self.create_database_object()
-        self.save_to_db()
 
     def save_to_db(self):
         mongo = Mongo()
