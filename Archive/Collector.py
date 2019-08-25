@@ -8,6 +8,7 @@ from time import mktime
 from Archive import News
 from Archive.MultiThreadHelper import NewsPool  #Multi Thread
 from Logger.Log import Logger
+import socket
 
 
 class AC(object):
@@ -15,6 +16,7 @@ class AC(object):
 
     def collect(self):
         sites = self.read_website_collection()
+        socket.setdefaulttimeout(120)  # 120 seconds
         db=Mongo()
         count = 0
         for info in sites:
@@ -30,7 +32,11 @@ class AC(object):
                 #if site == "http://feeds.bbci.co.uk/news/business/rss.xml":
                 #    if history.timestamp in self.Pass_List: #Control
                 #        continue
-                d = feedparser.parse(link)
+                try:
+                    d = feedparser.parse(link)
+                except Exception as exception:
+                    print("FeedParser Timeout ?")
+                    Logger().get_logger().error(type(exception).__name__, exc_info=True)
                 newslist = []
                 for post in d.entries:
                     try:
