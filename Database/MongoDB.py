@@ -30,6 +30,14 @@ class Mongo(object):
         else:
             return False
 
+    def is_title_url_exists(self, title, link):
+        collection = self.instance.db.get_collection(Config.database.collection)
+        if collection.count_documents({ '$or': [{"Title": {'$regex': title}}, {"RSS_Title": {'$regex': title}}, {"URL": link}]}, limit=1) != 0:
+            return True
+        else:
+            return False
+
+
 def main():
     #print("Hello World!")
     pwd = os.path.dirname(os.path.abspath(__file__))
