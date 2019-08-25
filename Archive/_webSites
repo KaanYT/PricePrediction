@@ -20,12 +20,17 @@ https://news.yahoo.com/rss/business Business
 https://news.yahoo.com/rss/politic Politics
 http://www.politico.com/rss/economy.xml Business
 http://www.politico.com/rss/politics08.xml Politics
+http://www.politico.com/rss/congress.xml Politics
 http://rss.cnn.com/rss/cnn_allpolitics.rss Politics
 http://rss.cnn.com/rss/edition_world.rss World
 http://rss.cnn.com/rss/money_news_international.rss Money
 https://www.economist.com/business/rss.xml Business
 https://www.economist.com/international/rss.xml International
 https://www.economist.com/finance-and-economics/rss.xml Economics
+https://www.economist.com/sections/economics/rss.xml Economics
+https://www.economist.com/topics/banking/index.xml Economics
+https://www.economist.com/sections/business-finance/rss.xml Business
+https://www.economist.com/rss/business_rss.xml
 http://www.buzzfeed.com/politics.xml Politics
 http://www.buzzfeed.com/business.xml Business
 http://feeds.foxnews.com/foxnews/politics Politics
@@ -66,3 +71,16 @@ http://www.bloomberg.com/news/rss/commodities.xml Commodities
 http://www.bloomberg.com/news/rss/energy.xml Energy
 http://www.bloomberg.com/news/rss/exclusive.xml Exclusive
 http://www.bloomberg.com/news/rss/topworldwide.xml World
+http://www.ft.com/rss/companies/financials Economics
+http://www.ft.com/rss/companies/banks Economics
+http://www.ft.com/rss/companies/technology Tech
+http://www.ft.com/rss/home/us Economy
+http://www.ft.com/news-feed Economy
+http://online.wsj.com/xml/rss/3_7455.xml Tech
+http://online.wsj.com/xml/rss/3_7086.xml Economy
+http://online.wsj.com/xml/rss/3_7433.xml Economy
+http://online.wsj.com/xml/rss/3_7014.xml Business
+http://online.wsj.com/xml/rss/3_7085.xml News
+http://www.wsj.com/xml/rss/3_7031.xml Economy
+http://www.wsj.com/xml/rss/3_7014.xml Business
+http://www.wsj.com/xml/rss/3_7085.xml News
