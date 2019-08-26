@@ -3,15 +3,14 @@ from datetime import datetime
 from newspaper import Article
 from Archive import News
 import archivecdx
-import csv
-import sys
 import pandas as pd
 from Logger.Log import Logger
 import sqlite3
 import re
+from Archive.MultiThreadHelper import NewsPool  #Multi Thread
 
 class FileCollector(object):
-    SQL_LOCATION = '/Users/kaaneksen/Desktop/Teach/143,000 articles from 15 American publications/all-the-news.db'
+    SQL_LOCATION = "C:\\Users\\eksen\\Downloads\\all-the-news.db"
 
     Title = 0
     Author = 1
@@ -23,7 +22,6 @@ class FileCollector(object):
     Url = 7
 
     def collect(self):
-        csv.field_size_limit(sys.maxsize)  # Setup CSV Size
         db = Mongo()
         conn = sqlite3.connect(self.SQL_LOCATION)
         c = conn.cursor()
@@ -38,7 +36,6 @@ class FileCollector(object):
             if url == "" or url is None or date == "":  # Is There Url Or Date
                 continue
             if db.is_title_url_exists(title, url):
-                print("Is Exist")
                 continue
             allUrls = FileCollector.extract_url_from_text(url)
             article = Article(allUrls[1])
@@ -52,9 +49,15 @@ class FileCollector(object):
                                          url=allUrls[1],
                                          iaurl=allUrls[0],
                                          article=article))
+            print(line_count)
+            if len(newslist)==20:
+                pool = NewsPool()
+                pool.set(newslist)
+                pool.join()
+                newslist = []
             line_count += 1
         print(f'\t{line_count}')
-        print(f'\t{newslist.count}')
+        print(f'\t{len(newslist)}')
     @staticmethod
     def str2date(string):
         "Parse a string into a datetime object."
