@@ -5,13 +5,13 @@ from newspaper import Article
 from Database.MongoDB import Mongo
 from datetime import datetime
 from time import mktime
-from Archive import News
-from Archive.MultiThreadHelper import NewsPool  #Multi Thread
+from Archive.News import News
+from Archive.News.MultiThreadHelper import NewsPool  #Multi Thread
 from Logger.Log import Logger
 import socket
 
 
-class AC(object):
+class NWC(object):
     #Pass_List = ["", "", "", "", ""]
 
     def collect(self):

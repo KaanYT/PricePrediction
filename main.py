@@ -1,7 +1,6 @@
 import os
-from Archive.Collector import AC
+from Archive.Market.FinancialDataCollector import FDC
 from ConfigManager import Config
-import newspaper
 
 
 def load_config():
@@ -13,7 +12,7 @@ def main():
     print("Loading Config...")
     load_config()
     print("Loading is loaded. Loading Database...")
-    collector = AC()
+    collector = FDC()
     collector.collect()
 
 

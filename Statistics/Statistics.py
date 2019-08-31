@@ -6,13 +6,15 @@ import calendar
 import os
 from ConfigManager import Config
 
+
 def load_config():
     pwd = os.path.dirname(os.path.abspath(__file__))
     Config.add_config_ini('%s/main.ini' % pwd)
 
+
 class Statistics(object):
-    START_YEAR=2016
-    END_YEAR=2018
+    START_YEAR = 2014
+    END_YEAR = 2018
     categories = ['business', 'politics', 'energy', 'commodities', 'stocks', 'exclusive', 'economy', 'world', 'technology', 'money',
      'news', 'economics', 'tech', 'bonds', ''];
 
@@ -20,8 +22,8 @@ class Statistics(object):
         socket.setdefaulttimeout(120)  # 120 seconds
         db=Mongo()
 
-        start = datetime(self.START_YEAR, 11, 1, 0, 0, 0, 0)
-        end = datetime(self.START_YEAR, 11+1, 1, 0, 0, 0, 0)
+        start = datetime(self.START_YEAR, 1, 1, 0, 0, 0, 0)
+        end = datetime(self.START_YEAR, 1+1, 1, 0, 0, 0, 0)
         collection = db.instance.db.get_collection(Config.database.collection)
         print("\t", end='\t')
         for category in self.categories:
@@ -35,8 +37,8 @@ class Statistics(object):
                                 { "$group": { "_id": None, "counts": { "$push": { "k": "$_id", "v": "$count" } } } },
                                 { "$replaceRoot": { "newRoot": { "$arrayToObject": "$counts" } } } ])
             print(str(start.year) + "." + str(start.month) + " \t " + str(count), end='\t')
-            listResult = list(result)
-            for item in listResult:
+            list_result = list(result)
+            for item in list_result:
                 for category in self.categories:
                     if category in item:
                         print(item[category], end='\t')

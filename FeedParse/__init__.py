@@ -1,4 +1,0 @@
-import feedparser
-
-d = feedparser.parse('http://feedparser.org/docs/examples/atom10.xml')
-print(d['feed'])

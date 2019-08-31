@@ -32,10 +32,25 @@ class Mongo(object):
 
     def is_title_url_exists(self, title, link):
         collection = self.instance.db.get_collection(Config.database.collection)
-        if collection.count_documents({ '$or': [{"URL": link}, {"Title": title}, {"RSS_Title": title}]}, limit=1) != 0:
+        if collection.count_documents({'$or': [{"URL": link}, {"Title": title}, {"RSS_Title": title}]}, limit=1) != 0:
             return True
         else:
             return False
+
+    def is_collection_exist(self, collection_name):
+        print(self.instance.db.list_collection_names())
+        if collection_name in self.instance.db.list_collection_names():
+            return True
+        else:
+            return False
+
+    def create_collection(self, collection_name):
+        if self.is_collection_exist(collection_name):
+            return self.instance.db.get_collection(collection_name)
+        else:
+            collection = self.instance.db.create_collection(collection_name)
+            collection.create_index([("Date", 1), ("Key", 1)], unique=True, name="index_date_key")
+            collection.create_index("Date", name="index_date")
 
 
 def main():

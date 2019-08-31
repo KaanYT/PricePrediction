@@ -1,13 +1,14 @@
 from Database.MongoDB import Mongo
 from datetime import datetime
 from newspaper import Article
-from Archive import News
+from Archive.News import News
 import archivecdx
 import pandas as pd
 from Logger.Log import Logger
 import sqlite3
 import re
-from Archive.MultiThreadHelper import NewsPool  #Multi Thread
+from Archive.News.MultiThreadHelper import NewsPool  #Multi Thread
+
 
 class FileCollector(object):
     SQL_LOCATION = "C:\\Users\\eksen\\Downloads\\all-the-news.db"
@@ -73,7 +74,7 @@ class FileCollector(object):
 
     @staticmethod
     def date_formats():
-        return ["%Y-%m-%d", "%Y/%m/%d", "%Y/%m/%-d"]
+        return ["%Y%m%d%H:%M:%S", "%Y.%m.%d %H:%M:%S", "%Y-%m-%d", "%Y/%m/%d", "%Y/%m/%-d"]
 
     @staticmethod
     def get_category(category,section):
@@ -98,9 +99,9 @@ class FileCollector(object):
     def extract_url_from_text(url):
         urls = re.split('https|http', url)
         if urls.__len__() == 2:
-            return [FileCollector.getArchiveOrgLink(url), "http://" + urls[1]]
+            return [FileCollector.getArchiveOrgLink(url), "http" + urls[1]]
         elif urls.__len__() == 3:
-            return [url, "http://" + urls[2]]
+            return [url, "http" + urls[2]]
         else:
             print(url)
 

@@ -20,7 +20,6 @@ class RssNews(object):
         self.row = ''
         self.selected_url = ''
 
-
     def download(self):
         self.selected_url = self.check_url()
         self.article.url = self.selected_url
@@ -37,9 +36,13 @@ class RssNews(object):
         try:
             mongo.insert(self.row)
         except Exception:
+            print(self.row)
             Logger().get_logger().error('Insert Error', exc_info=True)
 
     def create_database_object(self):
+        for key, value in self.article.meta_data:
+            if key.find('.') != -1:
+                self.article.meta_data.pop(key)
         self.row = {
             'RSS_Title': self.RssTitle,
             'RSS_Date': self.RssTime,
@@ -68,5 +71,6 @@ class RssNews(object):
             else:
                 return self.IA_URL
         except:
+            print("URL:" + self.URL)
             Logger().get_logger().error('URL Exception', exc_info=True)
             return self.IA_URL
