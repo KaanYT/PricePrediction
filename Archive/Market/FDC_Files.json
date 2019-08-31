@@ -1,0 +1,140 @@
+{
+    "XAUUSD": {
+        "Files": ["XAUUSD_2010_2019.csv"],
+        "TimeInterval": 5,
+        "Name": "Gold - United States Dollar",
+        "Type": 2,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE"
+    },
+    "XAGUSD": {
+        "Files": ["XAGUSD_2010_2019.csv"],
+        "TimeInterval": 5,
+        "Name": "Silver - United States Dollar",
+        "Type": 2,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE"
+    },
+    "BRTUSD": {
+        "Files": ["BRENTCMDUSD_2013_2018.csv","BRENTCMDUSD_2019.csv"],
+        "TimeInterval": 5,
+        "Name": "Brent Crude Oil",
+        "Type": 2,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE"
+    },  
+    "LCOUSD": {
+        "Files": ["LIGHTCMDUSD_2013_2014.csv", "LIGHTCMDUSD_2015_2018.csv", "LIGHTCMDUSD_2019.csv"],
+        "TimeInterval": 5,
+        "Name": "Light Crude Oil",
+        "Type": 2,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE",
+        "Link": "https://www.tradingview.com/symbols/NYMEX-CL1!/"
+    },
+    "USDCAD": {
+        "Files": ["USDCAD_2011_2018.csv","USDCAD_2019.csv"],
+        "TimeInterval": 5,
+        "Name": "United States Dollar - Canadian Dollar",
+        "Type": 1,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE"
+    },
+    "USDJPY": {
+        "Files": ["USDJPY2011_2019.csv"],
+        "TimeInterval": 5,
+        "Name": "United States Dollar - Japanese Yen",
+        "Type": 1,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE"
+    },
+    "GBPUSD": {
+        "Files": ["GBPUSD_2010_2018.csv", "GBPUSD_2019.csv"],
+        "TimeInterval": 5,
+        "Name": "Pound Sterling - United States Dollar",
+        "Type": 1,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE"
+    },
+    "EURUSD": {
+        "Files": ["EURUSD_2011_2015.csv", "EURUSD_2016_2019.csv"],
+        "TimeInterval": 5,
+        "Name": "Euro - United States Dollar",
+        "Type": 1,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE"
+    },
+    "TXN": {
+        "Files": ["TXN_5Y_2014_1_1HOUR.csv", "TXN_5Y_2019_1_1HOUR.csv"],
+        "TimeInterval": 60,
+        "Name": "Texas Instruments Incorporated",
+        "Type": 3,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD HH.MM.SS} | OPEN | HIGH | LOW | CLOSE | VOLUME | NUMBER OF TRADES | WEIGHTED AV. PRICE"
+    },
+    "MSFT": {
+        "Files": ["MSFT_5Y_2014_1_1HOUR.csv", "MSFT_5Y_2019_1_1HOUR.csv"],
+        "TimeInterval": 60,
+        "Name": "Microsoft Corporation",
+        "Type": 3,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD HH.MM.SS} | OPEN | HIGH | LOW | CLOSE | VOLUME | NUMBER OF TRADES | WEIGHTED AV. PRICE"
+    },
+    "SBUX": {
+        "Files": ["SBUX_5Y_2014_1_1HOUR.csv", "SBUX_5Y_2019_1_1HOUR.csv"],
+        "TimeInterval": 60,
+        "Name": "Starbucks Corporation",
+        "Type": 3,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD HH.MM.SS} | OPEN | HIGH | LOW | CLOSE | VOLUME | NUMBER OF TRADES | WEIGHTED AV. PRICE"
+    },
+    "NKE": {
+        "Files": ["NKE_5Y_2014_1_1HOUR.csv", "NKE_5Y_2019_1_1HOUR.csv"],
+        "TimeInterval": 60,
+        "Name": "Nike Inc",
+        "Type": 3,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD HH.MM.SS} | OPEN | HIGH | LOW | CLOSE | VOLUME | NUMBER OF TRADES | WEIGHTED AV. PRICE"
+    },
+    "S&P": {
+        "Files": ["SPX_1MIN_2014_12.csv", "SPX_1MIN_2016_12.csv", "SPX_1MIN_2018_12.csv"],
+        "TimeInterval": 1,
+        "Name": "S&P 500 Index",
+        "Type": 4,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE | VOLUME"
+    },
+    "NDX": {
+        "Files": ["2014_12.csv", "2016_12.csv", "2018_12.csv", "2019_3.csv"],
+        "TimeInterval": 1,
+        "Name": "NASDAQ-100",
+        "Type": 4,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE"
+    },
+    "HSI": {
+        "Files": ["HSI_2012_2019.csv", "HSI_2019.csv"],
+        "TimeInterval": 5,
+        "Name": "Hang Seng Index",
+        "Type": 5,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE"
+    },
+    "DJI": {
+        "Files": ["DJI_2012_2018.csv", "DJI_2019.csv"],
+        "TimeInterval": 5,
+        "Name": "Dow Jones Industrial Average",
+        "Type": 5,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE"
+    },
+    "UKX": {
+        "Files": ["FTSE100_2009.csv", "FTSE100_2012_2018.csv"],
+        "TimeInterval": 5,
+        "Name": "FTSE 100 Index",
+        "Type": 5,
+        "Location": "/Users/kaaneksen/Desktop/Teach/Backup/Exchange/Out/",
+        "Format": "DATETIME {YYYY.MM.DD} |TIME {HH:MM:SS} | OPEN | HIGH | LOW | CLOSE",
+        "Desc": "The Financial Times Stock Exchange 100 Index, also called the FTSE 100 Index, FTSE 100, FTSE, or, informally, the 'Footsie', is a share index of the 100 companies listed on the London Stock Exchange with the highest market capitalisation."
+    }
+}
