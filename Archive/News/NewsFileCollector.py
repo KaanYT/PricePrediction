@@ -1,5 +1,5 @@
 from Database.MongoDB import Mongo
-from datetime import datetime
+from Helper.DateHelper import DateHelper
 from newspaper import Article
 from Archive.News import News
 import archivecdx
@@ -32,7 +32,7 @@ class FileCollector(object):
         newslist = []
         for row in c:
             url = row[self.Url]
-            date = self.str2date(row[self.Date])
+            date = DateHelper.str2date(row[self.Date])
             title = row[self.Title]
             if url == "" or url is None or date == "":  # Is There Url Or Date
                 continue
@@ -59,22 +59,6 @@ class FileCollector(object):
             line_count += 1
         print(f'\t{line_count}')
         print(f'\t{len(newslist)}')
-    @staticmethod
-    def str2date(string):
-        "Parse a string into a datetime object."
-        if string == '' or pd.isnull(string) or string == 'nan' or string is None:
-            return ""
-        string = string.split('"', 1)[0]
-        for fmt in FileCollector.date_formats():
-            try:
-                return datetime.strptime(string, fmt)
-            except ValueError:
-                pass
-        raise ValueError("'%s' is not a recognized date/time" % string)
-
-    @staticmethod
-    def date_formats():
-        return ["%Y%m%d%H:%M:%S", "%Y.%m.%d %H:%M:%S", "%Y-%m-%d", "%Y/%m/%d", "%Y/%m/%-d"]
 
     @staticmethod
     def get_category(category,section):
@@ -133,11 +117,3 @@ class FileCollector(object):
             arr = arr[size:]
         arrs.append(arr)
         return arrs
-
-    @staticmethod
-    def is_time_of_date_exist(date):
-        if date.hour == 0 and date.minute == 0 and date.second == 0 and date.microsecond == 0:
-            return False
-        else:
-            return True
-

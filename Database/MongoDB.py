@@ -44,13 +44,14 @@ class Mongo(object):
         else:
             return False
 
-    def create_collection(self, collection_name):
+    def create_collection(self, collection_name, indexes=None):
         if self.is_collection_exist(collection_name):
             return self.instance.db.get_collection(collection_name)
         else:
             collection = self.instance.db.create_collection(collection_name)
-            collection.create_index([("Date", 1), ("Key", 1)], unique=True, name="index_date_key")
-            collection.create_index("Date", name="index_date")
+            if indexes:
+                collection.create_indexes(indexes)
+            return collection
 
 
 def main():

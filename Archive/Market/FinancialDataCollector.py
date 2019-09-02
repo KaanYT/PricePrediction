@@ -3,6 +3,7 @@ import json
 
 from datetime import datetime
 from Logger.Log import Logger
+from pymongo import IndexModel
 
 from Archive.Market.FinancialDataType import FinancialDataType
 from Archive.Market.FinancialDataLocation import FDLocations
@@ -56,7 +57,7 @@ class FDC(object):
     @staticmethod
     def parse_currency(currency_key, directory, name):  # Type : 1 - Currency
         print("Currency")
-        col = Mongo().create_collection("Currency")
+        col = Mongo().create_collection("Currency", FDC.get_index_models())
         with open(directory) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             print(currency_key)
@@ -86,7 +87,7 @@ class FDC(object):
     @staticmethod
     def parse_product(currency_key, directory, name, interval):  # Type : 2 - Product
         print("Product")
-        col = Mongo().create_collection("Product")
+        col = Mongo().create_collection("Product", FDC.get_index_models())
         with open(directory) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             line_count = 0
@@ -124,7 +125,7 @@ class FDC(object):
     @staticmethod
     def parse_stock(currency_key, directory, name, interval):  # Type : 3 - Stock
         print("Stock")
-        col = Mongo().create_collection("Stock")
+        col = Mongo().create_collection("Stock", FDC.get_index_models())
         with open(directory) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             print(currency_key)
@@ -147,7 +148,7 @@ class FDC(object):
 
     @staticmethod
     def parse_index(currency_key, directory, name, interval):  # Type : 4 - Index
-        col = Mongo().create_collection("Index")
+        col = Mongo().create_collection("Index", FDC.get_index_models())
         with open(directory) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             line_count = 0
@@ -215,6 +216,11 @@ class FDC(object):
                     hour_count += 1
                 line_count += 1
             print(f'Processed {line_count} lines.')
+
+    @staticmethod
+    def get_index_models():
+        return [IndexModel([("Date", 1), ("Key", 1)], unique=True, name="index_date_key"),
+                IndexModel("Date", name="index_date")]
 
     @staticmethod
     def alpha_collect():
