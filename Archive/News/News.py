@@ -1,7 +1,7 @@
 from newspaper import Article
-from Database.MongoDB import Mongo
+from Managers.DatabaseManager.MongoDB import Mongo
 from urllib.request import urlopen
-from Logger.Log import Logger
+from Managers.LogManager.Log import Logger
 
 
 class RssNews(object):

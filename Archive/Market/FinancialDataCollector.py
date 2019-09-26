@@ -2,7 +2,7 @@ import csv
 import json
 
 from datetime import datetime
-from Logger.Log import Logger
+from Managers.LogManager.Log import Logger
 from pymongo import IndexModel
 
 from Archive.Market.FinancialDataType import FinancialDataType
@@ -14,9 +14,10 @@ from alpha_vantage.cryptocurrencies import CryptoCurrencies
 from alpha_vantage.foreignexchange import ForeignExchange
 from alpha_vantage.techindicators import TechIndicators
 
-from Database.MongoDB import Mongo
-from ConfigManager import Config
+from Managers.DatabaseManager.MongoDB import Mongo
+from Managers.ConfigManager import Config
 
+from Helper.DateHelper import DateHelper
 
 class FDC(object):
     directory = "FDC_Files.json"
@@ -42,16 +43,16 @@ class FDC(object):
                         FDC.parse_currency(key, directory, name)
                     if type is FinancialDataType.Product.value:
                         print(key)
-                        #FDC.parse_product(key, directory, name, interval)
+                        FDC.parse_product(key, directory, name, interval)
                     if type is FinancialDataType.Stock.value:
                         print(key)
-                        #FDC.parse_stock(key, directory, name, interval)
+                        FDC.parse_stock(key, directory, name, interval)
                     if type is FinancialDataType.Index.value:
                         print(key)
-                        #FDC.parse_index(key, directory, name, interval)
+                        FDC.parse_index(key, directory, name, interval)
                     if type is FinancialDataType.IndexDateTime.value:
                         print(key)
-                        #FDC.parse_index_datetime(key, directory, name, interval)
+                        FDC.parse_index_datetime(key, directory, name, interval)
             print(f'Processed {total} lines.')
 
     @staticmethod
@@ -66,7 +67,12 @@ class FDC(object):
             for row in csv_reader:
                 if len(row) < 2:  # Check Data
                     continue
-                date = datetime.strptime((row[0] + row[1]), "%Y%m%d%H:%M:%S")
+                add_value = 0
+                if currency_key == "EURUSD":
+                    date = DateHelper.str2date(row[0])
+                    add_value = -1
+                else:
+                    date = DateHelper.str2date(row[0]+row[1])
                 if hour != date.hour:
                     hour = date.hour
                     if fd is not None:
@@ -75,14 +81,14 @@ class FDC(object):
                         except:
                             Logger().get_logger().error('Insert Error', exc_info=True)
                     fd = FinancialData(name, currency_key, date,
-                                       row[FDLocations.Currency_Open.value],
-                                       row[FDLocations.Currency_High.value],
-                                       row[FDLocations.Currency_Low.value],
-                                       row[FDLocations.Currency_Close.value])
+                                       row[FDLocations.Currency_Open.value + add_value],
+                                       row[FDLocations.Currency_High.value + add_value],
+                                       row[FDLocations.Currency_Low.value + add_value],
+                                       row[FDLocations.Currency_Close.value + add_value])
                 else:
-                    fd.add(row[FDLocations.Currency_High.value],
-                           row[FDLocations.Currency_Low.value],
-                           row[FDLocations.Currency_Close.value])
+                    fd.add(row[FDLocations.Currency_High.value + add_value],
+                           row[FDLocations.Currency_Low.value + add_value],
+                           row[FDLocations.Currency_Close.value + add_value])
 
     @staticmethod
     def parse_product(currency_key, directory, name, interval):  # Type : 2 - Product
@@ -98,7 +104,7 @@ class FDC(object):
             for row in csv_reader:
                 if len(row) < 2:  # Check Data
                     continue
-                date = datetime.strptime((row[0] + row[1]), "%Y%m%d%H:%M:%S")
+                date = DateHelper.str2date(row[0] + row[1])
                 if hour != date.hour:
                     hour = date.hour
                     hour_count = 0
@@ -132,7 +138,7 @@ class FDC(object):
             for row in csv_reader:
                 if len(row) < 2:  # Check Data
                     continue
-                date = datetime.strptime(row[0], "%Y.%m.%d %H:%M:%S")
+                date = DateHelper.str2date(row[0])
                 if interval == 60:
                     fd = FinancialData(name, currency_key, date,
                                        row[FDLocations.Stock_Open.value],
@@ -159,7 +165,7 @@ class FDC(object):
             for row in csv_reader:
                 if len(row) < 2:  # Check Data
                     continue
-                date = datetime.strptime(row[0], "%Y.%m.%d %H:%M:%S")
+                date = DateHelper.str2date(row[0])
                 if hour != date.hour:
                     hour = date.hour
                     hour_count = 0
@@ -194,7 +200,7 @@ class FDC(object):
             for row in csv_reader:
                 if len(row) < 2:  # Check Data
                     continue
-                date = datetime.strptime((row[0] + row[1]), "%Y%m%d%H:%M:%S")
+                date = DateHelper.str2date(row[0] + row[1])
                 if hour != date.hour:
                     hour = date.hour
                     hour_count = 0

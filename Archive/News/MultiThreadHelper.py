@@ -1,7 +1,7 @@
 import logging
 import queue
 import traceback
-from Logger.Log import Logger
+from Managers.LogManager.Log import Logger
 
 from threading import Thread
 

@@ -1,6 +1,8 @@
 import os
-from Archive.Market.FinancialDataCollector import FDC
-from ConfigManager import Config
+from Archive.News.NewsOrganizer import NewsOrganizer
+from Predictor.LstmTA.LSTMTechnicalAnalysis import LstmTechnicalAnalysis
+from Managers.ConfigManager import Config
+from Predictor.LstmTA.NewArchitecture.TaMain import TaMain
 
 
 def load_config():
@@ -11,9 +13,13 @@ def load_config():
 def main():
     print("Loading Config...")
     load_config()
-    print("Loading is loaded. Loading Database...")
-    collector = FDC()
-    collector.collect()
+    print("Loading is loaded. Loading DatabaseManager...")
+    #collector = NewsOrganizer()
+    ta = TaMain(5, 5, 10)
+    ta.train(epochs=10, batch_size=5, seq_length=10)
+    #ltsm = LstmTechnicalAnalysis()
+    #ltsm.create_model()
+    #collector.organize()
 
 
 """

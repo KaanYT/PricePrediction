@@ -1,17 +1,17 @@
-from Database.MongoDB import Mongo
+from Managers.DatabaseManager.MongoDB import Mongo
 from pymongo import IndexModel
 from Helper.DateHelper import DateHelper
 from Helper.FileHelper import FileHelper
 from bs4 import BeautifulSoup
 import re
 from datetime import datetime
-from Logger.Log import Logger
+from Managers.LogManager.Log import Logger
 import traceback
 
 
 class NewsOrganizer(object):
-    DATE_START = datetime.datetime.strptime("2014-01-01", '%Y-%m-%d')
-    DATE_END = datetime.datetime.strptime("2017-01-01", '%Y-%m-%d')
+    DATE_START = datetime.strptime("2014-01-01", '%Y-%m-%d')
+    DATE_END = datetime.strptime("2017-01-01", '%Y-%m-%d')
     FIND_FILTER = {'RSS_Date': {'$gte': DATE_START, '$lt': DATE_END}}
 
     def organize(self):
@@ -102,9 +102,12 @@ class NewsOrganizer(object):
         selected_date = rss_date
         if date:
             if DateHelper.is_time_of_date_exist(date):
-                if date > rss_date:
-                    selected_date = rss_date
-                else:
+                try:
+                    if date > rss_date:
+                        selected_date = rss_date
+                    else:
+                        selected_date = date
+                except:
                     selected_date = date
         elif rss_date:
             selected_date = rss_date

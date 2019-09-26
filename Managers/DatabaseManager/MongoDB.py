@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------
 # Singleton pattern restricts the instantiation of a class to one object.
 # -----------------------------------------------------------------------
-from ConfigManager import Config
+from Managers.ConfigManager import Config
 from pymongo import MongoClient
 import os
 
@@ -52,6 +52,13 @@ class Mongo(object):
             if indexes:
                 collection.create_indexes(indexes)
             return collection
+
+    def get_data(self, collection_name, query, fields=None):
+        collection = self.create_collection(collection_name)
+        if fields:
+            return collection.find(query, fields)
+        else:
+            return collection.find(query)
 
 
 def main():

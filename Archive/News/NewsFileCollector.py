@@ -1,10 +1,9 @@
-from Database.MongoDB import Mongo
+from Managers.DatabaseManager.MongoDB import Mongo
 from Helper.DateHelper import DateHelper
 from newspaper import Article
 from Archive.News import News
 import archivecdx
-import pandas as pd
-from Logger.Log import Logger
+from Managers.LogManager.Log import Logger
 import sqlite3
 import re
 from Archive.News.MultiThreadHelper import NewsPool  #Multi Thread

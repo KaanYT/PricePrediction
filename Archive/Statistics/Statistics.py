@@ -1,10 +1,10 @@
-from Database.MongoDB import Mongo
+from Managers.DatabaseManager.MongoDB import Mongo
 import socket
 from datetime import datetime
 from datetime import date
 import calendar
 import os
-from ConfigManager import Config
+from Managers.ConfigManager import Config
 
 
 def load_config():
@@ -16,7 +16,7 @@ class Statistics(object):
     START_YEAR = 2014
     END_YEAR = 2018
     categories = ['business', 'politics', 'energy', 'commodities', 'stocks', 'exclusive', 'economy', 'world', 'technology', 'money',
-     'news', 'economics', 'tech', 'bonds', ''];
+     'news', 'economics', 'tech', 'bonds', '', 'News_']
 
     def collect(self):
         socket.setdefaulttimeout(120)  # 120 seconds
@@ -24,7 +24,7 @@ class Statistics(object):
 
         start = datetime(self.START_YEAR, 1, 1, 0, 0, 0, 0)
         end = datetime(self.START_YEAR, 1+1, 1, 0, 0, 0, 0)
-        collection = db.instance.db.get_collection(Config.database.collection)
+        collection = db.create_collection("FilteredNews")
         print("\t", end='\t')
         for category in self.categories:
             print(category, end='\t')
@@ -32,8 +32,8 @@ class Statistics(object):
         while end.year < self.END_YEAR:
             count = collection.find({'RSS_Date': {'$gte': start, '$lt': end}}).count(False)
             # Get Category Count
-            result = collection.aggregate([{ '$match': { 'RSS_Date': {'$gte': start, '$lt': end},} },
-                                { "$group": { "_id": { "$toLower": "$RSS_Category" }, "count": { "$sum": 1 } } },
+            result = collection.aggregate([{ '$match': { 'date': {'$gte': start, '$lt': end},} },
+                                { "$group": { "_id": { "$toLower": "$category" }, "count": { "$sum": 1 } } },
                                 { "$group": { "_id": None, "counts": { "$push": { "k": "$_id", "v": "$count" } } } },
                                 { "$replaceRoot": { "newRoot": { "$arrayToObject": "$counts" } } } ])
             print(str(start.year) + "." + str(start.month) + " \t " + str(count), end='\t')

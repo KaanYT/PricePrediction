@@ -1,14 +1,14 @@
 import logging
-from ConfigManager import Config
+from Managers.ConfigManager import Config
 from mongolog.handlers import MongoHandler
 
-"""Logger Example Usage: 
-from Logger.Log import Logger
+"""LogManager Example Usage: 
+from LogManager.Log import LogManager
 
             try:
                 1 / 0
             except:
-                Log.Logger().get_logger().error('test zero division', exc_info=True)
+                Log.LogManager().get_logger().error('test zero division', exc_info=True)
 """
 
 

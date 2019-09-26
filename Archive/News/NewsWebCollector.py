@@ -2,12 +2,12 @@ import os
 import feedparser
 import archivecdx
 from newspaper import Article
-from Database.MongoDB import Mongo
+from Managers.DatabaseManager.MongoDB import Mongo
 from datetime import datetime
 from time import mktime
 from Archive.News import News
 from Archive.News.MultiThreadHelper import NewsPool  #Multi Thread
-from Logger.Log import Logger
+from Managers.LogManager.Log import Logger
 import socket
 
 
