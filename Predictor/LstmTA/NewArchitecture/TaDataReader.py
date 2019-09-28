@@ -59,16 +59,24 @@ class TaDataReader(object):
         return self.__test_cursor.count()
 
     def get_test_data(self):
-        self.__test_cursor()
-        self.data = []
-        count = 0
-        for row in self.__train_cursor:
-            self.data.append([row["Open"], row["High"]])
-            count += 1
-            if count % self.batch_size == 0:
-                yield self.data
-                self.data = []
-                count = 0
+        self.fetch_train_data()
+        self.clear_data()
+        batch_count = 0
+        sequence_count = 0
+        for row in self.__test_cursor:
+            self.__x_sequence.append(np.asarray([row["Open"]], dtype=np.float32))
+            self.__y_sequence.append(np.asarray([row["Open"]], dtype=np.float32))  # row["High"]
+            sequence_count += 1
+            if sequence_count % (self.sequence_length + 1) == 0:
+                self.__x_sequence.pop()
+                self.__y_sequence.pop(0)
+                self.x.append(np.asarray(self.__x_sequence, dtype=np.float32))
+                self.y.append(np.asarray(self.__y_sequence, dtype=np.float32))
+                self.clear_sequence()
+                batch_count += 1
+                if batch_count % self.batch_size == 0:
+                    yield np.asarray(self.x, dtype=np.float32), np.asarray(self.y, dtype=np.float32)
+                    self.clear_data()
 
     def clear_data(self):
         self.x = []

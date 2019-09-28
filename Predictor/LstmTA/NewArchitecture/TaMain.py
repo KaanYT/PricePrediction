@@ -84,7 +84,7 @@ class TaMain(object):
                     val_h = self.model.init_hidden(batch_size)
                     val_losses = []
                     self.model.eval()
-                    for x, y in self.reader.get_train_data():  # get_batches(val_data, batch_size, seq_length):
+                    for x, y in self.reader.get_test_data():  # get_batches(val_data, batch_size, seq_length):
 
                         x, y = torch.from_numpy(x), torch.from_numpy(y)
 
@@ -120,13 +120,24 @@ class TaMain(object):
     def save_model(self):
         # serialize model to JSON
         save_file_name = os.path.join(self.config["model"]["save_dir"],
-                                      '%s-e%s.h5' % (dt.datetime.now().strftime('%d%m%Y-%H%M%S'), str(self.epochs)))
-        model_json = self.model.to_json()
-        with open(save_file_name + "_model.json", "w") as json_file:
-            json_file.write(model_json)
-        # serialize weights to HDF5
-        self.model.save_weights(save_file_name + "_weights.h5")
-        print("Saved model to disk")
+                                      '%s-e%s.pth' % (dt.datetime.now().strftime('%d%m%Y-%H%M%S'), str(self.epochs)))
+        checkpoint = {
+            'model': TaModel(),
+            'model_state_dict': self.model.state_dict(),
+            'optimizer': optim.Adam(self.model.parameters(), lr=0.003),
+            'optimizer_state_dict': self.optimizer.state_dict()
+        }
+
+        torch.save(checkpoint, save_file_name)
+        print("Model Saved to disk")
+
+    def load_model(self, path):
+        checkpoint = torch.load(path)
+        self.model = checkpoint['model']
+        self.model.load_state_dict(checkpoint['state_dict'])
+        self.optimizer = checkpoint['optimizer']
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        print("Model loaded from disk")
 
     @staticmethod
     def get_config():
