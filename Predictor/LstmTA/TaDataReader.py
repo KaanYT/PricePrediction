@@ -34,7 +34,7 @@ class TaDataReader(object):
         return self.__train_cursor.count()
 
     def get_train_data(self):
-        self.fetch_train_data()
+        self.__train_cursor.rewind()
         self.clear_data()
         batch_count = 0
         sequence_count = 0
@@ -59,7 +59,7 @@ class TaDataReader(object):
         return self.__test_cursor.count()
 
     def get_test_data(self):
-        self.fetch_train_data()
+        self.__test_cursor.rewind()
         self.clear_data()
         batch_count = 0
         sequence_count = 0

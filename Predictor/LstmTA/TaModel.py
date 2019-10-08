@@ -4,7 +4,8 @@ from torch import nn
 
 class TaModel(nn.Module):
 
-    '''
+    """TaModel
+
             input_size: The number of expected features in the input `x`
             hidden_size: The number of features in the hidden state `h`
             num_layers: Stacked LSTM Default: 1
@@ -16,7 +17,7 @@ class TaModel(nn.Module):
                 LSTM layer except the last layer, with dropout probability equal to
                 :attr:`dropout`. Default: 0
             bidirectional: If ``True``, becomes a bidirectional LSTM. Default: ``False``
-    '''
+    """
     def __init__(self, input_size=1, hidden=256, n_layers=2,
                                drop_prob=0.2, lr=0.001):
         super().__init__()

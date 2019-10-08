@@ -4,47 +4,49 @@ import torch
 from torch import nn, optim
 from Helper.JsonDateHelper import DateTimeDecoder
 from Helper.Timer import Timer
-from Predictor.LstmTA.NewArchitecture.TaModel import TaModel
-from Predictor.LstmTA.NewArchitecture.TaDataReader import TaDataReader
-import matplotlib.pyplot as plt
+from Helper.DateHelper import DateHelper
+from Predictor.LstmTA.TaModel import TaModel
+from Predictor.LstmTA.TaDataReader import TaDataReader
+from Managers.ExportManager.Export import Export
 import numpy as np
 import datetime as dt
+import pandas
 
 
 class TaMain(object):
 
-    """
-    If I really hate pressing `enter` and
-    typing all those hash marks, I could
-    just do this instead
+    """ Initializer
+
+            Arguments
+            ---------
+            epochs: Number of epochs to train
+            batch_size: Number of mini-sequences per mini-batch, aka batch size
+            seq_length: Number of character steps per mini-batch
     """
     def __init__(self, epochs, batch_size, seq_length):
-        self.model = TaModel()
+        self.epochs = epochs
         self.config = self.get_config()
+        self.model: TaModel = TaModel()
         self.reader = TaDataReader(self.config['data'], batch_size, seq_length)
-        print(self.reader.get_train_count())
-        print(self.reader.get_test_count())
         self.timer = Timer()
         # Network Information
         self.criterion = nn.MSELoss()  #nn.CrossEntropyLoss() - nn.NLLLoss()
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.003)
-        self.epochs = epochs
+        print(self.reader.get_train_count())
+        print(self.reader.get_test_count())
 
-    def train(self, epochs=10, batch_size=10, seq_length=50, lr=0.001, clip=5, val_frac=0.1, print_every=10):
-        ''' Training a network
+    def train(self, lr=0.001, clip=5, val_frac=0.1, print_every=10):
+        """ Training a network
 
             Arguments
             ---------
-            data: text data to train the network
-            epochs: Number of epochs to train
-            batch_size: Number of mini-sequences per mini-batch, aka batch size
-            seq_length: Number of character steps per mini-batch
             lr: learning rate
             clip: gradient clipping
             val_frac: Fraction of data to hold out for validation
             print_every: Number of steps for printing training and validation loss
 
-        '''
+        """
+        df = pandas.DataFrame(columns=['Epoch', 'Step', 'Last Train Loss', 'Mean Test Loss'])
         self.timer.start()
         self.model.train()
 
@@ -52,9 +54,10 @@ class TaMain(object):
             self.model.cuda()
 
         counter = 0
-        for e in range(epochs):
-            # initialize hidden state
-            h = self.model.init_hidden(batch_size)
+        h = None
+        for e in range(self.epochs):
+            if h is None:  # initialize hidden state
+                h = self.model.init_hidden(self.reader.batch_size)
 
             for x, y in self.reader.get_train_data():  # get_batches(data, batch_size, seq_length):
                 counter += 1
@@ -72,7 +75,7 @@ class TaMain(object):
                 # get the output from the model -
                 output, h = self.model(inputs, h)  # Input Should Be 3-Dimensional: seq_len, batch, input_size
                 # calculate the loss and perform back propagation
-                loss = self.criterion(output, targets.view(batch_size * seq_length))
+                loss = self.criterion(output, targets.view(self.reader.batch_size * self.reader.sequence_length))
                 loss.backward()
                 # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
                 nn.utils.clip_grad_norm_(self.model.parameters(), clip)
@@ -81,7 +84,7 @@ class TaMain(object):
                 # loss stats
                 if counter % print_every == 0:
                     # Get validation loss
-                    val_h = self.model.init_hidden(batch_size)
+                    val_h = self.model.init_hidden(self.reader.batch_size)
                     val_losses = []
                     self.model.eval()
                     for x, y in self.reader.get_test_data():  # get_batches(val_data, batch_size, seq_length):
@@ -97,18 +100,26 @@ class TaMain(object):
                             inputs, targets = inputs.cuda(), targets.cuda()
 
                         output, val_h = self.model(inputs, val_h)
-                        val_loss = self.criterion(output, targets.view(batch_size * seq_length))
+                        val_loss = self.criterion(output, targets.view(self.reader.batch_size * self.reader.sequence_length))
 
                         val_losses.append(val_loss.item())
 
                     self.model.train()  # reset to train mode after iterationg through validation data
-
-                    print("Epoch: {}/{}...".format(e + 1, epochs),
+                    print("Epoch: {}/{}...".format(e + 1, self.epochs),
                           "Step: {}...".format(counter),
                           "Loss: {:.4f}...".format(loss.item()),
                           "Val Loss: {:.4f}".format(np.mean(val_losses)))
+                    df = df.append({
+                        'Epoch': "{}/{}".format(e + 1, self.epochs),
+                        'Step': counter,
+                        'Last Train Loss': loss.item(),
+                        'Mean Test Loss': np.mean(val_losses)
+                    }, ignore_index=True)
         self.timer.stop()
         self.save_model()
+        date = DateHelper.get_current_date()
+        Export.append_df_to_excel(df, date)
+        Export.append_df_to_excel(self.get_info(), date)
 
     def test(self):
         # Test the network
@@ -117,10 +128,42 @@ class TaMain(object):
             print(data)
             # Train
 
-    def save_model(self):
+    def get_info(self):
+        info = pandas.DataFrame(columns=['Database',
+                                         'Key',
+                                         'Batch Size',
+                                         'Sequence Length',
+                                         'Input Size',
+                                         'Hidden',
+                                         'Number of Layers',
+                                         'Dropout Prob',
+                                         'Learning Rate'])
+        info = info.append({
+            'Database': self.config["data"]["db"],
+            'Key': self.config["data"]["train_query"]["Key"],
+            'Batch Size': self.reader.batch_size,
+            'Sequence Length': self.reader.sequence_length,
+            'Input Size': self.model.input_size,
+            'Hidden': self.model.hidden,
+            'Number of Layers': self.model.num_layers,
+            'Dropout Prob': self.model.drop_prob,
+            'Learning Rate': self.model.lr
+        }, ignore_index=True)
+        return info
+
+    def get_save_file_name(self):
         # serialize model to JSON
         save_file_name = os.path.join(self.config["model"]["save_dir"],
-                                      '%s-e%s.pth' % (dt.datetime.now().strftime('%d%m%Y-%H%M%S'), str(self.epochs)))
+                                      '%s-e%s(%s-%s).pth' % (dt.datetime.now().strftime('%d%m%Y-%H%M%S'),
+                                                             str(self.epochs),
+                                                             self.config["data"]["db"],
+                                                             self.config["data"]["train_query"]["Key"]))
+
+        return save_file_name
+
+    def save_model(self):
+        # serialize model to JSON
+        save_file_name = self.get_save_file_name()
         checkpoint = {
             'model': TaModel(),
             'model_state_dict': self.model.state_dict(),

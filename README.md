@@ -22,35 +22,37 @@ Master Thesis Application
     * Environment Name : `MScThesis`
 * Programming Language : `Python 3.6`
 * Database : `MongoDB 4.x`
-* IDEA (Recomended) : `IntelliJ - PyCharm`
+* IDEA (Recommended) : `IntelliJ - PyCharm`
 
 ### Package List
-* pymongo
-    * MongoDB Access
-* mongolog 
-    * Centralized Logging 
-* keras
-* feedparser
-* configparser
-* newspaper3k
-    *  Info 
-        * Use [NLTK - Natural Language Toolkit](https://www.nltk.org/data.html)
-        * Download Corpora ` curl https://raw.githubusercontent.com/codelucas/newspaper/master/download_corpora.py | python3`
-        * Corpora List
-            * brown - Required for FastNPExtractor
-            * punkt - Required for WordTokenizer
-            * maxent_treebank_pos_tagger - Required for NLTKTagger
-            * movie_reviews - Required for NaiveBayesAnalyzer
-            * wordnet - Required for lemmatization and Wordnet
-            * stopwords
-    * `brew install libxml2 libxslt`
-    * `brew install libtiff libjpeg webp little-cms2`
-    * `pip3 install newspaper3k` 
-        * `conda install -c conda-forge newspaper3k`
-        * `import nltk; nltk.download()`
-    
-* archivecdx
-    * archive-cdx
+* Package list can accessed from MScThesis.yml
+    * Create env. and install packages `conda env create -f MScThesis.yml`
+    * Activate Env. `conda activate MScThesis`
+    * Remove Env. `conda remove --name MScThesis --all`
+* For More Information
+    * pymongo
+        * MongoDB Access
+    * mongolog 
+        * Centralized Logging 
+    * keras
+    * feedparser
+    * configparser
+    * newspaper3k
+        *  Info 
+            * Use [NLTK - Natural Language Toolkit](https://www.nltk.org/data.html)
+            * Download Corpora ` curl https://raw.githubusercontent.com/codelucas/newspaper/master/download_corpora.py | python3`
+            * Corpora List
+                * brown - Required for FastNPExtractor
+                * punkt - Required for WordTokenizer
+                * maxent_treebank_pos_tagger - Required for NLTKTagger
+                * movie_reviews - Required for NaiveBayesAnalyzer
+                * wordnet - Required for lemmatization and Wordnet
+                * stopwords
+        * `brew install libxml2 libxslt`
+        * `brew install libtiff libjpeg webp little-cms2`
+        * `pip3 install newspaper3k` 
+            * `conda install -c conda-forge newspaper3k`
+            * `import nltk; nltk.download()`
 
 ## Test Environment
 

@@ -28,3 +28,7 @@ class DateHelper(object):
     def date_formats():
         #2014-03-12T16:07:40Z
         return ["%Y-%m-%dT%H:%M:%SZ", "%Y%m%d%H:%M:%S", "%Y%m%d% H:%M:%S", "%Y.%m.%d %H:%M:%S", "%Y-%m-%d", "%Y/%m/%d", "%Y/%m/%-d"]
+
+    @staticmethod
+    def get_current_date():
+        return '%s' % datetime.now().strftime('%d%m%Y-%H%M%S')

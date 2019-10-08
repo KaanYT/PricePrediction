@@ -22,14 +22,13 @@
 			"Close",
 			"High",
 			"Low"
-		],
-		"sequence_length": 50,
-		"train_test_split": 0.85,
-		"normalise": true
+		]
 	},
 	"training": {
 		"epochs": 3,
-		"batch_size": 32
+		"batch_size": 32,
+		"sequence_length": 50,
+		"normalise": true
 	},
 	"model": {
 		"type": "Sequential",
