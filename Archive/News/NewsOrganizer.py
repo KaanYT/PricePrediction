@@ -200,8 +200,5 @@ class NewsOrganizer(object):
                 },
             "Key": key
         }
-        print(query)
         fields = {"Date": 1, "Open": 1, "Volume": 1, "High": 1, "_id": 0}
-        res = db.get_data_one(collection, query, fields, sort=[('Date', -1)])
-        print(res)
-        return res
+        return db.get_data_one(collection, query, fields, sort=[('Date', -1)])
