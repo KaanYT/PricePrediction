@@ -9,6 +9,10 @@ import os
 
 
 class Mongo(object):
+    ASCENDING = 1
+    """Ascending sort order."""
+    DESCENDING = -1
+    """Descending sort order."""
 
     def __new__(cls):
         if not hasattr(cls, 'instance'):
@@ -38,7 +42,6 @@ class Mongo(object):
             return False
 
     def is_collection_exist(self, collection_name):
-        print(self.instance.db.list_collection_names())
         if collection_name in self.instance.db.list_collection_names():
             return True
         else:
@@ -59,6 +62,16 @@ class Mongo(object):
             return collection.find(query, fields)
         else:
             return collection.find(query)
+
+    def get_data_one(self, collection_name, query, fields=None, sort=None):
+        collection = self.create_collection(collection_name)
+        if fields:
+            if sort:
+                return collection.find_one(query, fields, sort=sort)
+            else:
+                return collection.find_one(query, fields)
+        else:
+            return collection.find_one(query)
 
 
 def main():

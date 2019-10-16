@@ -1,18 +1,23 @@
-from Managers.DatabaseManager.MongoDB import Mongo
+import re
+import enum
+import traceback
+
 from pymongo import IndexModel
+from bs4 import BeautifulSoup
+from datetime import datetime
+from datetime import timedelta
+
+from Managers.DatabaseManager.MongoDB import Mongo
 from Helper.DateHelper import DateHelper
 from Helper.FileHelper import FileHelper
-from bs4 import BeautifulSoup
-import re
-from datetime import datetime
+from Helper.WordPreProcessing import PreProcessing
 from Managers.LogManager.Log import Logger
-import traceback
 
 
 class NewsOrganizer(object):
     DATE_START = datetime.strptime("2014-01-01", '%Y-%m-%d')
     DATE_END = datetime.strptime("2017-01-01", '%Y-%m-%d')
-    FIND_FILTER = {'RSS_Date': {'$gte': DATE_START, '$lt': DATE_END}}
+    FIND_FILTER = {'date': {'$gte': DATE_START, '$lt': DATE_END}}
 
     def organize(self):
         db = Mongo()
@@ -45,6 +50,37 @@ class NewsOrganizer(object):
                     "url": news['URL'],
                     "canonical_link": news['Canonical_Link'],
                     "authors": news['Authors']
+                })
+            except Exception as exception:
+                Logger().get_logger().error(type(exception).__name__, exc_info=True)
+                traceback.print_exc()
+
+    def dnn_organizer(self, collection="Stock", key="SBUX"):
+        db = Mongo()
+        pre_processing = PreProcessing()
+        news_collection = db.create_collection("FilteredNews")
+        news_filtered = db.create_collection("FilteredNewsForDnn", NewsOrganizer.get_index_models())
+
+        for news in news_collection.find(self.FIND_FILTER):
+            date = news.get('date')
+            before = self.get_price_before_date(db, collection, key, date)
+            minute = self.get_price_at_date(db, collection, key, date)
+            hour = self.get_price_at_date(db, collection, key, date, minutes=60)
+            day = self.get_price_at_date(db, collection, key, date, add_day=True)
+            try:
+                news_filtered.insert({
+                    "_id": news.get('_id'),
+                    "title": pre_processing.preprocess(news.get('title')),
+                    "summery": pre_processing.preprocess(news.get('summery')),
+                    "article": pre_processing.preprocess(news.get('article')),
+                    "url": news.get('url'),
+                    "category": news.get('category'),
+                    "price_after_minute": minute,
+                    "price_after_hour": hour,
+                    "price_after_day": day,
+                    "price_before": before,
+                    "date": date,
+                    "authors": news['authors']
                 })
             except Exception as exception:
                 Logger().get_logger().error(type(exception).__name__, exc_info=True)
@@ -134,3 +170,38 @@ class NewsOrganizer(object):
                 return None
         return selected_date
 
+    @staticmethod
+    def get_price_at_date(db, collection, key, date: datetime, add_day=False, minutes=1):
+        if add_day:
+            start = date + timedelta(days=1)
+        else:
+            start = date + timedelta(minutes=minutes)
+        end = start + timedelta(days=7)
+        query = {
+            "Date":
+                {
+                    "$gte": start,
+                    "$lt": end
+                },
+            "Key": key
+        }
+        fields = {"Date": 1, "Open": 1, "Volume": 1, "High": 1, "_id": 0}
+        return db.get_data_one(collection, query, fields, sort=[('Date', 1)])
+
+    @staticmethod
+    def get_price_before_date(db, collection, key, date: datetime):
+        start = date - timedelta(days=7)
+        end = date
+        query = {
+            "Date":
+                {
+                    "$gte": start,
+                    "$lt": end
+                },
+            "Key": key
+        }
+        print(query)
+        fields = {"Date": 1, "Open": 1, "Volume": 1, "High": 1, "_id": 0}
+        res = db.get_data_one(collection, query, fields, sort=[('Date', -1)])
+        print(res)
+        return res
