@@ -30,15 +30,16 @@ class NewsDnnMain(object):
         self.reader = NewsDnnDataReader(self.config['data'], batch_size, seq_length)
         self.timer = Timer()
         # Network Information
-        self.criterion = nn.MSELoss()  #nn.CrossEntropyLoss() - nn.NLLLoss()
+        self.criterion = nn.CrossEntropyLoss()  #nn.CrossEntropyLoss() - nn.NLLLoss() - nn.KLDivLoss() || MSELoss
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
         print(self.reader.get_train_count())
         print(self.reader.get_test_count())
+        print("Sequence Lengt :" + str(seq_length))
 
     def test(self):
         print("Start The Test")
 
-    def train(self, clip=5, val_frac=0.1, print_every=100):
+    def train(self, clip=5, val_frac=0.1, print_every=20):
         """ Training a network
 
             Arguments
@@ -58,11 +59,8 @@ class NewsDnnMain(object):
         counter = 0
         h = None
         for e in range(self.epochs):
-            if h is None:  # initialize hidden state
-                h = self.model.init_hidden(self.reader.batch_size)
-                print(type(h))
-                print(h[0].type())
-                print(h[0][0].type())
+            #if h is None:  # initialize hidden state
+            h = self.model.init_hidden(self.reader.batch_size)
 
             # Batch Loop
             for x, y in self.reader.get_train_data():  # get_batches(data, batch_size, seq_length):
@@ -83,7 +81,7 @@ class NewsDnnMain(object):
                 output, h = self.model(inputs, h)  # Input Should Be 3-Dimensional: seq_len, batch, input_size
 
                 # calculate the loss and perform back propagation
-                loss = self.criterion(output.squeeze(), targets.float())
+                loss = self.criterion(output.squeeze(), targets.long())
                 loss.backward()
 
                 # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
@@ -109,7 +107,7 @@ class NewsDnnMain(object):
                             inputs, targets = inputs.cuda(), targets.cuda()
 
                         output, val_h = self.model(inputs, val_h)
-                        val_loss = self.criterion(output, targets.float())
+                        val_loss = self.criterion(output, targets.long())
 
                         val_losses.append(val_loss.item())
 
@@ -149,7 +147,7 @@ class NewsDnnMain(object):
                                          'Learning Rate'])
         info = info.append({
             'Database': self.config["data"]["db"],
-            'Key': self.config["data"]["train_query"]["Key"],
+            'Key': self.config["data"]["train_query"]["category"],
             'Batch Size': self.reader.batch_size,
             'Sequence Length': self.reader.sequence_length,
             'Input Size': self.model.input_size,
@@ -163,10 +161,9 @@ class NewsDnnMain(object):
     def get_save_file_name(self):
         # serialize model to JSON
         save_file_name = os.path.join(self.config["model"]["save_dir"],
-                                      '%s-e%s(%s-%s).pth' % (dt.datetime.now().strftime('%d%m%Y-%H%M%S'),
+                                      '%s-e%s(%s).pth' % (dt.datetime.now().strftime('%d%m%Y-%H%M%S'),
                                                              str(self.epochs),
-                                                             self.config["data"]["db"],
-                                                             self.config["data"]["train_query"]["Key"]))
+                                                             self.config["data"]["db"]))
 
         return save_file_name
 

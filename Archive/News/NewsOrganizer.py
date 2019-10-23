@@ -1,7 +1,10 @@
 import re
 import enum
 import traceback
+import multiprocessing
 
+from functools import partial
+from itertools import chain
 from pymongo import IndexModel
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -12,12 +15,16 @@ from Helper.DateHelper import DateHelper
 from Helper.FileHelper import FileHelper
 from Helper.WordPreProcessing import PreProcessing
 from Managers.LogManager.Log import Logger
+from Helper.WordEmbedding import WordEmbedding
 
 
 class NewsOrganizer(object):
     DATE_START = datetime.strptime("2014-01-01", '%Y-%m-%d')
     DATE_END = datetime.strptime("2017-01-01", '%Y-%m-%d')
     FIND_FILTER = {'date': {'$gte': DATE_START, '$lt': DATE_END}}
+
+    def __init__(self, word_embedding_path="/Users/kaaneksen/Downloads/glove/glove.6B.100d.txt"):
+        self.embedding = WordEmbedding(word_embedding_path)
 
     def organize(self):
         db = Mongo()
@@ -55,7 +62,7 @@ class NewsOrganizer(object):
                 Logger().get_logger().error(type(exception).__name__, exc_info=True)
                 traceback.print_exc()
 
-    def dnn_organizer(self, collection="Stock", key="SBUX"):
+    def dnn_organizer(self, collection="Product", key="BRTUSD"):
         db = Mongo()
         pre_processing = PreProcessing()
         news_collection = db.create_collection("FilteredNews")
@@ -85,6 +92,89 @@ class NewsOrganizer(object):
             except Exception as exception:
                 Logger().get_logger().error(type(exception).__name__, exc_info=True)
                 traceback.print_exc()
+
+    def dnn_organizer_with_wiki(self, collection="Product", key="BRTUSD", name="Brand Oil"):
+        db = Mongo()
+        pre_processing = PreProcessing()
+        news_collection = db.create_collection("FilteredNews")
+        news_filtered = db.create_collection("FilteredNewsWikiForDnn", NewsOrganizer.get_index_models())
+        wiki = self.get_wiki(db, title=name)
+        wiki_summery = wiki["summary_p"]
+
+        for news in news_collection.find(self.FIND_FILTER):
+            summery = pre_processing.preprocess(news.get('summery'))
+            cosine = self.embedding.cosine_distance_word_embedding(wiki_summery, summery)
+
+            date = news.get('date')
+            before = self.get_price_before_date(db, collection, key, date)
+            minute = self.get_price_at_date(db, collection, key, date)
+            hour = self.get_price_at_date(db, collection, key, date, minutes=60)
+            day = self.get_price_at_date(db, collection, key, date, add_day=True)
+            try:
+                news_filtered.insert({
+                    "_id": news.get('_id'),
+                    "title": pre_processing.preprocess(news.get('title')),
+                    "summery": summery,
+                    "article": pre_processing.preprocess(news.get('article')),
+                    "url": news.get('url'),
+                    "category": news.get('category'),
+                    "price_after_minute": minute,
+                    "price_after_hour": hour,
+                    "price_after_day": day,
+                    "price_before": before,
+                    "relatedness": round((1 - cosine) * 100, 2),
+                    "date": date,
+                    "authors": news['authors']
+                })
+            except Exception as exception:
+                Logger().get_logger().error(type(exception).__name__, exc_info=True)
+                traceback.print_exc()
+
+    def dnn_organizer_with_wiki_tweets(self, collection="Product", key="BRTUSD", name="Brent Crude Oil"):
+        db = Mongo()
+        pre_processing = PreProcessing()
+        news_collection = db.create_collection("FilteredNews")
+        news_filtered = db.create_collection("FilteredNewsWikiAndTweetForDnn", NewsOrganizer.get_index_models())
+        wiki = self.get_wiki(db, title=name)
+        wiki_summery = wiki["summary_p"]
+        count = 0
+        for news in news_collection.find(self.FIND_FILTER):
+            try:
+                summery = pre_processing.preprocess(news.get('summery'))
+                cosine = self.embedding.cosine_distance_word_embedding(wiki_summery, summery)
+                summery_percentage = round((1 - cosine) * 100, 2)
+                print(summery_percentage)
+                date = news.get('date')
+                title = pre_processing.preprocess(news.get('title'))
+                before = self.get_price_before_date(db, collection, key, date)
+                minute = self.get_price_at_date(db, collection, key, date)
+                hour = self.get_price_at_date(db, collection, key, date, minutes=60)
+                day = self.get_price_at_date(db, collection, key, date, add_day=True)
+                percentage = self.calculate_popularity(db, date, title)
+            except Exception as exception:
+                summery_percentage = 0
+            try:
+                news_filtered.insert({
+                    "_id": news.get('_id'),
+                    "title": title,
+                    "summery": pre_processing.preprocess(news.get('summery')),
+                    "article": pre_processing.preprocess(news.get('article')),
+                    "url": news.get('url'),
+                    "category": news.get('category'),
+                    "price_after_minute": minute,
+                    "price_after_hour": hour,
+                    "price_after_day": day,
+                    "price_before": before,
+                    "relatedness": summery_percentage,
+                    "tweet_percentage": percentage,
+                    "date": date,
+                    "authors": news['authors']
+                })
+            except Exception as exception:
+                Logger().get_logger().error(type(exception).__name__, exc_info=True)
+                traceback.print_exc()
+            count = count + 1
+            print(count)
 
     @staticmethod
     def get_index_models():
@@ -202,3 +292,33 @@ class NewsOrganizer(object):
         }
         fields = {"Date": 1, "Open": 1, "Volume": 1, "High": 1, "_id": 0}
         return db.get_data_one(collection, query, fields, sort=[('Date', -1)])
+
+    def calculate_popularity(self, db, date, title):
+        tweets = self.get_tweets_before_date(db, date)
+        count = tweets.count()
+        if count > 100000:
+            count = 100000
+        result = WordEmbedding.multi_cosine_distance_word_embedding(count, date, title)
+        return result/count
+
+    @staticmethod
+    def get_tweets_before_date(db, date:datetime, collection="Tweet", days=7):
+        start = date - timedelta(days=5)
+        end = date
+        query = {
+            "tweet_created_at":
+                {
+                    "$gte": start,
+                    "$lt": end
+                }
+        }
+        fields = {"tweet_text": 1, "tweet_user_fallowers_count": 1, "tweet_user_verified": 1, "tweet_created_at": 1, "_id": 0}
+        return db.get_data(collection, query, fields).limit(1000)
+
+    @staticmethod
+    def get_wiki(db, collection="Wiki", title="Starbucks"):
+        query = {
+            "title": title
+        }
+        fields = {"summary_p": 1, "_id": 0}
+        return db.get_data_one(collection, query, fields)

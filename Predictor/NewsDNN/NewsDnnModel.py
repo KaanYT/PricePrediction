@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from torch.nn.utils.rnn import pack_padded_sequence, pad_sequence
 
 NumberOfClasses = 7
 
@@ -51,7 +52,7 @@ class NewsDnnModel(nn.Module):
         # Fully-Connected Output Layer
         self.fc = nn.Linear(self.hidden, output_size)
         # Sigmoid Layer
-        self.sig = nn.Sigmoid()
+        # self.sig = nn.Sigmoid()
 
         self.train_on_gpu = torch.cuda.is_available()
         if self.train_on_gpu:
@@ -63,13 +64,9 @@ class NewsDnnModel(nn.Module):
         ''' Forward pass through the network.
             These inputs are x, and the hidden/cell state `hidden`. '''
 
-        batch_size = x.size(0)
-
         # New Hidden State From the LSTM
         lstm_out, hidden = self.lstm(x, hidden)
-
-        # Stack Up LSTM Outputs - Reshape the output
-        lstm_out = lstm_out.contiguous().view(-1, self.hidden)
+        lstm_out = lstm_out[:, -1, :]  # Stack Up LSTM Outputs - Reshape the output
 
         # Dropout layer
         out = self.dropout(lstm_out)
@@ -77,28 +74,20 @@ class NewsDnnModel(nn.Module):
         # Fully-Connected Layer
         out = self.fc(out)
 
-        # Sigmoid Layer
-        sig_out = self.sig(out)
-
-        # reshape to be batch_size first
-        sig_out = sig_out.view(batch_size,-1)
-        sig_out = sig_out[:, -1]
-
         # return the final output and the hidden state
-        return sig_out, hidden
+        return out, hidden
 
     def init_hidden(self, batch_size):
         # Create two new tensors with sizes n_layers x batch_size x n_hidden,
         # initialized to zero, for hidden state and cell state of LSTM
-        weight = next(self.parameters()).data
 
         if self.train_on_gpu:
-            hidden = (weight.new(self.num_layers, batch_size, self.hidden).zero_().cuda(),
-                      weight.new(self.num_layers, batch_size, self.hidden).zero_().cuda())
-        else:
-            hidden = (weight.new(self.num_layers, batch_size, self.hidden).zero_(),
-                      weight.new(self.num_layers, batch_size, self.hidden).zero_())
 
+            hidden = (torch.zeros(self.num_layers, batch_size, self.hidden).cuda(),
+                      torch.zeros(self.num_layers, batch_size, self.hidden).cuda())
+        else:
+            hidden = (torch.zeros(self.num_layers, batch_size, self.hidden),
+                      torch.zeros(self.num_layers, batch_size, self.hidden))
         return hidden
 
     def calculate_hidden_size(self):
