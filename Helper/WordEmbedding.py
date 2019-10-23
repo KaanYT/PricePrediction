@@ -3,6 +3,7 @@ import multiprocessing
 
 from datetime import timedelta
 from Helper.Timer import Timer
+from Helper.WordPreProcessing import PreProcessing
 from functools import partial
 from scipy import spatial
 from Managers.LogManager.Log import Logger
@@ -80,14 +81,16 @@ class WordEmbedding(object):
         get = info["to"]
         date = info["date"]
         title = info["news_title"]
-        db = Mongo()
+        db = Mongo(test=2)
+        pre = PreProcessing()
         tweets = WordEmbedding.get_tweets_before_date(db, date).skip(skip).limit(get)
         tweetcount=0
         count = 0
+        vector = WordEmbedding.get_vector_list(title)
         for tweet in tweets:
             tweetcount += 1
             try:
-                cosine = WordEmbedding.cosine_distance_word_embedding(title, tweet["tweet_text"])
+                cosine = WordEmbedding.cosine_distance_word_embedding_with_vector(vector, pre.preprocess(tweet["tweet_text"]))
                 percentage = round((1 - cosine) * 100, 2)
             except Exception as exception:
                 percentage = 0
@@ -96,6 +99,7 @@ class WordEmbedding(object):
                 count += 1
                 if tweet["tweet_user_verified"]:
                     count += 1
+        db.close()
         return count
 
     @staticmethod
@@ -114,9 +118,23 @@ class WordEmbedding(object):
         return db.get_data(collection, query, fields).sort([("tweet_created_at", 1)])
 
     @staticmethod
+    def cosine_distance_word_embedding_with_vector(vector, s2):
+        vector2 = WordEmbedding.get_vector_list(s2)
+        if vector2 is np.NaN:
+            return 0.001
+        else:
+            mean = np.mean(vector, axis=0)
+            mean2 = np.mean(vector2, axis=0)
+            cosine = spatial.distance.cosine(mean, mean2)
+            return cosine
+
+    @staticmethod
     def cosine_distance_word_embedding(s1, s2):
-        vector_1 = np.mean(WordEmbedding.get_vector_list(s1), axis=0)
-        vector_2 = np.mean(WordEmbedding.get_vector_list(s2), axis=0)
+        try:
+            vector_1 = np.mean(WordEmbedding.get_vector_list(s1), axis=0)
+            vector_2 = np.mean(WordEmbedding.get_vector_list(s2), axis=0)
+        except:
+            return 0.001
         cosine = spatial.distance.cosine(vector_1, vector_2)
         return cosine
 
@@ -124,13 +142,10 @@ class WordEmbedding(object):
     def get_vector_list(paragraph):
         word_to_vector_list = []
         for word in paragraph:
-            try:
+            if word in WordEmbedding.Words:
                 word_to_vector_list.append(WordEmbedding.vec(word))
-            except:
-                Logger().get_logger().error('Get Vector List - Word Not Found', exc_info=False)
         if len(word_to_vector_list) == 0:
             return np.NaN
-
         return word_to_vector_list
 
     def _similarity_query(self, word_vec, number):

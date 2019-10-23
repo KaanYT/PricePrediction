@@ -14,9 +14,15 @@ class Mongo(object):
     DESCENDING = -1
     """Descending sort order."""
 
-    def __new__(cls):
-        if not hasattr(cls, 'instance'):
-            cls.instance = super(Mongo, cls).__new__(cls)
+    def __new__(cls, test=1):
+        if test == 1:
+            if not hasattr(cls, 'instance'):
+                cls.instance = super(Mongo, cls).__new__(cls)
+                cls.instance.client = MongoClient(host=Config.database.url,
+                                                  port=int(Config.database.port),
+                                                  authSource=Config.database.database)
+                cls.instance.db = cls.instance.client.get_database(Config.database.database)
+        else:
             cls.instance.client = MongoClient(host=Config.database.url,
                                               port=int(Config.database.port),
                                               authSource=Config.database.database)
@@ -72,6 +78,9 @@ class Mongo(object):
                 return collection.find_one(query, fields)
         else:
             return collection.find_one(query)
+
+    def close(self):
+        self.instance.client.close()
 
 
 def main():

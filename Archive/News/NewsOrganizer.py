@@ -23,8 +23,8 @@ class NewsOrganizer(object):
     DATE_END = datetime.strptime("2017-01-01", '%Y-%m-%d')
     FIND_FILTER = {'date': {'$gte': DATE_START, '$lt': DATE_END}}
 
-    def __init__(self, word_embedding_path="/Users/kaaneksen/Downloads/glove/glove.6B.100d.txt"):
-        self.embedding = WordEmbedding(word_embedding_path)
+    #def __init__(self, word_embedding_path="/Users/kaaneksen/Downloads/glove/glove.6B.100d.txt"):
+        #self.embedding = WordEmbedding(word_embedding_path)
 
     def organize(self):
         db = Mongo()
@@ -130,18 +130,19 @@ class NewsOrganizer(object):
                 Logger().get_logger().error(type(exception).__name__, exc_info=True)
                 traceback.print_exc()
 
-    def dnn_organizer_with_wiki_tweets(self, collection="Product", key="BRTUSD", name="Brent Crude Oil"):
+    def dnn_organizer_with_wiki_tweets(self, collection="Product", key="BRTUSD", name="Brent Crude"):
         db = Mongo()
         pre_processing = PreProcessing()
         news_collection = db.create_collection("FilteredNews")
         news_filtered = db.create_collection("FilteredNewsWikiAndTweetForDnn", NewsOrganizer.get_index_models())
         wiki = self.get_wiki(db, title=name)
+        print(wiki)
         wiki_summery = wiki["summary_p"]
         count = 0
-        for news in news_collection.find(self.FIND_FILTER):
+        for news in news_collection.find(self.FIND_FILTER, no_cursor_timeout=True):
             try:
                 summery = pre_processing.preprocess(news.get('summery'))
-                cosine = self.embedding.cosine_distance_word_embedding(wiki_summery, summery)
+                cosine = WordEmbedding.cosine_distance_word_embedding(wiki_summery, summery)
                 summery_percentage = round((1 - cosine) * 100, 2)
                 print(summery_percentage)
                 date = news.get('date')
@@ -151,9 +152,7 @@ class NewsOrganizer(object):
                 hour = self.get_price_at_date(db, collection, key, date, minutes=60)
                 day = self.get_price_at_date(db, collection, key, date, add_day=True)
                 percentage = self.calculate_popularity(db, date, title)
-            except Exception as exception:
-                summery_percentage = 0
-            try:
+                print(percentage)
                 news_filtered.insert({
                     "_id": news.get('_id'),
                     "title": title,
@@ -296,9 +295,11 @@ class NewsOrganizer(object):
     def calculate_popularity(self, db, date, title):
         tweets = self.get_tweets_before_date(db, date)
         count = tweets.count()
-        if count > 100000:
-            count = 100000
+        #if count > 100000:
+        #    count = 100000
         result = WordEmbedding.multi_cosine_distance_word_embedding(count, date, title)
+        if result == 0:
+            return 0
         return result/count
 
     @staticmethod
@@ -316,7 +317,7 @@ class NewsOrganizer(object):
         return db.get_data(collection, query, fields).limit(1000)
 
     @staticmethod
-    def get_wiki(db, collection="Wiki", title="Starbucks"):
+    def get_wiki(db, collection="Wiki", title="Brent Crude"):
         query = {
             "title": title
         }
