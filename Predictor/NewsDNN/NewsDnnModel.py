@@ -52,7 +52,7 @@ class NewsDnnModel(nn.Module):
         # Fully-Connected Output Layer
         self.fc = nn.Linear(self.hidden, output_size)
         # Sigmoid Layer
-        # self.sig = nn.Sigmoid()
+        self.sig = nn.LogSoftmax(dim=1)
 
         self.train_on_gpu = torch.cuda.is_available()
         if self.train_on_gpu:
@@ -63,6 +63,7 @@ class NewsDnnModel(nn.Module):
     def forward(self, x, hidden):
         ''' Forward pass through the network.
             These inputs are x, and the hidden/cell state `hidden`. '''
+        batch_size = x.size(0)
 
         # New Hidden State From the LSTM
         lstm_out, hidden = self.lstm(x, hidden)
@@ -74,8 +75,11 @@ class NewsDnnModel(nn.Module):
         # Fully-Connected Layer
         out = self.fc(out)
 
+        # Sigmoid Layer
+        sig_out = self.sig(out)
+
         # return the final output and the hidden state
-        return out, hidden
+        return sig_out, hidden
 
     def init_hidden(self, batch_size):
         # Create two new tensors with sizes n_layers x batch_size x n_hidden,

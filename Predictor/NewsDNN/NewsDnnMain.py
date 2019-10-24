@@ -29,15 +29,14 @@ class NewsDnnMain(object):
         self.model: NewsDnnModel = NewsDnnModel()
         self.reader = NewsDnnDataReader(self.config['data'], batch_size, seq_length)
         self.timer = Timer()
+        self.current_date = DateHelper.get_current_date()
         # Network Information
-        self.criterion = nn.CrossEntropyLoss()  #nn.CrossEntropyLoss() - nn.NLLLoss() - nn.KLDivLoss() || MSELoss
+        self.criterion = nn.NLLLoss()  #nn.CrossEntropyLoss() - nn.NLLLoss() - nn.KLDivLoss() || MSELoss
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
-        print(self.reader.get_train_count())
-        print(self.reader.get_test_count())
+        self.train_count = self.reader.get_train_count()
+        self.test_count = self.reader.get_test_count()
+        self.validate_count = self.reader.get_validate_count()
         print("Sequence Lengt :" + str(seq_length))
-
-    def test(self):
-        print("Start The Test")
 
     def train(self, clip=5, val_frac=0.1, print_every=20):
         """ Training a network
@@ -59,7 +58,6 @@ class NewsDnnMain(object):
         counter = 0
         h = None
         for e in range(self.epochs):
-            #if h is None:  # initialize hidden state
             h = self.model.init_hidden(self.reader.batch_size)
 
             # Batch Loop
@@ -94,8 +92,8 @@ class NewsDnnMain(object):
                     val_h = self.model.init_hidden(self.reader.batch_size)
                     val_losses = []
                     self.model.eval()
-                    for x, y in self.reader.get_test_data():  # get_batches(val_data, batch_size, seq_length):
-
+                    accuracy = 0
+                    for x, y in self.reader.get_validate_data():  # get_batches(val_data, batch_size, seq_length):
                         x, y = torch.from_numpy(x), torch.from_numpy(y)
 
                         # Creating new variables for the hidden state, otherwise
@@ -110,11 +108,13 @@ class NewsDnnMain(object):
                         val_loss = self.criterion(output, targets.long())
 
                         val_losses.append(val_loss.item())
-
+                        accuracy += self.calculate_accuracy(output, targets)
                     self.model.train()  # reset to train mode after iterationg through validation data
                     print("Epoch: {}/{}...".format(e + 1, self.epochs),
                           "Step: {}...".format(counter),
                           "Loss: {:.4f}...".format(loss.item()),
+                          "Accuracy In Step: {:.4f}...".format(accuracy),
+                          "Val Count: {:.4f}...".format(self.validate_count),
                           "Val Loss: {:.4f}".format(np.mean(val_losses)))
                     df = df.append({
                         'Epoch': "{}/{}".format(e + 1, self.epochs),
@@ -122,18 +122,52 @@ class NewsDnnMain(object):
                         'Last Train Loss': loss.item(),
                         'Mean Test Loss': np.mean(val_losses)
                     }, ignore_index=True)
+                self.model.train()
         self.timer.stop()
         self.save_model()
-        date = DateHelper.get_current_date()
-        Export.append_df_to_excel(df, date)
-        Export.append_df_to_excel(self.get_info(), date)
+        self.current_date = DateHelper.get_current_date()
+        Export.append_df_to_excel(df, self.current_date)
+        Export.append_df_to_excel(self.get_info(), self.current_date)
 
     def test(self):
-        # Test the network
-        for data in self.reader.get_test_data():
-            # Format Data
-            print(data)
-            # Train
+        df = pandas.DataFrame(columns=['Accuracy', 'Mean Test Loss'])
+        val_h = self.model.init_hidden(self.reader.batch_size)
+        val_losses = []
+        self.model.eval()
+        counter = 0
+        accuracy = 0
+        for x, y in self.reader.get_test_data():  # get_batches(val_data, batch_size, seq_length):
+            counter += 1
+            x, y = torch.from_numpy(x), torch.from_numpy(y)
+
+            # Creating new variables for the hidden state, otherwise
+            # we'd backprop through the entire training history
+            val_h = tuple([each.data for each in val_h])
+
+            inputs, targets = x, y
+            if self.model.train_on_gpu:
+                inputs, targets = inputs.cuda(), targets.cuda()
+
+            output, val_h = self.model(inputs, val_h)
+            val_loss = self.criterion(output, targets.long())
+            val_losses.append(val_loss.item())
+            accuracy += self.calculate_accuracy(output, targets)
+        df = df.append({
+            'Accuracy': "{}/{}".format(accuracy, self.test_count),
+            'Mean Test Loss': np.mean(val_losses)
+        }, ignore_index=True)
+
+        Export.append_df_to_excel(df, self.current_date)
+
+    @staticmethod
+    def calculate_accuracy(output, targets):
+        accuracy = 0
+        for i, out in enumerate(output):
+            top_n, top_i = out.topk(1)
+            result = top_i[0].item()
+            if result == targets[i]:
+                accuracy = accuracy + 1
+        return accuracy
 
     def get_info(self):
         info = pandas.DataFrame(columns=['Database',

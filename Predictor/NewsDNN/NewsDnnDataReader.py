@@ -24,20 +24,17 @@ class NewsDnnDataReader(object):
         self.word_embedding = WordEmbedding(self.configs["WordEmbeddingPath"])
         self.__test_cursor = None
         self.__train_cursor = None
+        self.__validate_cursor = None
 
+    '''
+        Train
+    '''
     def fetch_train_data(self):
         self.__train_cursor = self.db.get_data(self.configs['db'],
                                                self.configs['train_query'],
                                                self.configs['train_query_fields'], notimeout=True)
         self.__train_cursor = self.__train_cursor.sort(NewsDnnDataReader.get_sort_list(self.configs['train_query_sort']))
         self.__train_cursor.batch_size(self.batch_size * self.sequence_length)  # DB To Local Length
-
-    def fetch_test_data(self):
-        self.__test_cursor = self.db.get_data(self.configs['db'],
-                                              self.configs['test_query'],
-                                              self.configs['test_query_fields'], notimeout=True)
-        self.__test_cursor = self.__test_cursor.sort(NewsDnnDataReader.get_sort_list(self.configs['test_query_sort']))
-        self.__test_cursor.batch_size(self.batch_size * self.sequence_length)  # DB To Local Length
 
     def get_train_count(self):
         if self.__train_cursor is None:
@@ -64,6 +61,15 @@ class NewsDnnDataReader(object):
             if batch_count % self.batch_size == 0:
                 yield np.asarray(self.x, dtype=np.float32), np.asarray(self.y, dtype=np.float32)
                 self.clear_data()
+    '''
+        Test
+    '''
+    def fetch_test_data(self):
+        self.__test_cursor = self.db.get_data(self.configs['db'],
+                                              self.configs['test_query'],
+                                              self.configs['test_query_fields'], notimeout=True)
+        self.__test_cursor = self.__test_cursor.sort(NewsDnnDataReader.get_sort_list(self.configs['test_query_sort']))
+        self.__test_cursor.batch_size(self.batch_size * self.sequence_length)  # DB To Local Length
 
     def get_test_count(self):
         if self.__test_cursor is None:
@@ -87,6 +93,42 @@ class NewsDnnDataReader(object):
             batch_count = batch_count + 1
             if batch_count % self.batch_size == 0:
                 yield np.asarray(self.x, dtype=np.float32), np.asarray(self.y, dtype=np.long)
+                self.clear_data()
+
+    '''
+        Validation
+    '''
+    def fetch_validate_data(self):
+        self.__validate_cursor = self.db.get_data(self.configs['db'],
+                                                  self.configs['validate_query'],
+                                                  self.configs['validate_query_fields'], notimeout=True)
+        self.__validate_cursor = self.__validate_cursor.sort(NewsDnnDataReader.get_sort_list(self.configs['validate_query_sort']))
+        self.__validate_cursor.batch_size(self.batch_size * self.sequence_length)  # DB To Local Length
+
+    def get_validate_count(self):
+        if self.__validate_cursor is None:
+            self.fetch_validate_data()
+        return self.__validate_cursor.count()
+
+    def get_validate_data(self):
+        self.__validate_cursor.rewind()
+        self.clear_data()
+        batch_count = 0
+        price_start = self.configs["price"]["start"]
+        price_end = self.configs["price"]["end"]
+        for row in self.__validate_cursor:
+            embedded_article = self.word_embedding.get_weight_matrix(row["article"])
+            if len(embedded_article) < NewsDnnDataReader.ArticleMinSize:
+                continue
+            shape = self.pad_embedded_article(embedded_article).shape
+            if shape[0] != self.sequence_length:
+                continue
+            self.x.append(self.pad_embedded_article(embedded_article))
+            self.y.append(NewsDnnDataReader.get_classification(row[price_start],
+                                                               row[price_end]))
+            batch_count = batch_count + 1
+            if batch_count % self.batch_size == 0:
+                yield np.asarray(self.x, dtype=np.float32), np.asarray(self.y, dtype=np.float32)
                 self.clear_data()
 
     def pad_embedded_article(self, embedded_article):
