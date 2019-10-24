@@ -11,6 +11,7 @@ from datetime import datetime
 from datetime import timedelta
 
 from Managers.DatabaseManager.MongoDB import Mongo
+from Helper.Timer import Timer
 from Helper.DateHelper import DateHelper
 from Helper.FileHelper import FileHelper
 from Helper.WordPreProcessing import PreProcessing
@@ -144,15 +145,13 @@ class NewsOrganizer(object):
                 summery = pre_processing.preprocess(news.get('summery'))
                 cosine = WordEmbedding.cosine_distance_word_embedding(wiki_summery, summery)
                 summery_percentage = round((1 - cosine) * 100, 2)
-                print(summery_percentage)
                 date = news.get('date')
                 title = pre_processing.preprocess(news.get('title'))
                 before = self.get_price_before_date(db, collection, key, date)
                 minute = self.get_price_at_date(db, collection, key, date)
                 hour = self.get_price_at_date(db, collection, key, date, minutes=60)
                 day = self.get_price_at_date(db, collection, key, date, add_day=True)
-                percentage = self.calculate_popularity(db, date, title)
-                print(percentage)
+                # percentage = self.calculate_popularity(db, date, title)
                 news_filtered.insert({
                     "_id": news.get('_id'),
                     "title": title,
@@ -165,7 +164,7 @@ class NewsOrganizer(object):
                     "price_after_day": day,
                     "price_before": before,
                     "relatedness": summery_percentage,
-                    "tweet_percentage": percentage,
+                    "tweet_percentage": 0,
                     "date": date,
                     "authors": news['authors']
                 })
@@ -173,7 +172,8 @@ class NewsOrganizer(object):
                 Logger().get_logger().error(type(exception).__name__, exc_info=True)
                 traceback.print_exc()
             count = count + 1
-            print(count)
+            if count % 500 == 0:
+                print(count)
 
     @staticmethod
     def get_index_models():
@@ -297,10 +297,16 @@ class NewsOrganizer(object):
         count = tweets.count()
         #if count > 100000:
         #    count = 100000
-        result = WordEmbedding.multi_cosine_distance_word_embedding(count, date, title)
-        if result == 0:
-            return 0
-        return result/count
+        if count > 0:
+            ta = Timer()
+            ta.start()
+            result = WordEmbedding.multi_cosine_distance_word_embedding(count, date, title)
+            ta.stop()
+            print()
+            if result == 0:
+                return 0
+            return result / count
+        return 0
 
     @staticmethod
     def get_tweets_before_date(db, date:datetime, collection="Tweet", days=7):

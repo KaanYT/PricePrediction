@@ -28,14 +28,14 @@ class NewsDnnDataReader(object):
     def fetch_train_data(self):
         self.__train_cursor = self.db.get_data(self.configs['db'],
                                                self.configs['train_query'],
-                                               self.configs['train_query_fields'])
+                                               self.configs['train_query_fields'], notimeout=True)
         self.__train_cursor = self.__train_cursor.sort(NewsDnnDataReader.get_sort_list(self.configs['train_query_sort']))
         self.__train_cursor.batch_size(self.batch_size * self.sequence_length)  # DB To Local Length
 
     def fetch_test_data(self):
         self.__test_cursor = self.db.get_data(self.configs['db'],
                                               self.configs['test_query'],
-                                              self.configs['test_query_fields'])
+                                              self.configs['test_query_fields'], notimeout=True)
         self.__test_cursor = self.__test_cursor.sort(NewsDnnDataReader.get_sort_list(self.configs['test_query_sort']))
         self.__test_cursor.batch_size(self.batch_size * self.sequence_length)  # DB To Local Length
 
@@ -53,6 +53,9 @@ class NewsDnnDataReader(object):
         for row in self.__train_cursor:
             embedded_article = self.word_embedding.get_weight_matrix(row["article"])
             if len(embedded_article) < NewsDnnDataReader.ArticleMinSize:
+                continue
+            shape = self.pad_embedded_article(embedded_article).shape
+            if shape[0] != self.sequence_length:
                 continue
             self.x.append(self.pad_embedded_article(embedded_article))
             self.y.append(NewsDnnDataReader.get_classification(row[price_start],
@@ -74,6 +77,9 @@ class NewsDnnDataReader(object):
         for row in self.__test_cursor:
             embedded_article = self.word_embedding.get_weight_matrix(row["article"])
             if len(embedded_article) < NewsDnnDataReader.ArticleMinSize:
+                continue
+            shape = self.pad_embedded_article(embedded_article).shape
+            if shape[0] != self.sequence_length:
                 continue
             self.x.append(self.pad_embedded_article(embedded_article))
             self.y.append(NewsDnnDataReader.get_classification(row["price_before"],

@@ -23,10 +23,12 @@ class Mongo(object):
                                                   authSource=Config.database.database)
                 cls.instance.db = cls.instance.client.get_database(Config.database.database)
         else:
-            cls.instance.client = MongoClient(host=Config.database.url,
-                                              port=int(Config.database.port),
-                                              authSource=Config.database.database)
-            cls.instance.db = cls.instance.client.get_database(Config.database.database)
+            if not hasattr(cls, 'instance'):
+                cls.instance = super(Mongo, cls).__new__(cls)
+                cls.instance.client = MongoClient(host="mongodb://localhost/",
+                                                  port=27017,
+                                                  authSource="MScThesis")
+                cls.instance.db = cls.instance.client.get_database("MScThesis")
         return cls.instance
 
     def insert(self, value):
@@ -62,12 +64,12 @@ class Mongo(object):
                 collection.create_indexes(indexes)
             return collection
 
-    def get_data(self, collection_name, query, fields=None):
+    def get_data(self, collection_name, query, fields=None, notimeout=False):
         collection = self.create_collection(collection_name)
         if fields:
-            return collection.find(query, fields)
+            return collection.find(query, fields, no_cursor_timeout=notimeout)
         else:
-            return collection.find(query)
+            return collection.find(query, no_cursor_timeout=notimeout)
 
     def get_data_one(self, collection_name, query, fields=None, sort=None):
         collection = self.create_collection(collection_name)

@@ -47,7 +47,7 @@ class WordEmbedding(object):
 
     @staticmethod
     def multi_cosine_distance_word_embedding(count, date, news_title):
-        cpu_count = multiprocessing.cpu_count()
+        cpu_count = int((multiprocessing.cpu_count()/2))
         p = multiprocessing.Pool(cpu_count)
         numbers = list()
         total = int(count / cpu_count)
@@ -86,6 +86,7 @@ class WordEmbedding(object):
         tweets = WordEmbedding.get_tweets_before_date(db, date).skip(skip).limit(get)
         tweetcount=0
         count = 0
+        print(get)
         vector = WordEmbedding.get_vector_list(title)
         for tweet in tweets:
             tweetcount += 1
@@ -93,13 +94,14 @@ class WordEmbedding(object):
                 cosine = WordEmbedding.cosine_distance_word_embedding_with_vector(vector, pre.preprocess(tweet["tweet_text"]))
                 percentage = round((1 - cosine) * 100, 2)
             except Exception as exception:
+                print("Exeption")
                 percentage = 0
 
             if percentage > 80:
                 count += 1
                 if tweet["tweet_user_verified"]:
                     count += 1
-        db.close()
+        print("count" + str(count))
         return count
 
     @staticmethod
@@ -121,7 +123,7 @@ class WordEmbedding(object):
     def cosine_distance_word_embedding_with_vector(vector, s2):
         vector2 = WordEmbedding.get_vector_list(s2)
         if vector2 is np.NaN:
-            return 0.001
+            return 0.99
         else:
             mean = np.mean(vector, axis=0)
             mean2 = np.mean(vector2, axis=0)
