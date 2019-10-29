@@ -23,8 +23,11 @@ class NewsDnnDataReader(object):
         self.clear_data()
         self.word_embedding = WordEmbedding(self.configs["WordEmbeddingPath"])
         self.__test_cursor = None
+        self.test_count = 0
         self.__train_cursor = None
+        self.train_count = 0
         self.__validate_cursor = None
+        self.validate_count = 0
 
     '''
         Train
@@ -34,12 +37,13 @@ class NewsDnnDataReader(object):
                                                self.configs['train_query'],
                                                self.configs['train_query_fields'], notimeout=True)
         self.__train_cursor = self.__train_cursor.sort(NewsDnnDataReader.get_sort_list(self.configs['train_query_sort']))
-        self.__train_cursor.batch_size(self.batch_size * self.sequence_length)  # DB To Local Length
+            #self.__train_cursor.batch_size(self.batch_size * self.sequence_length)  # DB To Local Length
 
     def get_train_count(self):
         if self.__train_cursor is None:
             self.fetch_train_data()
-        return self.__train_cursor.count()
+        self.train_count = self.__train_cursor.count()
+        return self.train_count
 
     def get_train_data(self):
         self.__train_cursor.rewind()
@@ -69,12 +73,13 @@ class NewsDnnDataReader(object):
                                               self.configs['test_query'],
                                               self.configs['test_query_fields'], notimeout=True)
         self.__test_cursor = self.__test_cursor.sort(NewsDnnDataReader.get_sort_list(self.configs['test_query_sort']))
-        self.__test_cursor.batch_size(self.batch_size * self.sequence_length)  # DB To Local Length
+            #self.__test_cursor.batch_size(self.batch_size * self.sequence_length)  # DB To Local Length
 
     def get_test_count(self):
         if self.__test_cursor is None:
             self.fetch_test_data()
-        return self.__test_cursor.count()
+        self.test_count = self.__test_cursor.count()
+        return self.test_count
 
     def get_test_data(self):
         self.__test_cursor.rewind()
@@ -103,12 +108,13 @@ class NewsDnnDataReader(object):
                                                   self.configs['validate_query'],
                                                   self.configs['validate_query_fields'], notimeout=True)
         self.__validate_cursor = self.__validate_cursor.sort(NewsDnnDataReader.get_sort_list(self.configs['validate_query_sort']))
-        self.__validate_cursor.batch_size(self.batch_size * self.sequence_length)  # DB To Local Length
+            #self.__validate_cursor.batch_size(self.batch_size * self.sequence_length)  # DB To Local Length
 
     def get_validate_count(self):
         if self.__validate_cursor is None:
             self.fetch_validate_data()
-        return self.__validate_cursor.count()
+        self.validate_count = self.__validate_cursor.count()
+        return self.validate_count
 
     def get_validate_data(self):
         self.__validate_cursor.rewind()

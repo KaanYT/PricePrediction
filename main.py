@@ -1,5 +1,6 @@
 import os
 import json
+import platform
 import datetime
 
 from Helper.Timer import Timer
@@ -7,7 +8,7 @@ from Managers.ConfigManager import Config
 #from Archive.Market.FinancialDataCollector import FDC
 from Archive.News.NewsOrganizer import NewsOrganizer
 #from Predictor.NewsDNN.NewsDnnDataReader import NewsDnnDataReader
-#from Predictor.NewsDNN.NewsDnnMain import NewsDnnMain
+from Predictor.NewsDNN.NewsDnnMain import NewsDnnMain
 #from Helper.JsonDateHelper import DateTimeDecoder
 from Archive.Wiki.WikiRecorder import WikiRecorder
 
@@ -17,7 +18,11 @@ from Helper.WordEmbedding import WordEmbedding
 
 def load_config():
     pwd = os.path.dirname(os.path.abspath(__file__))
-    Config.add_config_ini('%s/main.ini' % pwd)
+    print(platform.system())
+    if platform.system() == "Windows":
+        Config.add_config_ini('%s\\initialization\\main_w.ini' % pwd)
+    else:
+        Config.add_config_ini('%s/initialization/main.ini' % pwd)
 
 def main():
     timer = Timer()
@@ -26,9 +31,9 @@ def main():
     print("Loading is loaded. Loading DatabaseManager...")
     #wiki = WikiRecorder()
     #wiki.collect_all()
-    WordEmbedding(path="/Users/kaaneksen/Downloads/glove/glove.6B.100d.txt")
-    collector = NewsOrganizer()
-    collector.dnn_organizer_with_wiki_tweets()
+    #WordEmbedding(path="/Users/kaaneksen/Downloads/glove/glove.6B.100d.txt")
+    #collector = NewsOrganizer()
+    #collector.dnn_organizer_with_wiki_tweets()
     #page = Wikipedia.get_page("Starbucks")
     #print(page)
     #fdc  = FDC()
@@ -38,8 +43,13 @@ def main():
     #tst = NewsDnnDataReader(config, batch_size=10, sequence_length=100)
     #print(tst.get_train_count())
     count = 0
-    ##newsdnn = NewsDnnMain(5, 10, 200)
-    ##newsdnn.train()
+    newsdnn = NewsDnnMain(epochs=int(Config.training.epochs),
+                          batch_size=int(Config.training.batch_size),
+                          seq_length=int(Config.training.sequence_length),
+                          lr=float(Config.training.lr))
+    newsdnn.train(print_every=int(Config.training.print_every))
+    newsdnn.test()
+    #newsdnn.load_model("saved_models\\25102019-175105-e5(FilteredNewsForDnn).pth")
 
 
     #tr = TweetRecorder()

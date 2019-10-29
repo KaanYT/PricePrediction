@@ -27,8 +27,10 @@ class NewsDnnModel(nn.Module):
                  n_layers=2,
                  drop_prob=0.2,
                  lr=0.001,
-                 output_size=3):
+                 output_size=3,
+                 use_gpu=True):
         super().__init__()
+        self.use_gpu = use_gpu
         self.input_size = input_size
         if hidden is None:
             self.hidden = self.calculate_hidden_size()
@@ -56,7 +58,10 @@ class NewsDnnModel(nn.Module):
 
         self.train_on_gpu = torch.cuda.is_available()
         if self.train_on_gpu:
-            print('Training on GPU!')
+            if self.use_gpu:
+                print('Training on GPU!')
+            else:
+                print('GPU usage is disabled by config.json')
         else:
             print('No GPU available, training on CPU; consider making n_epochs very small.')
 
@@ -85,8 +90,7 @@ class NewsDnnModel(nn.Module):
         # Create two new tensors with sizes n_layers x batch_size x n_hidden,
         # initialized to zero, for hidden state and cell state of LSTM
 
-        if self.train_on_gpu:
-
+        if self.train_on_gpu and self.use_gpu:
             hidden = (torch.zeros(self.num_layers, batch_size, self.hidden).cuda(),
                       torch.zeros(self.num_layers, batch_size, self.hidden).cuda())
         else:

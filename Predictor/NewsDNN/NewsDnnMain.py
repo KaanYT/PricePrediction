@@ -1,4 +1,5 @@
 import os
+import platform
 import json
 import torch
 from torch import nn, optim
@@ -23,10 +24,10 @@ class NewsDnnMain(object):
             batch_size: Number of mini-sequences per mini-batch, aka batch size
             seq_length: Number of character steps per mini-batch
     """
-    def __init__(self, epochs, batch_size, seq_length, lr=0.003):
+    def __init__(self, epochs, batch_size, seq_length, lr=0.005):
         self.epochs = epochs
         self.config = self.get_config()
-        self.model: NewsDnnModel = NewsDnnModel()
+        self.model: NewsDnnModel = NewsDnnModel(input_size=100, lr=lr, use_gpu=self.config["training"]["useGPU"])
         self.reader = NewsDnnDataReader(self.config['data'], batch_size, seq_length)
         self.timer = Timer()
         self.current_date = DateHelper.get_current_date()
@@ -52,7 +53,7 @@ class NewsDnnMain(object):
         self.timer.start()
         self.model.train()
 
-        if self.model.train_on_gpu:
+        if self.model.train_on_gpu and self.config["training"]["useGPU"]:
             self.model.cuda()
 
         counter = 0
@@ -65,7 +66,7 @@ class NewsDnnMain(object):
                 counter += 1
                 inputs, targets = torch.from_numpy(x), torch.from_numpy(y)
 
-                if self.model.train_on_gpu:
+                if self.model.train_on_gpu and self.config["training"]["useGPU"]:
                     inputs, targets = inputs.cuda(), targets.cuda()
 
                 # Creating new variables for the hidden state, otherwise
@@ -88,6 +89,8 @@ class NewsDnnMain(object):
 
                 # loss stats
                 if counter % print_every == 0:
+                    timer = Timer()
+                    timer.start()
                     # Get validation loss
                     val_h = self.model.init_hidden(self.reader.batch_size)
                     val_losses = []
@@ -101,7 +104,7 @@ class NewsDnnMain(object):
                         val_h = tuple([each.data for each in val_h])
 
                         inputs, targets = x, y
-                        if self.model.train_on_gpu:
+                        if self.model.train_on_gpu and self.config["training"]["useGPU"]:
                             inputs, targets = inputs.cuda(), targets.cuda()
 
                         output, val_h = self.model(inputs, val_h)
@@ -122,6 +125,7 @@ class NewsDnnMain(object):
                         'Last Train Loss': loss.item(),
                         'Mean Test Loss': np.mean(val_losses)
                     }, ignore_index=True)
+                    timer.stop()
                 self.model.train()
         self.timer.stop()
         self.save_model()
@@ -130,6 +134,8 @@ class NewsDnnMain(object):
         Export.append_df_to_excel(self.get_info(), self.current_date)
 
     def test(self):
+        print("Test Started")
+        self.timer.start()
         df = pandas.DataFrame(columns=['Accuracy', 'Mean Test Loss'])
         val_h = self.model.init_hidden(self.reader.batch_size)
         val_losses = []
@@ -145,7 +151,7 @@ class NewsDnnMain(object):
             val_h = tuple([each.data for each in val_h])
 
             inputs, targets = x, y
-            if self.model.train_on_gpu:
+            if self.model.train_on_gpu and self.config["training"]["useGPU"]:
                 inputs, targets = inputs.cuda(), targets.cuda()
 
             output, val_h = self.model(inputs, val_h)
@@ -158,6 +164,7 @@ class NewsDnnMain(object):
         }, ignore_index=True)
 
         Export.append_df_to_excel(df, self.current_date)
+        self.timer.stop()
 
     @staticmethod
     def calculate_accuracy(output, targets):
@@ -179,16 +186,23 @@ class NewsDnnMain(object):
                                          'Number of Layers',
                                          'Dropout Prob',
                                          'Learning Rate'])
+
+        db = (self.config["data"]["db"] if 'db' in self.config["data"] else "Unknown")
+        key = (self.config["data"]["train_query"]["category"] if 'category' in self.config["data"]["train_query"] else "All")
+
         info = info.append({
-            'Database': self.config["data"]["db"],
-            'Key': self.config["data"]["train_query"]["category"],
+            'Database': db,
+            'Key': key,
             'Batch Size': self.reader.batch_size,
             'Sequence Length': self.reader.sequence_length,
             'Input Size': self.model.input_size,
             'Hidden': self.model.hidden,
             'Number of Layers': self.model.num_layers,
             'Dropout Prob': self.model.drop_prob,
-            'Learning Rate': self.model.lr
+            'Learning Rate': self.model.lr,
+            'Train Size': self.reader.train_count,
+            'Validation Size': self.reader.validate_count,
+            'Test Size': self.reader.test_count
         }, ignore_index=True)
         return info
 
@@ -196,8 +210,8 @@ class NewsDnnMain(object):
         # serialize model to JSON
         save_file_name = os.path.join(self.config["model"]["save_dir"],
                                       '%s-e%s(%s).pth' % (dt.datetime.now().strftime('%d%m%Y-%H%M%S'),
-                                                             str(self.epochs),
-                                                             self.config["data"]["db"]))
+                                                          str(self.epochs),
+                                                          self.config["data"]["db"]))
 
         return save_file_name
 
@@ -207,7 +221,7 @@ class NewsDnnMain(object):
         checkpoint = {
             'model': NewsDnnModel(),
             'model_state_dict': self.model.state_dict(),
-            'optimizer': optim.Adam(self.model.parameters(), lr=0.003),
+            'optimizer': optim.Adam(self.model.parameters(), lr=self.model.lr),
             'optimizer_state_dict': self.optimizer.state_dict()
         }
 
@@ -217,12 +231,24 @@ class NewsDnnMain(object):
     def load_model(self, path):
         checkpoint = torch.load(path)
         self.model = checkpoint['model']
-        self.model.load_state_dict(checkpoint['state_dict'])
+        self.model.load_state_dict(checkpoint['model_state_dict'])
         self.optimizer = checkpoint['optimizer']
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        print("**Model Info**"
+              + "\nbatch_size : " + str(self.reader.batch_size)
+              + "\nsequence_length : " + str(self.reader.sequence_length)
+              + "\ninput_size : " + str(self.model.input_size)
+              + "\nhidden : " + str(self.model.hidden)
+              + "\nnum_layers : " + str(self.model.num_layers)
+              + "\ndrop_prob : " + str(self.model.drop_prob)
+              + "\nlr : " + str(self.model.lr)
+              + "\nHidden Size : " + str(self.model.hidden))
         print("Model loaded from disk")
 
     @staticmethod
     def get_config():
         pwd = os.path.dirname(os.path.abspath(__file__))
-        return json.load(open(pwd+'/config.json', 'r'), cls=DateTimeDecoder)
+        if platform.system() == "Windows":
+            return json.load(open(pwd + '/config_w.json', 'r'), cls=DateTimeDecoder)
+        else:
+            return json.load(open(pwd+'/config.json', 'r'), cls=DateTimeDecoder)
