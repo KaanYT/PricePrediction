@@ -7,7 +7,7 @@ from Helper.Timer import Timer
 from Managers.ConfigManager import Config
 #from Archive.Market.FinancialDataCollector import FDC
 from Archive.News.NewsOrganizer import NewsOrganizer
-#from Predictor.NewsDNN.NewsDnnDataReader import NewsDnnDataReader
+#from Predictor.NewsDNN.NewsDnnWikiDataReader import NewsDnnWikiDataReader
 from Predictor.NewsDNN.NewsDnnMain import NewsDnnMain
 #from Helper.JsonDateHelper import DateTimeDecoder
 from Archive.Wiki.WikiRecorder import WikiRecorder
@@ -40,7 +40,7 @@ def main():
     #fdc.collect()
     #pwd = os.path.dirname(os.path.abspath(__file__))
     #config = json.load(open(pwd + '/Predictor/NewsDNN/config.json', 'r'), cls=DateTimeDecoder)["data"]
-    #tst = NewsDnnDataReader(config, batch_size=10, sequence_length=100)
+    #tst = NewsDnnWikiDataReader(config, batch_size=10, sequence_length=100)
     #print(tst.get_train_count())
     count = 0
     newsdnn = NewsDnnMain(epochs=int(Config.training.epochs),
@@ -55,7 +55,7 @@ def main():
     #tr = TweetRecorder()
     #tr.load_tweets()
 
-    #ta = NewsDnnMain(5, 50, 10)
+    #ta = NewsDnnWikiMain(5, 50, 10)
     #ta.test()
     #ltsm = LstmTechnicalAnalysis()
     #ltsm.create_model()
