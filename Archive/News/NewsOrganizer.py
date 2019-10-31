@@ -1,5 +1,7 @@
 import re
+import os
 import enum
+import json
 import traceback
 import multiprocessing
 
@@ -94,7 +96,7 @@ class NewsOrganizer(object):
                 Logger().get_logger().error(type(exception).__name__, exc_info=True)
                 traceback.print_exc()
 
-    def dnn_organizer_with_wiki(self, collection="Product", key="BRTUSD", name="Brand Oil"):
+    def dnn_organizer_with_wiki(self, collection="Product", key="BRTUSD", name="Brent Crude"):
         db = Mongo()
         pre_processing = PreProcessing()
         news_collection = db.create_collection("FilteredNews")
@@ -104,8 +106,7 @@ class NewsOrganizer(object):
 
         for news in news_collection.find(self.FIND_FILTER):
             summery = pre_processing.preprocess(news.get('summery'))
-            cosine = self.embedding.cosine_distance_word_embedding(wiki_summery, summery)
-
+            cosine = WordEmbedding.cosine_distance_word_embedding(wiki_summery, summery)
             date = news.get('date')
             before = self.get_price_before_date(db, collection, key, date)
             minute = self.get_price_at_date(db, collection, key, date)
@@ -133,7 +134,7 @@ class NewsOrganizer(object):
 
     def dnn_organizer_with_wiki_tweets(self, collection="Product", key="BRTUSD", name="Brent Crude"):
         db = Mongo()
-        pre_processing = PreProcessing()
+        self.pre_processing = PreProcessing()
         news_collection = db.create_collection("FilteredNews")
         news_filtered = db.create_collection("FilteredNewsWikiAndTweetForDnn", NewsOrganizer.get_index_models())
         wiki = self.get_wiki(db, title=name)
@@ -142,21 +143,21 @@ class NewsOrganizer(object):
         count = 0
         for news in news_collection.find(self.FIND_FILTER, no_cursor_timeout=True):
             try:
-                summery = pre_processing.preprocess(news.get('summery'))
+                summery = self.pre_processing.preprocess(news.get('summery'))
                 cosine = WordEmbedding.cosine_distance_word_embedding(wiki_summery, summery)
                 summery_percentage = round((1 - cosine) * 100, 2)
                 date = news.get('date')
-                title = pre_processing.preprocess(news.get('title'))
+                title = self.pre_processing.preprocess(news.get('title'))
                 before = self.get_price_before_date(db, collection, key, date)
                 minute = self.get_price_at_date(db, collection, key, date)
                 hour = self.get_price_at_date(db, collection, key, date, minutes=60)
                 day = self.get_price_at_date(db, collection, key, date, add_day=True)
-                # percentage = self.calculate_popularity(db, date, title)
+                percentage = self.calculate_popularity(db, date, title, self.pre_processing)
                 news_filtered.insert({
                     "_id": news.get('_id'),
                     "title": title,
-                    "summery": pre_processing.preprocess(news.get('summery')),
-                    "article": pre_processing.preprocess(news.get('article')),
+                    "summery": self.pre_processing.preprocess(news.get('summery')),
+                    "article": self.pre_processing.preprocess(news.get('article')),
                     "url": news.get('url'),
                     "category": news.get('category'),
                     "price_after_minute": minute,
@@ -164,7 +165,7 @@ class NewsOrganizer(object):
                     "price_after_day": day,
                     "price_before": before,
                     "relatedness": summery_percentage,
-                    "tweet_percentage": 0,
+                    "tweet_percentage": percentage,
                     "date": date,
                     "authors": news['authors']
                 })
@@ -292,25 +293,30 @@ class NewsOrganizer(object):
         fields = {"Date": 1, "Open": 1, "Volume": 1, "High": 1, "_id": 0}
         return db.get_data_one(collection, query, fields, sort=[('Date', -1)])
 
-    def calculate_popularity(self, db, date, title):
-        tweets = self.get_tweets_before_date(db, date)
-        count = tweets.count()
-        #if count > 100000:
-        #    count = 100000
-        if count > 0:
-            ta = Timer()
-            ta.start()
-            result = WordEmbedding.multi_cosine_distance_word_embedding(count, date, title)
-            ta.stop()
-            print()
-            if result == 0:
-                return 0
-            return result / count
-        return 0
+    def calculate_popularity(self, db, date, title, pre):
+        ta = Timer()
+        ta.start()
+        tags = ' '.join(title) + ' '.join(self.get_tags())
+        print(tags)
+        date = datetime.strptime("2014-03-10", '%Y-%m-%d')
+        tweets = self.get_tweets_and_filter(db, date, tags=tags, hours=60, add=False)
+        print("Query")
+        print(tweets)
+        ta.stop()
+        # tweets = self.get_tweets_before_date(db, date)
+        ta = Timer()
+        ta.start()
+        result = WordEmbedding.calculate_distance_for_tweets(tweets, title, pre)
+        # result = WordEmbedding.multi_cosine_distance_word_embedding(count, date, title)
+        ta.stop()
+        print()
+        if result == 0:
+            return 0
+        return result
 
     @staticmethod
-    def get_tweets_before_date(db, date:datetime, collection="Tweet", days=7):
-        start = date - timedelta(days=5)
+    def get_tweets_before_date(db, date: datetime, collection="Tweet", days=5):
+        start = date - timedelta(days=days)
         end = date
         query = {
             "tweet_created_at":
@@ -320,7 +326,31 @@ class NewsOrganizer(object):
                 }
         }
         fields = {"tweet_text": 1, "tweet_user_fallowers_count": 1, "tweet_user_verified": 1, "tweet_created_at": 1, "_id": 0}
-        return db.get_data(collection, query, fields).limit(1000)
+        return db.get_data(collection, query, fields)
+
+    @staticmethod
+    def get_tweets_and_filter(db, date: datetime, tags="", collection="Tweet", hours=5, add=True):
+        if add:
+            start = date
+            end = date + timedelta(hours=hours)
+        else:
+            start = date - timedelta(hours=hours)
+            end = date
+        query = {
+            "tweet_created_at":
+                {
+                    "$gte": start,
+                    "$lt": end
+                },
+            "$text": {"$search": tags}
+        }
+        print(query)
+        fields = {"tweet_text": 1,
+                  "tweet_user_fallowers_count": 1,
+                  "tweet_user_verified": 1,
+                  "tweet_created_at": 1,
+                  "_id": 0}
+        return db.get_data(collection, query, fields)
 
     @staticmethod
     def get_wiki(db, collection="Wiki", title="Brent Crude"):
@@ -329,3 +359,7 @@ class NewsOrganizer(object):
         }
         fields = {"summary_p": 1, "_id": 0}
         return db.get_data_one(collection, query, fields)
+    @staticmethod
+    def get_tags():
+        pwd = os.path.dirname(os.path.abspath(__file__))
+        return json.load(open(pwd+'/pre_defined_tags.json', 'r'))["tags"]

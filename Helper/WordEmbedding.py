@@ -76,6 +76,28 @@ class WordEmbedding(object):
         #p.map(mp_worker, data)
 
     @staticmethod
+    def calculate_distance_for_tweets(tweets, title, pre):
+        vector = WordEmbedding.get_vector_list(title)
+        count = 0
+        tweetcount = 0
+        for tweet in tweets:
+            tweetcount += 1
+            try:
+                cosine = WordEmbedding.cosine_distance_word_embedding_with_vector(vector, pre.preprocess(tweet["tweet_text"]))
+                percentage = round((1 - cosine) * 100, 2)
+            except Exception as exception:
+                print("Exeption")
+                percentage = 0
+
+            if percentage > 80:
+                count += 1
+                if tweet["tweet_user_verified"]:
+                    count += 1
+        print("Tweet Count:" + str(tweetcount))
+        print("count" + str(count))
+        return count
+
+    @staticmethod
     def calculate_distance_for_tweet(info, input):
         skip = info["skip"]
         get = info["to"]
@@ -136,7 +158,7 @@ class WordEmbedding(object):
             vector_1 = np.mean(WordEmbedding.get_vector_list(s1), axis=0)
             vector_2 = np.mean(WordEmbedding.get_vector_list(s2), axis=0)
         except:
-            return 0.001
+            return 0.999
         cosine = spatial.distance.cosine(vector_1, vector_2)
         return cosine
 
