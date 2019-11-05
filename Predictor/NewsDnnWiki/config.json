@@ -1,6 +1,6 @@
 {
 	"data": {
-        "db": "FilteredNewsForDnn",
+        "db": "FilteredNewsWikiForDnn",
         "train_query":{ "date": { "$gte":
 											{"__type__": "date", "year": 2013, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0},
 									"$lt":
@@ -9,7 +9,7 @@
 						"category":{"$in" : ["Economics", "World", "Business"]}
 		},
 		"train_query_sort":[{"date":1}],
-		"train_query_fields": {"article": 1, "summery": 1, "title": 1, "price_before":1, "price_after_minute":1, "price_after_hour":1, "price_after_day": 1, "authors": 1, "category": 1, "date": 1, "_id": 0 },
+		"train_query_fields": {"article": 1, "summery": 1, "title": 1, "relatedness": 1, "price_before":1, "price_after_minute":1, "price_after_hour":1, "price_after_day": 1, "authors": 1, "category": 1, "date": 1, "_id": 0 },
 
 		"validate_query": { "date": { "$gte":
 													{"__type__": "date", "year": 2013, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0},
@@ -19,7 +19,7 @@
 								"category":{"$in" : ["Economics", "World", "Business"]}
 				},
 		"validate_query_sort":[{"date":1}],
-		"validate_query_fields": {"article": 1, "summery": 1, "title": 1, "price_before":1, "price_after_minute":1, "price_after_hour":1, "price_after_day": 1, "authors": 1, "category": 1, "date": 1, "_id": 0 },
+		"validate_query_fields": {"article": 1, "summery": 1, "title": 1, "relatedness": 1, "price_before":1, "price_after_minute":1, "price_after_hour":1, "price_after_day": 1, "authors": 1, "category": 1, "date": 1, "_id": 0 },
 
         "test_query": { "date": { "$gte":
 											{"__type__": "date", "year": 2013, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0},
@@ -29,7 +29,7 @@
 						"category":{"$in" : ["Economics", "World", "Business"]}
 		},
 		"test_query_sort":[{"date":1}],
-		"test_query_fields": {"article": 1, "summery": 1, "title": 1, "price_before":1, "price_after_minute":1, "price_after_hour":1, "price_after_day": 1, "authors": 1, "category": 1, "date": 1, "_id": 0 },
+		"test_query_fields": {"article": 1, "summery": 1, "title": 1, "relatedness": 1, "price_before":1, "price_after_minute":1, "price_after_hour":1, "price_after_day": 1, "authors": 1, "category": 1, "date": 1, "_id": 0 },
 		"price": {
 			"start": "price_before",
 			"end": "price_after_day"
@@ -44,6 +44,10 @@
 			"title",
 			"url"
 		],
+		"wiki":{
+			"skip": false,
+			"value": 50
+		},
 		"WordEmbeddingPath": "/Users/kaaneksen/Downloads/glove/glove.6B.100d.txt"
 	},
 	"training": {

@@ -27,7 +27,7 @@ class NewsDnnWikiMain(object):
     def __init__(self, epochs, batch_size, seq_length, lr=0.005):
         self.epochs = epochs
         self.config = self.get_config()
-        self.model: NewsDnnWikiModel = NewsDnnWikiModel(input_size=100, lr=lr, use_gpu=self.config["training"]["useGPU"])
+        self.model: NewsDnnWikiModel = NewsDnnWikiModel(input_size=101, lr=lr, use_gpu=self.config["training"]["useGPU"])
         self.reader = NewsDnnWikiDataReader(self.config['data'], batch_size, seq_length)
         self.timer = Timer()
         self.current_date = DateHelper.get_current_date()

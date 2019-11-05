@@ -52,7 +52,9 @@ class NewsDnnWikiDataReader(object):
         price_start = self.configs["price"]["start"]
         price_end = self.configs["price"]["end"]
         for row in self.__train_cursor:
-            embedded_article = self.word_embedding.get_weight_matrix_with_wiki(row["article"], row["wiki"])
+            embedded_article = self.word_embedding.get_weight_matrix_with_wiki(row["article"], row["relatedness"])
+            if self.configs["wiki"]["skip"] and row["relatedness"] < self.configs["wiki"]["value"]:
+                continue
             if len(embedded_article) < NewsDnnWikiDataReader.ArticleMinSize:
                 continue
             shape = self.pad_embedded_article(embedded_article).shape
@@ -86,7 +88,9 @@ class NewsDnnWikiDataReader(object):
         self.clear_data()
         batch_count = 0
         for row in self.__test_cursor:
-            embedded_article = self.word_embedding.get_weight_matrix_with_wiki(row["article"], row["wiki"])
+            embedded_article = self.word_embedding.get_weight_matrix_with_wiki(row["article"], row["relatedness"])
+            if self.configs["wiki"]["skip"] and row["relatedness"] < self.configs["wiki"]["value"]:
+                continue
             if len(embedded_article) < NewsDnnWikiDataReader.ArticleMinSize:
                 continue
             shape = self.pad_embedded_article(embedded_article).shape
@@ -123,7 +127,9 @@ class NewsDnnWikiDataReader(object):
         price_start = self.configs["price"]["start"]
         price_end = self.configs["price"]["end"]
         for row in self.__validate_cursor:
-            embedded_article = self.word_embedding.get_weight_matrix_with_wiki(row["article"], row["wiki"])
+            embedded_article = self.word_embedding.get_weight_matrix_with_wiki(row["article"], row["relatedness"])
+            if self.configs["wiki"]["skip"] and row["relatedness"] < self.configs["wiki"]["value"]:
+                continue
             if len(embedded_article) < NewsDnnWikiDataReader.ArticleMinSize:
                 continue
             shape = self.pad_embedded_article(embedded_article).shape
