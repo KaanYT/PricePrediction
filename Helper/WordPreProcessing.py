@@ -23,6 +23,11 @@ class PreProcessing(object):
                     words_filtered.append(w)
         return words_filtered
 
+    def is_stop_word_or_punctuation(self, word):
+        if (word in self.stopwords) or (word in self.punctuation):
+            return True
+        return False
+
     @staticmethod
     def get_stopwords():
         pwd = os.path.dirname(os.path.abspath(__file__))

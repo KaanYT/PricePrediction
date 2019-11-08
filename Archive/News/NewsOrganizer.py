@@ -1,5 +1,7 @@
 import re
+import os
 import enum
+import json
 import traceback
 import multiprocessing
 
@@ -11,6 +13,8 @@ from datetime import datetime
 from datetime import timedelta
 
 from Managers.DatabaseManager.MongoDB import Mongo
+from Managers.DatabaseManager.ElasticSearchDB import ElasticSearch
+
 from Helper.Timer import Timer
 from Helper.DateHelper import DateHelper
 from Helper.FileHelper import FileHelper
@@ -20,7 +24,7 @@ from Helper.WordEmbedding import WordEmbedding
 
 
 class NewsOrganizer(object):
-    DATE_START = datetime.strptime("2014-01-01", '%Y-%m-%d')
+    DATE_START = datetime.strptime("2014-02-01", '%Y-%m-%d')
     DATE_END = datetime.strptime("2017-01-01", '%Y-%m-%d')
     FIND_FILTER = {'date': {'$gte': DATE_START, '$lt': DATE_END}}
 
@@ -137,8 +141,8 @@ class NewsOrganizer(object):
         news_collection = db.create_collection("FilteredNews")
         news_filtered = db.create_collection("FilteredNewsWikiAndTweetForDnn", NewsOrganizer.get_index_models())
         wiki = self.get_wiki(db, title=name)
-        print(wiki)
         wiki_summery = wiki["summary_p"]
+        tags = self.get_pre_defined_tags()
         count = 0
         for news in news_collection.find(self.FIND_FILTER, no_cursor_timeout=True):
             try:
@@ -151,7 +155,7 @@ class NewsOrganizer(object):
                 minute = self.get_price_at_date(db, collection, key, date)
                 hour = self.get_price_at_date(db, collection, key, date, minutes=60)
                 day = self.get_price_at_date(db, collection, key, date, add_day=True)
-                # percentage = self.calculate_popularity(db, date, title)
+                percentage = self.calculate_popularity_es(date, title + tags["tags"], pre_processing)
                 news_filtered.insert({
                     "_id": news.get('_id'),
                     "title": title,
@@ -164,7 +168,7 @@ class NewsOrganizer(object):
                     "price_after_day": day,
                     "price_before": before,
                     "relatedness": summery_percentage,
-                    "tweet_percentage": 0,
+                    "tweet_percentage": percentage,
                     "date": date,
                     "authors": news['authors']
                 })
@@ -308,6 +312,35 @@ class NewsOrganizer(object):
             return result / count
         return 0
 
+    def calculate_popularity_es(self, date, title, pre):
+        tweets = self.get_tweets_before_date_from_es(date, title)
+        total_tweets = tweets["hits"]["total"]["value"]
+        if total_tweets == 0:
+            return 0
+        else:
+            ta = Timer()
+            ta.start()
+            vector = WordEmbedding.get_vector_list(title)
+            count = 0
+            for es_tweet in tweets["hits"]["hits"]:
+                tweet = es_tweet["_source"]
+                try:
+                    cosine = WordEmbedding.cosine_distance_word_embedding_with_vector(vector, pre.preprocess(
+                        tweet["tweet_text"]))
+                    percentage = round((1 - cosine) * 100, 2)
+                except Exception as exception:
+                    print("Exeption")
+                    percentage = 0
+
+                if percentage > 70:
+                    count += 1
+                    if tweet["tweet_user_verified"]:
+                        count += 1
+            ta.stop()
+            if count == 0:
+                return 0
+            return count / total_tweets
+
     @staticmethod
     def get_tweets_before_date(db, date:datetime, collection="Tweet", days=7):
         start = date - timedelta(days=5)
@@ -323,9 +356,45 @@ class NewsOrganizer(object):
         return db.get_data(collection, query, fields).limit(1000)
 
     @staticmethod
+    def get_tweets_before_date_from_es(date: datetime, hashtags, collection="twitter", days=5):
+        start = date - timedelta(days=days)
+        end = date
+        es = ElasticSearch()
+        query = {
+            "query":
+                {
+                    "bool": {
+                        "filter": {
+                            "range": {
+                                "tweet_created_at": {
+                                    "gte": start,  #"2014-03-31T20:03:12.963",
+                                    "lte": end,  #"2014-04-03T20:03:12.963"
+                                }
+                            }
+                        },
+                        "should": [
+                            {
+                                "terms": {
+                                    "tweet_entities.hashtags.text": hashtags  #[]
+                                }
+                            }
+                        ],
+                        "minimum_should_match": 1,
+                        "boost": 1.0
+                    }
+                }
+        }
+        return es.search(index=collection, body=query)
+
+    @staticmethod
     def get_wiki(db, collection="Wiki", title="Brent Crude"):
         query = {
             "title": title
         }
         fields = {"summary_p": 1, "_id": 0}
         return db.get_data_one(collection, query, fields)
+
+    @staticmethod
+    def get_pre_defined_tags():
+        pwd = os.path.dirname(os.path.abspath(__file__))
+        return json.load(open(pwd + '/tags_pre_defined.json', 'r'))

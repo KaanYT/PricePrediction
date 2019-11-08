@@ -31,9 +31,9 @@ def main():
     print("Loading is loaded. Loading DatabaseManager...")
     #wiki = WikiRecorder()
     #wiki.collect_all()
-    #WordEmbedding(path="/Users/kaaneksen/Downloads/glove/glove.6B.100d.txt")
-    #collector = NewsOrganizer()
-    #collector.dnn_organizer_with_wiki_tweets()
+    WordEmbedding(path=Config.word_embedding.path)
+    collector = NewsOrganizer()
+    collector.dnn_organizer_with_wiki_tweets()
     #page = Wikipedia.get_page("Starbucks")
     #print(page)
     #fdc  = FDC()
@@ -42,13 +42,12 @@ def main():
     #config = json.load(open(pwd + '/Predictor/NewsDNN/config.json', 'r'), cls=DateTimeDecoder)["data"]
     #tst = NewsDnnWikiDataReader(config, batch_size=10, sequence_length=100)
     #print(tst.get_train_count())
-    count = 0
-    newsdnn = NewsDnnMain(epochs=int(Config.training.epochs),
-                          batch_size=int(Config.training.batch_size),
-                          seq_length=int(Config.training.sequence_length),
-                          lr=float(Config.training.lr))
-    newsdnn.train(print_every=int(Config.training.print_every))
-    newsdnn.test()
+    #newsdnn = NewsDnnMain(epochs=int(Config.training.epochs),
+                          #batch_size=int(Config.training.batch_size),
+                          #seq_length=int(Config.training.sequence_length),
+                          #lr=float(Config.training.lr))
+    #newsdnn.train(print_every=int(Config.training.print_every))
+    #newsdnn.test()
     #newsdnn.load_model("saved_models\\25102019-175105-e5(FilteredNewsForDnn).pth")
 
 

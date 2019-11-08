@@ -1,7 +1,10 @@
 import numpy as np
 import multiprocessing
+import gensim
 
 from datetime import timedelta
+
+from Helper import WordPreProcessing
 from Helper.Timer import Timer
 from Helper.WordPreProcessing import PreProcessing
 from functools import partial
@@ -12,9 +15,9 @@ from Managers.DatabaseManager.MongoDB import Mongo
 
 class WordEmbedding(object):
 
-    Words={}
+    Words = {}
 
-    def __init__(self, path=None, vector_size=100):
+    def __init__(self, path=None, vector_size=100, word_processing=None):
         self.timer = Timer()
         self.manager = multiprocessing.Manager()
         WordEmbedding.Words = self.manager.dict()
@@ -23,6 +26,10 @@ class WordEmbedding(object):
             self.path = 'glove.6B.100d.txt'
         else:
             self.path = path
+        if word_processing is None:
+            self.word_processing = PreProcessing()
+        else:
+            self.word_processing = word_processing
         self.__read_embeddings()
 
     def __read_embeddings(self):
@@ -32,9 +39,16 @@ class WordEmbedding(object):
             for line in f:
                 values = line.split()
                 word = values[0]
+                if self.word_processing.is_stop_word_or_punctuation(word):
+                    continue
                 vector = np.asarray(values[1:], dtype=np.float32)
                 WordEmbedding.Words[word] = vector
-        self.timer.stop()
+        self.timer.stop(time_for='Word Embedding Loading')
+
+    def __read_embeddings_gensim(self):
+        self.timer.start()
+        WordEmbedding.Words = gensim.models.KeyedVectors.load_word2vec_format(self.path, binary=True)
+        self.timer.stop(time_for='Word Embedding Loading')
 
     @staticmethod
     def vec(w):
