@@ -188,14 +188,16 @@ class WordEmbedding(object):
                 embedding_matrix[index] = embedding_vector
         return embedding_matrix
 
-    def get_weight_matrix_with_wiki(self, article, wiki):
+    def get_weight_matrix_with_wiki_tweet(self, article, wiki, tweet):
         vocabulary_size = len(article)
-        embedding_matrix = np.zeros((vocabulary_size, self.vector_size + 1), dtype=np.double)
+        embedding_matrix = np.zeros((vocabulary_size, self.vector_size + 2), dtype=np.double)
         for index in range(vocabulary_size):
             word = article[index]
             embedding_vector = WordEmbedding.Words.get(word)
             if embedding_vector is not None:
                 # Add Wiki Info
                 embedding_matrix[index] = np.append(embedding_vector, wiki/100)
+                # Add Tweet
+                embedding_matrix[index] = np.append(embedding_vector, tweet)
         return embedding_matrix
 
