@@ -318,8 +318,6 @@ class NewsOrganizer(object):
         if total_tweets == 0:
             return 0
         else:
-            ta = Timer()
-            ta.start()
             vector = WordEmbedding.get_vector_list(title)
             count = 0
             for es_tweet in tweets["hits"]["hits"]:
@@ -336,7 +334,6 @@ class NewsOrganizer(object):
                     count += 1
                     if tweet["tweet_user_verified"]:
                         count += 1
-            ta.stop()
             if count == 0:
                 return 0
             return count / total_tweets
