@@ -1,0 +1,91 @@
+{
+	"database": {
+        "name": "FilteredNewsWikiAndTweetForDnn",
+		"train": {
+			"query": {
+				"date": {
+					"$gte": {
+						"__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2016, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				}
+			}
+		},
+		"validate": {
+			"query": {
+				"date": {
+					"$gte": {
+						"__type__": "date", "year": 2016, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				}
+			}
+		},
+		"test": {
+			"query": {
+				"date": {
+					"$gte": {
+						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				}
+			}
+		},
+		"sort": [
+			{"date":1}
+		],
+		"fields": {
+			"article": 1,
+			"summery": 1,
+			"title": 1,
+			"relatedness": 1,
+			"price_before":1,
+			"price_after_minute":1,
+			"price_after_hour":1,
+			"price_after_day": 1,
+			"tweet_percentage": 1,
+			"authors": 1,
+			"category": 1,
+			"date": 1,
+			"_id": 0
+		},
+		"price": {
+			"start": "price_before",
+			"end": "price_after_hour",
+			"buffer_percent": 0.005
+		}
+	},
+	"wordEmbedding":{
+		"path":"G:\\Glove\\glove.6B.100d.txt",
+		"size":100
+	},
+	"networkConfig": {
+		"epochs": 3,
+		"batch_size": 32,
+		"sequence_length": 50,
+		"normalise": true,
+		"criterion":"NLLLoss",
+		"optimizer":"Adam",
+		"useGPU": false,
+		"save_dir": "saved_models"
+	},
+	"options": {
+		"network_type":"News",
+		"wiki":{
+			"enabled": false,
+			"multiply_factors":1,
+			"skip": false,
+			"value": 50
+		},
+		"twitter":{
+			"enabled": false,
+			"multiply_factors":1
+		}
+	}
+}

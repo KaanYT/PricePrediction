@@ -1,26 +1,22 @@
 import re
-import os
-import enum
-import json
 import traceback
-import multiprocessing
 
-from functools import partial
-from itertools import chain
 from pymongo import IndexModel
 from bs4 import BeautifulSoup
 from datetime import datetime
 from datetime import timedelta
 
 from Managers.DatabaseManager.MongoDB import Mongo
-from Managers.DatabaseManager.ElasticSearchDB import ElasticSearch
 
-from Helper.Timer import Timer
 from Helper.DateHelper import DateHelper
 from Helper.FileHelper import FileHelper
 from Helper.WordPreProcessing import PreProcessing
 from Managers.LogManager.Log import Logger
-from Helper.WordEmbedding import WordEmbedding
+
+from Forecast.Wiki.WikiForecast import WikiForecast
+from Forecast.Twitter.TwitterForecast import TwitterForecast
+
+from Predictor.NewsDnnGeneral.NewsDnnGeneralWordEmbedding import WordEmbedding
 
 
 class NewsOrganizer(object):
@@ -28,8 +24,8 @@ class NewsOrganizer(object):
     DATE_END = datetime.strptime("2017-01-01", '%Y-%m-%d')
     FIND_FILTER = {'date': {'$gte': DATE_START, '$lt': DATE_END}}
 
-    #def __init__(self, word_embedding_path="/Users/kaaneksen/Downloads/glove/glove.6B.100d.txt"):
-        #self.embedding = WordEmbedding(word_embedding_path)
+    def __init__(self, word_embedding_path="/Users/kaaneksen/Downloads/glove/glove.6B.100d.txt"):
+        self.embedding = WordEmbedding(word_embedding_path)
 
     def organize(self):
         db = Mongo()
@@ -98,56 +94,19 @@ class NewsOrganizer(object):
                 Logger().get_logger().error(type(exception).__name__, exc_info=True)
                 traceback.print_exc()
 
-    def dnn_organizer_with_wiki(self, collection="Product", key="BRTUSD", name="Brand Oil"):
-        db = Mongo()
-        pre_processing = PreProcessing()
-        news_collection = db.create_collection("FilteredNews")
-        news_filtered = db.create_collection("FilteredNewsWikiForDnn", NewsOrganizer.get_index_models())
-        wiki = self.get_wiki(db, title=name)
-        wiki_summery = wiki["summary_p"]
-
-        for news in news_collection.find(self.FIND_FILTER):
-            summery = pre_processing.preprocess(news.get('summery'))
-            cosine = self.embedding.cosine_distance_word_embedding(wiki_summery, summery)
-
-            date = news.get('date')
-            before = self.get_price_before_date(db, collection, key, date)
-            minute = self.get_price_at_date(db, collection, key, date)
-            hour = self.get_price_at_date(db, collection, key, date, minutes=60)
-            day = self.get_price_at_date(db, collection, key, date, add_day=True)
-            try:
-                news_filtered.insert({
-                    "_id": news.get('_id'),
-                    "title": pre_processing.preprocess(news.get('title')),
-                    "summery": summery,
-                    "article": pre_processing.preprocess(news.get('article')),
-                    "url": news.get('url'),
-                    "category": news.get('category'),
-                    "price_after_minute": minute,
-                    "price_after_hour": hour,
-                    "price_after_day": day,
-                    "price_before": before,
-                    "relatedness": round((1 - cosine) * 100, 2),
-                    "date": date,
-                    "authors": news['authors']
-                })
-            except Exception as exception:
-                Logger().get_logger().error(type(exception).__name__, exc_info=True)
-                traceback.print_exc()
-
     def dnn_organizer_with_wiki_tweets(self, collection="Product", key="BRTUSD", name="Brent Crude"):
         db = Mongo()
         pre_processing = PreProcessing()
         news_collection = db.create_collection("FilteredNews")
         news_filtered = db.create_collection("FilteredNewsWikiAndTweetForDnn", NewsOrganizer.get_index_models())
-        wiki = self.get_wiki(db, title=name)
-        wiki_summery = wiki["summary_p"]
-        tags = self.get_pre_defined_tags()
+        wiki_forecast = WikiForecast()
+        twitter_forecast = TwitterForecast()
+        tags = twitter_forecast.get_pre_defined_tags()
         count = 0
         for news in news_collection.find(self.FIND_FILTER, no_cursor_timeout=True):
             try:
                 summery = pre_processing.preprocess(news.get('summery'))
-                cosine = WordEmbedding.cosine_distance_word_embedding(wiki_summery, summery)
+                cosine = wiki_forecast.get_similarity(summery, title=name)
                 summery_percentage = round((1 - cosine) * 100, 2)
                 date = news.get('date')
                 title = pre_processing.preprocess(news.get('title'))
@@ -155,7 +114,9 @@ class NewsOrganizer(object):
                 minute = self.get_price_at_date(db, collection, key, date)
                 hour = self.get_price_at_date(db, collection, key, date, minutes=60)
                 day = self.get_price_at_date(db, collection, key, date, add_day=True)
-                percentage = self.calculate_popularity_es(date, title + tags["tags"], pre_processing)
+                total, percentage = twitter_forecast.get_popularity_from_elastic_search(date,
+                                                                                        title + tags["tags"],
+                                                                                        pre_processing)
                 news_filtered.insert({
                     "_id": news.get('_id'),
                     "title": title,
@@ -167,7 +128,8 @@ class NewsOrganizer(object):
                     "price_after_hour": hour,
                     "price_after_day": day,
                     "price_before": before,
-                    "relatedness": summery_percentage,
+                    "wiki_relatedness": summery_percentage,
+                    "tweet_count": total,
                     "tweet_percentage": percentage,
                     "date": date,
                     "authors": news['authors']
@@ -295,103 +257,3 @@ class NewsOrganizer(object):
         }
         fields = {"Date": 1, "Open": 1, "Volume": 1, "High": 1, "_id": 0}
         return db.get_data_one(collection, query, fields, sort=[('Date', -1)])
-
-    def calculate_popularity(self, db, date, title):
-        tweets = self.get_tweets_before_date(db, date)
-        count = tweets.count()
-        #if count > 100000:
-        #    count = 100000
-        if count > 0:
-            ta = Timer()
-            ta.start()
-            result = WordEmbedding.multi_cosine_distance_word_embedding(count, date, title)
-            ta.stop()
-            print()
-            if result == 0:
-                return 0
-            return result / count
-        return 0
-
-    def calculate_popularity_es(self, date, title, pre):
-        tweets = self.get_tweets_before_date_from_es(date, title)
-        total_tweets = tweets["hits"]["total"]["value"]
-        if total_tweets == 0:
-            return 0
-        else:
-            vector = WordEmbedding.get_vector_list(title)
-            count = 0
-            for es_tweet in tweets["hits"]["hits"]:
-                tweet = es_tweet["_source"]
-                try:
-                    cosine = WordEmbedding.cosine_distance_word_embedding_with_vector(vector, pre.preprocess(
-                        tweet["tweet_text"]))
-                    percentage = round((1 - cosine) * 100, 2)
-                except Exception as exception:
-                    print("Exeption")
-                    percentage = 0
-
-                if percentage > 70:
-                    count += 1
-                    if tweet["tweet_user_verified"]:
-                        count += 1
-            if count == 0:
-                return 0
-            return count / total_tweets
-
-    @staticmethod
-    def get_tweets_before_date(db, date:datetime, collection="Tweet", days=7):
-        start = date - timedelta(days=5)
-        end = date
-        query = {
-            "tweet_created_at":
-                {
-                    "$gte": start,
-                    "$lt": end
-                }
-        }
-        fields = {"tweet_text": 1, "tweet_user_fallowers_count": 1, "tweet_user_verified": 1, "tweet_created_at": 1, "_id": 0}
-        return db.get_data(collection, query, fields).limit(1000)
-
-    @staticmethod
-    def get_tweets_before_date_from_es(date: datetime, hashtags, collection="twitter", days=5):
-        start = date - timedelta(days=days)
-        end = date
-        es = ElasticSearch()
-        query = {
-            "query":
-                {
-                    "bool": {
-                        "filter": {
-                            "range": {
-                                "tweet_created_at": {
-                                    "gte": start,  #"2014-03-31T20:03:12.963",
-                                    "lte": end,  #"2014-04-03T20:03:12.963"
-                                }
-                            }
-                        },
-                        "should": [
-                            {
-                                "terms": {
-                                    "tweet_entities.hashtags.text": hashtags  #[]
-                                }
-                            }
-                        ],
-                        "minimum_should_match": 1,
-                        "boost": 1.0
-                    }
-                }
-        }
-        return es.search(index=collection, body=query)
-
-    @staticmethod
-    def get_wiki(db, collection="Wiki", title="Brent Crude"):
-        query = {
-            "title": title
-        }
-        fields = {"summary_p": 1, "_id": 0}
-        return db.get_data_one(collection, query, fields)
-
-    @staticmethod
-    def get_pre_defined_tags():
-        pwd = os.path.dirname(os.path.abspath(__file__))
-        return json.load(open(pwd + '/tags_pre_defined.json', 'r'))

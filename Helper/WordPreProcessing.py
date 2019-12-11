@@ -23,6 +23,19 @@ class PreProcessing(object):
                     words_filtered.append(w)
         return words_filtered
 
+    def preprocess_extra(self, content):
+        content = content.lower()
+        words = word_tokenize(content)
+        sentence_filtered = ""
+        words_filtered = []
+        for w in words:
+            if (w not in self.stopwords) and (w not in self.punctuation):
+                w = ' '.join([c for c in w if c not in punctuation])
+                if w.isalpha() and len(w) > 1:  # filter out short tokens and not alphabetic
+                    sentence_filtered += " " + w
+                    words_filtered.append(w)
+        return words_filtered, sentence_filtered
+
     def is_stop_word_or_punctuation(self, word):
         if (word in self.stopwords) or (word in self.punctuation):
             return True

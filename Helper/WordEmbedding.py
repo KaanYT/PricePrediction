@@ -201,3 +201,30 @@ class WordEmbedding(object):
                 embedding_matrix[index] = np.append(embedding_vector, tweet)
         return embedding_matrix
 
+    def get_weight_matrix_with_wiki(self, article, wiki):
+        vocabulary_size = len(article)
+        embedding_matrix = np.zeros((vocabulary_size, self.vector_size + 1), dtype=np.double)
+        for index in range(vocabulary_size):
+            word = article[index]
+            embedding_vector = WordEmbedding.Words.get(word)
+            if embedding_vector is not None:
+                # Add Wiki Info
+                embedding_matrix[index] = np.append(embedding_vector, wiki / 100)
+        return embedding_matrix
+
+    def get_weight_matrix_all(self, article, wiki=None, wiki_multiply_factors=0, tweet=None, tweet_multiply_factors=0):
+        vocabulary_size = len(article)
+        vector_size = self.vector_size + wiki_multiply_factors + tweet_multiply_factors
+        embedding_matrix = np.zeros((vocabulary_size, vector_size), dtype=np.double)
+        for index in range(vocabulary_size):
+            word = article[index]
+            embedding_vector = WordEmbedding.Words.get(word)
+            if embedding_vector is not None:
+                embedding_matrix[index] = embedding_vector
+                if wiki is not None:
+                    wiki_array = np.full(wiki_multiply_factors, wiki/100)
+                    embedding_matrix[index] = np.append(embedding_vector, wiki_array)
+                if tweet is not None:
+                    tweet_array = np.full(wiki_multiply_factors, tweet)
+                    embedding_matrix[index] = np.append(embedding_vector, tweet_array)
+        return embedding_matrix
