@@ -14,7 +14,7 @@ class TwitterForecast(object):
         tweets = self.get_tweets_before_date_from_elastic_search(date, title)
         total_tweets = tweets["hits"]["total"]["value"]
         if total_tweets == 0:
-            return 0
+            return 0, 0
         else:
             title_filtered_words, title_filtered = pre.preprocess_extra(title)
             count = 0

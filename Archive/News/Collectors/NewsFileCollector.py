@@ -1,12 +1,12 @@
 from Managers.DatabaseManager.MongoDB import Mongo
 from Helper.DateHelper import DateHelper
 from newspaper import Article
-from Archive.News import News
+from Archive.News.Collectors import News
 import archivecdx
 from Managers.LogManager.Log import Logger
 import sqlite3
 import re
-from Archive.News.MultiThreadHelper import NewsPool  #Multi Thread
+from Archive.News.Collectors.MultiThreadHelper import NewsPool  #Multi Thread
 
 
 class FileCollector(object):

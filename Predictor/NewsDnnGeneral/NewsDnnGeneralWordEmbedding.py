@@ -24,13 +24,13 @@ class WordEmbedding(object):
         return self.instance.Model[word]
 
     def find_most_similar_words(self, word):
-        self.instance.Model.most_similar(word)
+        return self.instance.Model.most_similar(word)
 
     def get_similarity(self, word1, word2):
-        self.instance.Model.similarity(word1, word2)
+        return self.instance.Model.similarity(word1, word2)
 
     def get_similarity_sentence(self, sentence1, sentence2):
-        self.instance.Model.wmdistance(sentence1, sentence2)
+        return self.instance.Model.wmdistance(sentence1, sentence2)
 
     def get_weight_matrix(self, article):
         vocabulary_size = len(article)

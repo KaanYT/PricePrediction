@@ -1,4 +1,7 @@
 import re
+import os
+import json
+import platform
 import traceback
 
 from pymongo import IndexModel
@@ -11,6 +14,7 @@ from Managers.DatabaseManager.MongoDB import Mongo
 from Helper.DateHelper import DateHelper
 from Helper.FileHelper import FileHelper
 from Helper.WordPreProcessing import PreProcessing
+from Helper.JsonDateHelper import DateTimeDecoder
 from Managers.LogManager.Log import Logger
 
 from Forecast.Wiki.WikiForecast import WikiForecast
@@ -20,11 +24,11 @@ from Predictor.NewsDnnGeneral.NewsDnnGeneralWordEmbedding import WordEmbedding
 
 
 class NewsOrganizer(object):
-    DATE_START = datetime.strptime("2014-02-01", '%Y-%m-%d')
-    DATE_END = datetime.strptime("2017-01-01", '%Y-%m-%d')
-    FIND_FILTER = {'date': {'$gte': DATE_START, '$lt': DATE_END}}
 
-    def __init__(self, word_embedding_path="/Users/kaaneksen/Downloads/glove/glove.6B.100d.txt"):
+    def __init__(self, word_embedding_path=None):
+        self.config = self.get_config()
+        if word_embedding_path is None:
+            word_embedding_path = self.config["wordEmbedding"]["path"]
         self.embedding = WordEmbedding(word_embedding_path)
 
     def organize(self):
@@ -35,18 +39,18 @@ class NewsOrganizer(object):
         for news in news_collection.find():
             article = NewsOrganizer.get_article(news)
             if article is None:
-                FileHelper.append_to_file("NewsOrganizer_No_Article_List.txt", news["_id"])
+                FileHelper.append_to_file(self.config["log"]["Article_None"], news["_id"])
                 continue
             if article == "":
-                FileHelper.append_to_file("NewsOrganizer_Article_Not_Found.txt", news["_id"])
+                FileHelper.append_to_file(self.config["log"]["Article_Empty"], news["_id"])
                 continue
             date = NewsOrganizer.get_date(news)
             if not date:
-                FileHelper.append_to_file("NewsOrganizer_No_Date_List.txt", news["_id"])
+                FileHelper.append_to_file(self.config["Log"]["Date_None"], news["_id"])
                 continue
             summery = NewsOrganizer.get_summery(news)
             if not summery:
-                FileHelper.append_to_file("NewsOrganizer_No_Summery_List.txt", news["_id"])
+                FileHelper.append_to_file(self.config["Log"]["Summery_None"], news["_id"])
                 continue
             try:
                 news_filtered.insert({
@@ -66,10 +70,10 @@ class NewsOrganizer(object):
     def dnn_organizer(self, collection="Product", key="BRTUSD"):
         db = Mongo()
         pre_processing = PreProcessing()
-        news_collection = db.create_collection("FilteredNews")
-        news_filtered = db.create_collection("FilteredNewsForDnn", NewsOrganizer.get_index_models())
+        news_collection = db.create_collection(self.config["database"]["collection"])
+        news_filtered = db.create_collection(self.config["database"]["destination"], NewsOrganizer.get_index_models())
 
-        for news in news_collection.find(self.FIND_FILTER):
+        for news in news_collection.find(self.config["database"]["query"]):
             date = news.get('date')
             before = self.get_price_before_date(db, collection, key, date)
             minute = self.get_price_at_date(db, collection, key, date)
@@ -97,17 +101,16 @@ class NewsOrganizer(object):
     def dnn_organizer_with_wiki_tweets(self, collection="Product", key="BRTUSD", name="Brent Crude"):
         db = Mongo()
         pre_processing = PreProcessing()
-        news_collection = db.create_collection("FilteredNews")
-        news_filtered = db.create_collection("FilteredNewsWikiAndTweetForDnn", NewsOrganizer.get_index_models())
+        news_collection = db.create_collection(self.config["database"]["collection"])
+        news_filtered = db.create_collection(self.config["database"]["destination"], NewsOrganizer.get_index_models())
         wiki_forecast = WikiForecast()
         twitter_forecast = TwitterForecast()
         tags = twitter_forecast.get_pre_defined_tags()
         count = 0
-        for news in news_collection.find(self.FIND_FILTER, no_cursor_timeout=True):
+        for news in news_collection.find(self.config["database"]["query"], no_cursor_timeout=True):
             try:
                 summery = pre_processing.preprocess(news.get('summery'))
-                cosine = wiki_forecast.get_similarity(summery, title=name)
-                summery_percentage = round((1 - cosine) * 100, 2)
+                summery_similarity = wiki_forecast.get_similarity(summery, title=name)
                 date = news.get('date')
                 title = pre_processing.preprocess(news.get('title'))
                 before = self.get_price_before_date(db, collection, key, date)
@@ -128,7 +131,7 @@ class NewsOrganizer(object):
                     "price_after_hour": hour,
                     "price_after_day": day,
                     "price_before": before,
-                    "wiki_relatedness": summery_percentage,
+                    "wiki_relatedness": summery_similarity,
                     "tweet_count": total,
                     "tweet_percentage": percentage,
                     "date": date,
@@ -257,3 +260,11 @@ class NewsOrganizer(object):
         }
         fields = {"Date": 1, "Open": 1, "Volume": 1, "High": 1, "_id": 0}
         return db.get_data_one(collection, query, fields, sort=[('Date', -1)])
+
+    @staticmethod
+    def get_config():
+        pwd = os.path.dirname(os.path.abspath(__file__))
+        if platform.system() == "Windows":
+            return json.load(open(pwd + '/config_w.json', 'r'), cls=DateTimeDecoder)
+        else:
+            return json.load(open(pwd+'/config.json', 'r'), cls=DateTimeDecoder)

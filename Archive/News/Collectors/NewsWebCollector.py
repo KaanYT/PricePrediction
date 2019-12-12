@@ -5,8 +5,8 @@ from newspaper import Article
 from Managers.DatabaseManager.MongoDB import Mongo
 from datetime import datetime
 from time import mktime
-from Archive.News import News
-from Archive.News.MultiThreadHelper import NewsPool  #Multi Thread
+from Archive.News.Collectors import News
+from Archive.News.Collectors.MultiThreadHelper import NewsPool  #Multi Thread
 from Managers.LogManager.Log import Logger
 import socket
 
