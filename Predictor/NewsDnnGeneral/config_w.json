@@ -1,6 +1,6 @@
 {
 	"database": {
-        "name": "FilteredNewsWikiAndTweetForDnn",
+        "name": "FilteredNewsGeneral",
 		"train": {
 			"query": {
 				"date": {
@@ -44,12 +44,13 @@
 			"article": 1,
 			"summery": 1,
 			"title": 1,
-			"relatedness": 1,
+			"wiki_relatedness": 1,
 			"price_before":1,
 			"price_after_minute":1,
 			"price_after_hour":1,
 			"price_after_day": 1,
 			"tweet_percentage": 1,
+			"tweet_count": 1,
 			"authors": 1,
 			"category": 1,
 			"date": 1,
@@ -62,13 +63,13 @@
 		}
 	},
 	"wordEmbedding":{
-		"path":"G:\\Glove\\glove.6B.100d.txt",
+		"path":"I:\\Glove\\glove.6B.100d.w2v.txt",
 		"size":100
 	},
 	"networkConfig": {
-		"epochs": 3,
-		"batch_size": 32,
-		"sequence_length": 50,
+		"epochs": 5,
+		"batch_size": 20,
+		"sequence_length": 200,
 		"normalise": true,
 		"criterion":"NLLLoss",
 		"optimizer":"Adam",

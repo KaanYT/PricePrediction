@@ -16,24 +16,22 @@ class TwitterForecast(object):
         if total_tweets == 0:
             return 0, 0
         else:
-            title_filtered_words, title_filtered = pre.preprocess_extra(title)
             count = 0
             for es_tweet in tweets["hits"]["hits"]:
                 tweet = es_tweet["_source"]
                 try:
-                    tweet_filtered_words, tweet_filtered = pre.preprocess_extra(tweet["tweet_text"])
-                    cosine = self.embedding.get_similarity_sentence(title_filtered, tweet_filtered)
-                    percentage = round((1 - cosine) * 100, 2)
+                    tweet_filtered = pre.preprocess(tweet["tweet_text"])
+                    cosine = self.embedding.get_similarity_sentence(title, tweet_filtered)
                 except Exception as exception:
                     print("Exeption")
-                    percentage = 0
+                    cosine = 6
 
-                if percentage > 70:
+                if cosine < 5.1:
                     count += 1
                     if tweet["tweet_user_verified"]:
                         count += 1
             if count == 0:
-                return 0
+                return total_tweets, 0
             return total_tweets, count / total_tweets
 
     @staticmethod

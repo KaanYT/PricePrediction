@@ -21,7 +21,10 @@ class WordEmbedding(object):
         return cls.instance
 
     def get_vec(self, word):
-        return self.instance.Model[word]
+        try:
+            return self.instance.Model[word]
+        except KeyError:
+            None
 
     def find_most_similar_words(self, word):
         return self.instance.Model.most_similar(word)
@@ -40,7 +43,7 @@ class WordEmbedding(object):
             try:
                 embedding_matrix[index] = self.instance.Model.get_vector(word)
             except KeyError:
-                print(f"{word} is not found.")
+                #print(f"{word} is not found.")
                 continue
             index += 1
         return embedding_matrix
@@ -49,17 +52,20 @@ class WordEmbedding(object):
         vocabulary_size = len(article)
         vector_size = self.instance.Model.vector_size + wiki_multiply_factors + tweet_multiply_factors
         embedding_matrix = np.zeros((vocabulary_size, vector_size), dtype=np.double)
+        vector_index = 0
         for index in range(vocabulary_size):
             word = article[index]
-            embedding_vector = WordEmbedding.Words.get(word)
+            embedding_vector = self.get_vec(word)
             if embedding_vector is not None:
-                embedding_matrix[index] = embedding_vector
+                if wiki is None and tweet is None:
+                    embedding_matrix[vector_index] = embedding_vector
                 if wiki is not None:
-                    wiki_array = np.full(wiki_multiply_factors, wiki / 100)
-                    embedding_matrix[index] = np.append(embedding_vector, wiki_array)
+                    wiki_array = np.full(wiki_multiply_factors, wiki)
+                    embedding_matrix[vector_index] = np.append(embedding_vector, wiki_array)
                 if tweet is not None:
                     tweet_array = np.full(wiki_multiply_factors, tweet)
-                    embedding_matrix[index] = np.append(embedding_vector, tweet_array)
+                    embedding_matrix[vector_index] = np.append(embedding_vector, tweet_array)
+                vector_index += 1
         return embedding_matrix
 
     @staticmethod

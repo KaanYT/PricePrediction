@@ -181,6 +181,8 @@ class NewsDnnGeneralDataReader(object):
     def pad_embedded_article(self, embedded_article):
         # Calculate Difference
         padding_difference = (embedded_article.shape[0] - self.sequence_length)
+        if padding_difference == 0:
+            return embedded_article
         if padding_difference >= 0:
             return embedded_article[:-padding_difference]
         else:  # Add Padding
