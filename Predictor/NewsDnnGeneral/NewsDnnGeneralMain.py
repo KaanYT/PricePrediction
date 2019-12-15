@@ -6,6 +6,7 @@ from torch import nn, optim
 from Helper.JsonDateHelper import DateTimeDecoder
 from Helper.Timer import Timer
 from Helper.DateHelper import DateHelper
+from Helper.LoggerHelper import LoggerHelper
 from Predictor.NewsDnnGeneral.NewsDnnGeneralModel import NewsDnnGeneralModel
 from Predictor.NewsDnnGeneral.NewsDnnGeneralDataReader import NewsDnnGeneralDataReader
 from Predictor.NewsDnnBase.NewsDnnBaseMain import NewsDnnBaseMain
@@ -66,7 +67,8 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             print(NewsDnnGeneralDataReader.DictDataType[
                       self.config["options"]["network_type"]])
             # Batch Loop
-            for x, y in self.reader.get_data(fetch_type=NewsDnnGeneralDataReader.DictDataTerm["Train"],data_type=NewsDnnGeneralDataReader.DictDataType[self.config["options"]["network_type"]]):
+            for x, y in self.reader.get_data(fetch_type=NewsDnnGeneralDataReader.DictDataTerm["Train"],
+                                             data_type=NewsDnnGeneralDataReader.DictDataType[self.config["options"]["network_type"]]):
                 counter += 1
                 inputs, targets = torch.from_numpy(x), torch.from_numpy(y)
 
@@ -120,12 +122,12 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                         val_losses.append(val_loss.item())
                         accuracy += self.calculate_accuracy(output, targets)
                     self.model.train()  # reset to train mode after iterationg through validation data
-                    print("Epoch: {}/{}...".format(e + 1, self.epochs),
-                          "Step: {}...".format(counter),
-                          "Loss: {:.4f}...".format(loss.item()),
-                          "Accuracy In Step: {:.4f}...".format(accuracy),
-                          "Val Count: {:.4f}...".format(self.validate_count),
-                          "Val Loss: {:.4f}".format(np.mean(val_losses)))
+                    LoggerHelper.info("Epoch: {}/{}...".format(e + 1, self.epochs),
+                                      "Step: {}...".format(counter),
+                                      "Loss: {:.4f}...".format(loss.item()),
+                                      "Accuracy In Step: {:.4f}...".format(accuracy),
+                                      "Val Count: {:.4f}...".format(self.validate_count),
+                                      "Val Loss: {:.4f}".format(np.mean(val_losses)))
                     df = df.append({
                         'Epoch': "{}/{}".format(e + 1, self.epochs),
                         'Step': counter,
@@ -237,7 +239,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
         }
 
         torch.save(checkpoint, save_file_name)
-        print("Model Saved to disk")
+        LoggerHelper.info("Model Saved to disk")
 
     def load_model(self, path):
         checkpoint = torch.load(path)
@@ -245,16 +247,16 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.optimizer = checkpoint['optimizer']
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        print("**Model Info**"
-              + "\nbatch_size : " + str(self.reader.batch_size)
-              + "\nsequence_length : " + str(self.reader.sequence_length)
-              + "\ninput_size : " + str(self.model.input_size)
-              + "\nhidden : " + str(self.model.hidden)
-              + "\nnum_layers : " + str(self.model.num_layers)
-              + "\ndrop_prob : " + str(self.model.drop_prob)
-              + "\nlr : " + str(self.model.lr)
-              + "\nHidden Size : " + str(self.model.hidden))
-        print("Model loaded from disk")
+        LoggerHelper.info("**Model Info**"
+                          + "\nbatch_size : " + str(self.reader.batch_size)
+                          + "\nsequence_length : " + str(self.reader.sequence_length)
+                          + "\ninput_size : " + str(self.model.input_size)
+                          + "\nhidden : " + str(self.model.hidden)
+                          + "\nnum_layers : " + str(self.model.num_layers)
+                          + "\ndrop_prob : " + str(self.model.drop_prob)
+                          + "\nlr : " + str(self.model.lr)
+                          + "\nHidden Size : " + str(self.model.hidden))
+        LoggerHelper.info("Model loaded from disk")
 
     def get_network_input_size(self):
         size = self.config["wordEmbedding"]["size"]
@@ -262,6 +264,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             size = size + self.config["options"]["wiki"]["multiply_factors"]
         if self.config["options"]["twitter"]["enabled"]:
             size = size + self.config["options"]["twitter"]["multiply_factors"]
+        LoggerHelper.info("Network Input Size :" + str(size))
         return size
 
     @staticmethod

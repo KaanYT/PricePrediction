@@ -16,9 +16,9 @@ class NewsDnnBaseMain(object):
         else:
             self.batch_size = batch_size
         if seq_length is None:
-            self.seq_length = self.config["networkConfig"]["batch_size"]
+            self.seq_length = self.config["networkConfig"]["sequence_length"]
         else:
-            self.seq_length = epochs
+            self.seq_length = seq_length
         if use_gpu is None:
             self.use_gpu = self.config["networkConfig"]["useGPU"]
         else:

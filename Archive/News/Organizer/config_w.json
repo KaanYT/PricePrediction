@@ -1,0 +1,43 @@
+{
+	"database": {
+        "collection": "FilteredNews",
+        "destination": "FilteredNewsGeneralNoTag",
+        "query": {
+            "$or":
+            [
+                {
+                    "date":
+                    {
+                        "$gte": {
+                            "__type__": "date", "year": 2014, "month": 2, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                        },
+                        "$lt": {
+                            "__type__": "date", "year": 2015, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                        }
+                    }
+                },
+                {
+                    "date":
+                    {
+                        "$gte": {
+                            "__type__": "date", "year": 2015, "month": 3, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                        },
+                        "$lt": {
+                            "__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                        }
+                    }
+                }
+            ]
+        }
+	},
+	"wordEmbedding":{
+		"path":"I:\\Glove\\GoogleNews-vectors-negative300.bin",
+		"size":300
+	},
+	"log": {
+		"article_None": "NewsOrganizer_No_Article_List.txt",
+		"article_Empty": "NewsOrganizer_No_Article_List.txt",
+		"date_None": "NewsOrganizer_No_Date_List.txt",
+		"summery_None": "NewsOrganizer_No_Summery_List.txt"
+	}
+}
