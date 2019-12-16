@@ -135,7 +135,7 @@ class NewsDnnGeneralDataReader(object):
         for row in cursor:
             embedded_article = self.word_embedding.\
                 get_weight_matrix_all(article=row["article"],
-                                      wiki=row["relatedness"],
+                                      wiki=row["wiki_relatedness"],
                                       wiki_multiply_factors=self.configs['options']['wiki']['multiply_factors'])
             if len(embedded_article) < NewsDnnGeneralDataReader.ArticleMinSize:
                 continue
@@ -158,7 +158,7 @@ class NewsDnnGeneralDataReader(object):
         for row in cursor:
             embedded_article = self.word_embedding. \
                 get_weight_matrix_all(article=row["article"],
-                                      wiki=row["relatedness"],
+                                      wiki=row["wiki_relatedness"],
                                       wiki_multiply_factors=self.configs['options']['wiki']['multiply_factors'],
                                       tweet=row["tweet_percentage"],
                                       tweet_multiply_factors=self.configs['options']['twitter']['multiply_factors'])
