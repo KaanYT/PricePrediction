@@ -5,6 +5,7 @@ import platform
 import traceback
 
 from pymongo import IndexModel
+from pymongo.errors import CursorNotFound
 from bs4 import BeautifulSoup
 from datetime import datetime
 from datetime import timedelta
@@ -107,42 +108,53 @@ class NewsOrganizer(object):
         twitter_forecast = TwitterForecast()
         tags = twitter_forecast.get_pre_defined_tags()
         count = 0
-        for news in news_collection.find(self.config["database"]["query"], no_cursor_timeout=True):
+        while True:
+            processed = 0
             try:
-                summery = pre_processing.preprocess(news.get('summery'))
-                summery_similarity = wiki_forecast.get_similarity(summery, title=name)
-                date = news.get('date')
-                title = pre_processing.preprocess(news.get('title'))
-                before = self.get_price_before_date(db, collection, key, date)
-                minute = self.get_price_at_date(db, collection, key, date)
-                hour = self.get_price_at_date(db, collection, key, date, minutes=60)
-                day = self.get_price_at_date(db, collection, key, date, add_day=True)
-                total, percentage = twitter_forecast.get_popularity_from_elastic_search(date,
-                                                                                        title + tags["tags"],
-                                                                                        pre_processing)
-                news_filtered.insert({
-                    "_id": news.get('_id'),
-                    "title": title,
-                    "summery": pre_processing.preprocess(news.get('summery')),
-                    "article": pre_processing.preprocess(news.get('article')),
-                    "url": news.get('url'),
-                    "category": news.get('category'),
-                    "price_after_minute": minute,
-                    "price_after_hour": hour,
-                    "price_after_day": day,
-                    "price_before": before,
-                    "wiki_relatedness": summery_similarity,
-                    "tweet_count": total,
-                    "tweet_percentage": percentage,
-                    "date": date,
-                    "authors": news['authors']
-                })
-            except Exception as exception:
-                Logger().get_logger().error(type(exception).__name__, exc_info=True)
-                traceback.print_exc()
-            count = count + 1
-            if count % 500 == 0:
-                print(count)
+                cursor = news_collection.find(self.config["database"]["query"], no_cursor_timeout=True).skip(processed)
+                for news in cursor:
+                    try:
+                        summery = pre_processing.preprocess(news.get('summery'))
+                        summery_similarity = wiki_forecast.get_similarity(summery, title=name)
+                        date = news.get('date')
+                        title = pre_processing.preprocess(news.get('title'))
+                        before = self.get_price_before_date(db, collection, key, date)
+                        minute = self.get_price_at_date(db, collection, key, date)
+                        hour = self.get_price_at_date(db, collection, key, date, minutes=60)
+                        day = self.get_price_at_date(db, collection, key, date, add_day=True)
+                        total, percentage = twitter_forecast.get_popularity_from_elastic_search(date,
+                                                                                                title + tags["tags"],
+                                                                                                pre_processing,
+                                                                                                maxsize=self.config["elasticSearch"]["maxSize"])
+                        news_filtered.insert({
+                            "_id": news.get('_id'),
+                            "title": title,
+                            "summery": pre_processing.preprocess(news.get('summery')),
+                            "article": pre_processing.preprocess(news.get('article')),
+                            "url": news.get('url'),
+                            "category": news.get('category'),
+                            "price_after_minute": minute,
+                            "price_after_hour": hour,
+                            "price_after_day": day,
+                            "price_before": before,
+                            "wiki_relatedness": summery_similarity,
+                            "tweet_count": total,
+                            "tweet_percentage": percentage,
+                            "date": date,
+                            "authors": news['authors']
+                        })
+                    except Exception as exception:
+                        Logger().get_logger().error(type(exception).__name__, exc_info=True)
+                        traceback.print_exc()
+                    count = count + 1
+                    if count % 500 == 0:
+                        print(count)
+                    processed += 1
+                cursor.close()
+                break
+            except CursorNotFound:
+                processed += 1
+                print("Lost cursor. Retry with skip")
 
     @staticmethod
     def get_index_models():

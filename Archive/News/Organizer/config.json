@@ -22,5 +22,8 @@
 		"article_Empty": "NewsOrganizer_No_Article_List.txt",
 		"date_None": "NewsOrganizer_No_Date_List.txt",
 		"summery_None": "NewsOrganizer_No_Summery_List.txt"
-	}
+	},
+    "elasticSearch": {
+		"maxSize": 100000
+    }
 }

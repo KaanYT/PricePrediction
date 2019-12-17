@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_sequence
+from Helper.LoggerHelper import LoggerHelper
 
 NumberOfClasses = 7
 
@@ -58,11 +59,11 @@ class NewsDnnGeneralModel(nn.Module):
         self.train_on_gpu = torch.cuda.is_available()
         if self.train_on_gpu:
             if self.use_gpu:
-                print('Training on GPU!')
+                LoggerHelper.info('Training on GPU!')
             else:
-                print('GPU usage is disabled by config.json')
+                LoggerHelper.info('GPU usage is disabled by config.json')
         else:
-            print('No GPU available, training on CPU; consider making n_epochs very small.')
+            LoggerHelper.info('No GPU available, training on CPU; consider making n_epochs very small.')
 
     def forward(self, x, hidden):
         ''' Forward pass through the network.
@@ -100,5 +101,10 @@ class NewsDnnGeneralModel(nn.Module):
     def calculate_hidden_size(self):
         sample_size = 116100
         scaling_factor = 5
-        return int(sample_size/(scaling_factor*self.input_size*self.input_size))
+        size = int(sample_size / (scaling_factor * self.input_size * self.input_size))
+        if size == 0:
+            LoggerHelper.error('Calculated hidden size is 0. It is changed to 2')
+            return 2
+        else:
+            return size
 

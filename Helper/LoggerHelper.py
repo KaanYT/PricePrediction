@@ -1,5 +1,6 @@
 import sys
 import time
+import os, os.path
 import logging
 import logging.handlers
 
@@ -11,19 +12,32 @@ class LoggerHelper(object):
     def setup_logger(filepath='logs'):
         # Add Std. Out
         root_logger = logging.getLogger()
-        root_logger.addHandler(logging.StreamHandler(sys.stdout))
-
+        root_logger.setLevel(logging.DEBUG)
         # Setup Formatter
         # Ex: 2012-12-05 16:58:26,618 [MainThread] [INFO] Message
         log_formatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
         # Add File Output
-        file_handler = logging.FileHandler("{0}/{1}.log".format(filepath, LoggerHelper.__get_filename()))
+        path = LoggerHelper.get_file_path(filepath)
+        file_handler = logging.FileHandler(path)
         file_handler.setFormatter(log_formatter)
         root_logger.addHandler(file_handler)
         # Add Console Output
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(log_formatter)
         root_logger.addHandler(console_handler)
+        LoggerHelper.loaded = True
+
+    @staticmethod
+    def get_file_path(path):
+        if path == "logs":
+            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), path,
+                                LoggerHelper.__get_filename() + ".log")
+        else:
+            path = os.path.join(path,
+                                LoggerHelper.__get_filename() + ".log")
+        if not os.path.exists(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
+        return path
 
     @staticmethod
     def __get_filename():
@@ -31,24 +45,24 @@ class LoggerHelper(object):
         return date
 
     @staticmethod
-    def critical(msg, *args, **kwargs):
+    def critical(msg):
         LoggerHelper.__check_setup()
-        logging.critical(msg, args, kwargs)
+        logging.critical(msg)
 
     @staticmethod
-    def info(msg, *args, **kwargs):
+    def info(msg):
         LoggerHelper.__check_setup()
-        logging.info(msg, args, kwargs)
+        logging.info(msg)
 
     @staticmethod
-    def debug(msg, *args, **kwargs):
+    def debug(msg):
         LoggerHelper.__check_setup()
-        logging.debug(msg, args, kwargs)
+        logging.debug(msg)
 
     @staticmethod
-    def error(msg, *args, **kwargs):
+    def error(msg):
         LoggerHelper.__check_setup()
-        logging.error(msg, args, kwargs)
+        logging.error(msg)
 
     @staticmethod
     def __check_setup():

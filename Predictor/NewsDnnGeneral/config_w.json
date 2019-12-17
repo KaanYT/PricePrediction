@@ -63,8 +63,8 @@
 		}
 	},
 	"wordEmbedding":{
-		"path":"I:\\Glove\\glove.6B.100d.w2v.txt",
-		"size":100
+		"path":"I:\\Glove\\GoogleNews-vectors-negative300.bin",
+		"size":300
 	},
 	"networkConfig": {
 		"epochs": 5,
@@ -77,16 +77,16 @@
 		"save_dir": "saved_models"
 	},
 	"options": {
-		"network_type":"News",
+		"network_type":"WikiAndTweet",
 		"wiki":{
-			"enabled": false,
-			"multiply_factors":1,
+			"enabled": true,
+			"multiply_factors":50,
 			"skip": false,
 			"value": 50
 		},
 		"twitter":{
-			"enabled": false,
-			"multiply_factors":1
+			"enabled": true,
+			"multiply_factors":50
 		}
 	}
 }

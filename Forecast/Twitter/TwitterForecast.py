@@ -10,8 +10,8 @@ class TwitterForecast(object):
     def __init__(self, word_embedding_path="/Users/kaaneksen/Downloads/glove/glove.6B.100d.txt"):
         self.embedding: WordEmbedding = WordEmbedding(word_embedding_path)
 
-    def get_popularity_from_elastic_search(self, date, title, pre):
-        tweets = self.get_tweets_before_date_from_elastic_search(date, title)
+    def get_popularity_from_elastic_search(self, date, title, pre, maxsize=10000):
+        tweets = self.get_tweets_before_date_from_elastic_search(date, title, maxsize=maxsize)
         total_tweets = tweets["hits"]["total"]["value"]
         if total_tweets == 0:
             return 0, 0
@@ -35,11 +35,16 @@ class TwitterForecast(object):
             return total_tweets, count / total_tweets
 
     @staticmethod
-    def get_tweets_before_date_from_elastic_search(date: datetime, hashtags, collection="twitter", days=5):
+    def get_tweets_before_date_from_elastic_search(date: datetime,
+                                                   hashtags,
+                                                   collection="twitter",
+                                                   days=5,
+                                                   maxsize=10000):
         start = date - timedelta(days=days)
         end = date
         es = ElasticSearch()
         query = {
+            "size": maxsize,
             "query":
                 {
                     "bool": {

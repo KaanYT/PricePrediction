@@ -24,7 +24,7 @@ class WordEmbedding(object):
         try:
             return self.instance.Model[word]
         except KeyError:
-            None
+            return None
 
     def find_most_similar_words(self, word):
         return self.instance.Model.most_similar(word)
@@ -57,14 +57,14 @@ class WordEmbedding(object):
             word = article[index]
             embedding_vector = self.get_vec(word)
             if embedding_vector is not None:
-                if wiki is None and tweet is None:
-                    embedding_matrix[vector_index] = embedding_vector
+                vector = embedding_vector
                 if wiki is not None:
                     wiki_array = np.full(wiki_multiply_factors, wiki)
-                    embedding_matrix[vector_index] = np.append(embedding_vector, wiki_array)
+                    vector = np.append(vector, wiki_array)
                 if tweet is not None:
                     tweet_array = np.full(wiki_multiply_factors, tweet)
-                    embedding_matrix[vector_index] = np.append(embedding_vector, tweet_array)
+                    vector = np.append(vector, tweet_array)
+                embedding_matrix[vector_index] = vector
                 vector_index += 1
         return embedding_matrix
 
