@@ -106,7 +106,10 @@ class NewsOrganizer(object):
         news_filtered = db.create_collection(self.config["database"]["destination"], NewsOrganizer.get_index_models())
         wiki_forecast = WikiForecast()
         twitter_forecast = TwitterForecast()
-        tags = twitter_forecast.get_pre_defined_tags()
+        if self.config["elasticSearch"]["enableTag"]:
+            tags = twitter_forecast.get_pre_defined_tags()
+        else:
+            tags = {"tags": []}
         count = 0
         while True:
             processed = 0

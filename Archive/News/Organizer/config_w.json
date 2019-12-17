@@ -41,6 +41,7 @@
 		"summery_None": "NewsOrganizer_No_Summery_List.txt"
 	},
 	"elasticSearch": {
-		"maxSize": 50000
+		"maxSize": 50000,
+		"enableTag": false
 	}
 }
