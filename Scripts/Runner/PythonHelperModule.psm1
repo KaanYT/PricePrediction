@@ -4,26 +4,23 @@ function Run-Python-Script {
     Param
     (
         [Parameter(Mandatory=$true, Position=0)]
-        [string]$Path,
+        [string]$ScriptPath,
 
         [Parameter(Mandatory=$true, Position=0)]
         [string]$CondaEnv
     )
-
-    # Change Location 
-    Set-Location $ConfigPath
-
+    
     # Change Environment
-    conda activate $CondaEnvirment
-
-    Write-Output "Running Script..."
+    conda activate $CondaEnv
+    Write-Output "Script is running..."
     # Get Start Time Stamp
     $StartDate=(GET-DATE)
     # Run Python Script
-    python main.py
+    python $ScriptPath\main.py
     # Get End Time Stamp
     $EndDate=(GET-DATE)
+    Write-Output "Script is finished..."
     # Inform User
     Write-Output "Run Statistics:"
-    NEW-TIMESPAN –Start $StartDate –End $EndDate
+    NEW-TIMESPAN $StartDate $EndDate
 }
