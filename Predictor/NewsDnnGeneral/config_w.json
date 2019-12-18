@@ -86,7 +86,8 @@
 		},
 		"twitter":{
 			"enabled": true,
-			"multiply_factors":50
+			"multiply_factors":50,
+			"tweet_column": "tweet_percentage"
 		}
 	}
 }

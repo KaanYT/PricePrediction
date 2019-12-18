@@ -111,8 +111,8 @@ class NewsOrganizer(object):
         else:
             tags = {"tags": []}
         count = 0
+        processed = 0
         while True:
-            processed = 0
             try:
                 cursor = news_collection.find(self.config["database"]["query"], no_cursor_timeout=True).skip(processed)
                 for news in cursor:

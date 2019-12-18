@@ -122,17 +122,18 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                         val_losses.append(val_loss.item())
                         accuracy += self.calculate_accuracy(output, targets)
                     self.model.train()  # reset to train mode after iterationg through validation data
-                    LoggerHelper.info("Epoch: {}/{}...".format(e + 1, self.epochs),
-                                      "Step: {}...".format(counter),
-                                      "Loss: {:.4f}...".format(loss.item()),
-                                      "Accuracy In Step: {:.4f}...".format(accuracy),
-                                      "Val Count: {:.4f}...".format(self.validate_count),
+                    LoggerHelper.info("Epoch: {}/{}...".format(e + 1, self.epochs) +
+                                      "Step: {}...".format(counter) +
+                                      "Loss: {:.4f}...".format(loss.item()) +
+                                      "Accuracy In Step: {:.4f}...".format(accuracy) +
+                                      "Val Count: {:.4f}...".format(self.validate_count) +
                                       "Val Loss: {:.4f}".format(np.mean(val_losses)))
                     df = df.append({
                         'Epoch': "{}/{}".format(e + 1, self.epochs),
                         'Step': counter,
                         'Last Train Loss': loss.item(),
-                        'Mean Test Loss': np.mean(val_losses)
+                        'Mean Test Loss': np.mean(val_losses),
+                        'Accuracy In Step': accuracy,
                     }, ignore_index=True)
                     timer.stop()
                 self.model.train()
@@ -196,7 +197,11 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                                          'Hidden',
                                          'Number of Layers',
                                          'Dropout Prob',
-                                         'Learning Rate'])
+                                         'Learning Rate',
+                                         'Train Size',
+                                         'Validation Size',
+                                         'Test Size',
+                                         'Price Buffer Percent'])
 
         db = (self.config["database"]["name"]
               if 'name' in self.config["database"] else "Unknown")
@@ -215,7 +220,8 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             'Learning Rate': self.model.lr,
             'Train Size': self.reader.train_count,
             'Validation Size': self.reader.validate_count,
-            'Test Size': self.reader.test_count
+            'Test Size': self.reader.test_count,
+            'Price Buffer Percent': self.configs['database']['price']['buffer_percent']
         }, ignore_index=True)
         return info
 

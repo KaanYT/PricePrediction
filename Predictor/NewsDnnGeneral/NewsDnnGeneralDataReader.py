@@ -155,13 +155,16 @@ class NewsDnnGeneralDataReader(object):
         batch_count = 0
         price_start = self.configs["database"]["price"]["start"]
         price_end = self.configs["database"]["price"]["end"]
+        tweet_column = self.configs['options']['twitter']['tweet_column']
+        wiki_multiply_factors = self.configs['options']['wiki']['multiply_factors']
+        tweet_multiply_factors = self.configs['options']['twitter']['multiply_factors']
         for row in cursor:
             embedded_article = self.word_embedding. \
                 get_weight_matrix_all(article=row["article"],
                                       wiki=row["wiki_relatedness"],
-                                      wiki_multiply_factors=self.configs['options']['wiki']['multiply_factors'],
-                                      tweet=row["tweet_percentage"],
-                                      tweet_multiply_factors=self.configs['options']['twitter']['multiply_factors'])
+                                      wiki_multiply_factors=wiki_multiply_factors,
+                                      tweet=row[tweet_column],
+                                      tweet_multiply_factors=tweet_multiply_factors)
             if len(embedded_article) < NewsDnnGeneralDataReader.ArticleMinSize:
                 continue
             # Article
