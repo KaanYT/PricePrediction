@@ -7,6 +7,9 @@ function Run-Python-Script {
         [string]$ScriptPath,
 
         [Parameter(Mandatory=$true, Position=0)]
+        [string]$CommandLineArguments,
+
+        [Parameter(Mandatory=$true, Position=0)]
         [string]$CondaEnv
     )
     
@@ -16,7 +19,7 @@ function Run-Python-Script {
     # Get Start Time Stamp
     $StartDate=(GET-DATE)
     # Run Python Script
-    python $ScriptPath\main.py
+    python $ScriptPath\main.py $CommandLineArguments
     # Get End Time Stamp
     $EndDate=(GET-DATE)
     Write-Output "Script is finished..."

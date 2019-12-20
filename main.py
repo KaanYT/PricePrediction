@@ -29,11 +29,13 @@ def load_arg():
     parser = argparse.ArgumentParser()
 
     # Add Argument
-    parser.add_argument("--organize", "-o", help="Run News Organizer. Pre process news to new collection. "
+    parser.add_argument("-o", "--organize", help="Run news organizer. Pre-Process news to new database collection. "
                                                  "Settings can be accessible from config.json", action="store_true")
-    parser.add_argument("-v", "--version", help="Show Program Version", action="store_true")
-    parser.add_argument("-w", "--wiki", help="Run Wiki Recorder. Record Wikipedia pages to collection.")
-    parser.add_argument("-n", "--news", help="Run News DNN to predict possible stock price. Types: general")
+    parser.add_argument('-v', '--version', action='version', help="Show program version and exit",
+                        version='Program Version is 0.1')
+    parser.add_argument("-w", "--wiki", help="Run wiki recorder. Record Wikipedia pages to database collection.",
+                        action="store_true")
+    parser.add_argument("-n", "--news", help="Run News DNN to predict possible stock price.", metavar='general')
     parser.add_argument("-f", "--fdc", help="Run Financial Data Collector.", action="store_true")
     # Read Arguments
     return parser.parse_args()
@@ -44,10 +46,6 @@ def main():
     load_config()
     # Load arg
     args = load_arg()
-
-    if args.version:
-        LoggerHelper.info("Program Version is 0.1")
-        sys.exit(0)
 
     if args.fdc:
         LoggerHelper.info("Starting Financial Data Collector Mode...")

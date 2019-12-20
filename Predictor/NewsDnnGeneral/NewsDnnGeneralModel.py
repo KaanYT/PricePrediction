@@ -105,8 +105,9 @@ class NewsDnnGeneralModel(nn.Module):
         input_neurons = self.input_size
         output_neurons = self.output_size
         size = int(samples_in_training_data / (scaling_factor * (input_neurons + output_neurons)))
+        LoggerHelper.info('Calculated hidden size is ' + str(size))
         if size == 0:
-            LoggerHelper.error('Calculated hidden size is 0. It is changed to 2')
+            LoggerHelper.error('Calculated hidden size is changed to 2')
             return 2
         else:
             return size
