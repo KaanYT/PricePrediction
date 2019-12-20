@@ -32,6 +32,7 @@ class NewsDnnGeneralModel(nn.Module):
         super().__init__()
         self.use_gpu = use_gpu
         self.input_size = input_size
+        self.output_size = output_size
         if hidden is None:
             self.hidden = self.calculate_hidden_size()
         else:
@@ -99,9 +100,11 @@ class NewsDnnGeneralModel(nn.Module):
         return hidden
 
     def calculate_hidden_size(self):
-        sample_size = 116100
+        samples_in_training_data = 116100
         scaling_factor = 5
-        size = int(sample_size / (scaling_factor * self.input_size * self.input_size))
+        input_neurons = self.input_size
+        output_neurons = self.output_size
+        size = int(samples_in_training_data / (scaling_factor * (input_neurons + output_neurons)))
         if size == 0:
             LoggerHelper.error('Calculated hidden size is 0. It is changed to 2')
             return 2
