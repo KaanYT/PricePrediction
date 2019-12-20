@@ -222,7 +222,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             'Train Size': self.reader.train_count,
             'Validation Size': self.reader.validate_count,
             'Test Size': self.reader.test_count,
-            'Price Buffer Percent': self.configs['database']['price']['buffer_percent']
+            'Price Buffer Percent': self.config['database']['price']['buffer_percent']
         }, ignore_index=True)
         return info
 
