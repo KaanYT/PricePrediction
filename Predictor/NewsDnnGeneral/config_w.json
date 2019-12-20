@@ -70,12 +70,12 @@
 		"epochs": 5,
 		"batch_size": 20,
 		"sequence_length": 200,
-		"hidden_size": 5,
+		"hidden_size": -5,
 		"normalise": true,
 		"criterion":"NLLLoss",
 		"optimizer":"Adam",
 		"useGPU": false,
-		"save_dir": "saved_models"
+		"save_dir": "C:\\Users\\eksen\\Documents\\2_master\\models"
 	},
 	"options": {
 		"network_type":"WikiAndTweet",
