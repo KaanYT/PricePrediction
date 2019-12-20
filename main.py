@@ -40,9 +40,6 @@ def load_arg():
 
 
 def main():
-    # Config Variables
-    organize = False
-    dnn_type = None
     # Load Config
     load_config()
     # Load arg
