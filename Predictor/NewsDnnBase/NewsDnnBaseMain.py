@@ -5,7 +5,7 @@ from torch import nn, optim
 
 class NewsDnnBaseMain(object):
 
-    def __init__(self, config, epochs=None, batch_size=None, seq_length=None, use_gpu=None, lr=0.005):
+    def __init__(self, config, epochs=None, batch_size=None, seq_length=None, use_gpu=None, lr=0.005, hidden_size=None):
         self.config = config
         if epochs is None:
             self.epochs = config["networkConfig"]["epochs"]
@@ -23,6 +23,11 @@ class NewsDnnBaseMain(object):
             self.use_gpu = self.config["networkConfig"]["useGPU"]
         else:
             self.use_gpu = use_gpu
+        if hidden_size is not None:
+            self.hidden_size = self.config["networkConfig"]["hidden_size"]
+        else:
+            self.hidden_size = hidden_size
+
         self.timer = Timer()
         self.current_date = DateHelper.get_current_date()
         self.criterion = self.load_criterion()

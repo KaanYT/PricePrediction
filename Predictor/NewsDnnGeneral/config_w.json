@@ -70,6 +70,7 @@
 		"epochs": 5,
 		"batch_size": 20,
 		"sequence_length": 200,
+		"hidden_size": 5,
 		"normalise": true,
 		"criterion":"NLLLoss",
 		"optimizer":"Adam",

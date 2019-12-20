@@ -68,6 +68,9 @@ function Change-Network-Settings {
         [string]$Criterion,
 
         [Parameter(Mandatory=$false, Position=0)]
+        [int]$HiddenSize,
+
+        [Parameter(Mandatory=$false, Position=0)]
         [string]$Optimizer,
 
         [Parameter(Mandatory=$false, Position=0)]
@@ -84,6 +87,9 @@ function Change-Network-Settings {
     }
     IF ($PSBoundParameters.ContainsKey('Optimizer')) {
         $config.networkConfig.optimizer = $Optimizer
+    }
+    IF ($PSBoundParameters.ContainsKey('HiddenSize')) {
+        $config.networkConfig.hidden_size = $HiddenSize
     }
     IF ($PSBoundParameters.ContainsKey('UseGPU')) {
         $config.networkConfig.useGPU = $UseGPU
@@ -153,4 +159,36 @@ function Change-Database {
     }
     $config | ConvertTo-Json -depth 32| set-content $ConfigPath
     Write-Output "Config Database is changed."
+}
+
+function Change-Price-Settings {
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory=$true, Position=0)]
+        [string]$ConfigPath,
+
+        [Parameter(Mandatory=$false, Position=0)]
+        [string]$Start,
+
+        [Parameter(Mandatory=$false, Position=0)]
+        [string]$End,
+
+        [Parameter(Mandatory=$true, Position=0)]
+        [double]$BufferPercent
+    )
+
+    # Network Type
+    $config = Get-Content $ConfigPath -raw | ConvertFrom-Json
+
+    IF ($PSBoundParameters.ContainsKey('Start')) {
+        $config.database.price.start = $Start
+    }
+
+    IF ($PSBoundParameters.ContainsKey('End')) {
+        $config.database.price.end = $End
+    }
+    $config.database.price.buffer_percent = $BufferPercent
+    $config | ConvertTo-Json -depth 32| set-content $ConfigPath
+    Write-Output "Config price is changed."
 }

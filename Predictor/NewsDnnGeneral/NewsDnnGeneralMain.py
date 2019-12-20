@@ -26,8 +26,8 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             batch_size: Number of mini-sequences per mini-batch, aka batch size
             seq_length: Number of character steps per mini-batch
     """
-    def __init__(self, epochs=None, batch_size=None, seq_length=None, use_gpu=None, lr=0.005):
-        super().__init__(self.get_config(), epochs, batch_size, seq_length, use_gpu, lr)
+    def __init__(self, epochs=None, batch_size=None, seq_length=None, use_gpu=None, lr=0.005, hidden_size=None):
+        super().__init__(self.get_config(), epochs, batch_size, seq_length, use_gpu, lr, hidden_size=hidden_size)
         # Load DB
         self.reader = NewsDnnGeneralDataReader(self.config, self.batch_size, self.seq_length)
         self.train_count = self.reader.get_count(NewsDnnGeneralDataReader.DictDataTerm["Train"])
@@ -37,6 +37,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
         self.model: NewsDnnGeneralModel = NewsDnnGeneralModel(
             input_size=self.get_network_input_size(),
             lr=lr,
+            hidden=hidden_size,
             use_gpu=self.use_gpu)
         # Optimizer
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
