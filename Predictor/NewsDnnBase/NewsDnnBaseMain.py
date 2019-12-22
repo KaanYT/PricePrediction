@@ -23,7 +23,7 @@ class NewsDnnBaseMain(object):
             self.use_gpu = self.config["networkConfig"]["useGPU"]
         else:
             self.use_gpu = use_gpu
-        if hidden_size is not None:
+        if hidden_size is None:
             if self.config["networkConfig"]["hidden_size"] < 0:
                 self.hidden_size = None
             else:

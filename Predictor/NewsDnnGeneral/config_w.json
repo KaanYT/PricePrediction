@@ -45,12 +45,14 @@
 			"summery": 1,
 			"title": 1,
 			"wiki_relatedness": 1,
+			"wiki_relatedness_nor": 1,
 			"price_before":1,
 			"price_after_minute":1,
 			"price_after_hour":1,
 			"price_after_day": 1,
 			"tweet_percentage": 1,
 			"tweet_count": 1,
+			"tweet_count_nor": 1,
 			"authors": 1,
 			"category": 1,
 			"date": 1,
@@ -82,8 +84,7 @@
 		"wiki":{
 			"enabled": true,
 			"multiply_factors":50,
-			"skip": false,
-			"value": 50
+			"wiki_column": "wiki_relatedness"
 		},
 		"twitter":{
 			"enabled": true,

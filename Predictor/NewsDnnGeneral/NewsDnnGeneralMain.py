@@ -37,7 +37,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
         self.model: NewsDnnGeneralModel = NewsDnnGeneralModel(
             input_size=self.get_network_input_size(),
             lr=lr,
-            hidden=hidden_size,
+            hidden=self.hidden_size,
             use_gpu=self.use_gpu)
         # Optimizer
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
@@ -136,9 +136,9 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                         'Mean Test Loss': np.mean(val_losses),
                         'Accuracy In Step': accuracy,
                     }, ignore_index=True)
-                    timer.stop()
+                    timer.stop(time_for="Validate")
                 self.model.train()
-        self.timer.stop()
+        self.timer.stop(time_for="Train")
         self.save_model()
         self.current_date = DateHelper.get_current_date()
         Export.append_df_to_excel(df, self.current_date)
@@ -177,7 +177,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
         }, ignore_index=True)
 
         Export.append_df_to_excel(df, self.current_date)
-        self.timer.stop()
+        self.timer.stop(time_for="Test")
 
     @staticmethod
     def calculate_accuracy(output, targets):
