@@ -2,6 +2,7 @@ import os
 import platform
 import json
 import torch
+import ntpath
 from torch import nn, optim
 from Helper.JsonDateHelper import DateTimeDecoder
 from Helper.Timer import Timer
@@ -195,6 +196,8 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                                          'Batch Size',
                                          'Sequence Length',
                                          'Input Size',
+                                         'Input Wiki Factor',
+                                         'Input Twitter Factor',
                                          'Hidden',
                                          'Number of Layers',
                                          'Dropout Prob',
@@ -202,7 +205,11 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                                          'Train Size',
                                          'Validation Size',
                                          'Test Size',
-                                         'Price Buffer Percent'])
+                                         'Price Buffer Percent',
+                                         'Word Vector',
+                                         'Network Type',
+                                         'Wiki Column',
+                                         'Tweet Column'])
 
         db = (self.config["database"]["name"]
               if 'name' in self.config["database"] else "Unknown")
@@ -215,6 +222,8 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             'Batch Size': self.reader.batch_size,
             'Sequence Length': self.reader.sequence_length,
             'Input Size': self.model.input_size,
+            'Input Wiki Factor': self.config["options"]["wiki"]["multiply_factors"],
+            'Input Twitter Factor': self.config["options"]["twitter"]["multiply_factors"],
             'Hidden': self.model.hidden,
             'Number of Layers': self.model.num_layers,
             'Dropout Prob': self.model.drop_prob,
@@ -222,7 +231,11 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             'Train Size': self.reader.train_count,
             'Validation Size': self.reader.validate_count,
             'Test Size': self.reader.test_count,
-            'Price Buffer Percent': self.config['database']['price']['buffer_percent']
+            'Price Buffer Percent': self.config['database']['price']['buffer_percent'],
+            'Word Vector': ntpath.basename(self.config["wordEmbedding"]["path"]),
+            'Network Type': self.config["options"]["network_type"],
+            'Wiki Column': self.configs['options']['wiki']['wiki_column'],
+            'Tweet Column': self.configs['options']['twitter']['tweet_column']
         }, ignore_index=True)
         return info
 
