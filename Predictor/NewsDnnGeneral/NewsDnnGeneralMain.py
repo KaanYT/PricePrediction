@@ -234,8 +234,8 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             'Price Buffer Percent': self.config['database']['price']['buffer_percent'],
             'Word Vector': ntpath.basename(self.config["wordEmbedding"]["path"]),
             'Network Type': self.config["options"]["network_type"],
-            'Wiki Column': self.configs['options']['wiki']['wiki_column'],
-            'Tweet Column': self.configs['options']['twitter']['tweet_column']
+            'Wiki Column': self.config['options']['wiki']['wiki_column'],
+            'Tweet Column': self.config['options']['twitter']['tweet_column']
         }, ignore_index=True)
         return info
 
