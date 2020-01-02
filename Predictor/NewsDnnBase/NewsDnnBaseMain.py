@@ -1,6 +1,6 @@
 from Helper.Timer import Timer
 from Helper.DateHelper import DateHelper
-from torch import nn, optim
+from torch import nn
 
 
 class NewsDnnBaseMain(object):
@@ -45,6 +45,8 @@ class NewsDnnBaseMain(object):
             return nn.KLDivLoss()
         elif "MSELoss" == self.config["networkConfig"]["criterion"]:
             return nn.MSELoss()
+        elif "BCEWithLogitsLoss" == self.config["networkConfig"]["criterion"]:
+            return nn.BCEWithLogitsLoss()
         else:
             print("Criterion Not Found - NLLLoss is used")
             return nn.NLLLoss()

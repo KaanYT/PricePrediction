@@ -30,7 +30,7 @@ class NewsDnnGeneralModel(nn.Module):
                  output_size=3,
                  use_gpu=True):
         super().__init__()
-        self.use_gpu = use_gpu
+        self.should_use_gpu = use_gpu
         self.input_size = input_size
         self.output_size = output_size
         if hidden is None:
@@ -56,10 +56,10 @@ class NewsDnnGeneralModel(nn.Module):
         self.fc = nn.Linear(self.hidden, output_size)
         # Sigmoid Layer
         self.sig = nn.LogSoftmax(dim=1)
-
-        self.train_on_gpu = torch.cuda.is_available()
-        if self.train_on_gpu:
-            if self.use_gpu:
+        # Check GPU Usage
+        self.can_use_gpu = torch.cuda.is_available()
+        if self.can_use_gpu:
+            if self.should_use_gpu:
                 LoggerHelper.info('Training on GPU!')
             else:
                 LoggerHelper.info('GPU usage is disabled by config.json')
@@ -91,7 +91,7 @@ class NewsDnnGeneralModel(nn.Module):
         # Create two new tensors with sizes n_layers x batch_size x n_hidden,
         # initialized to zero, for hidden state and cell state of LSTM
 
-        if self.train_on_gpu and self.use_gpu:
+        if self.can_use_gpu and self.should_use_gpu:
             hidden = (torch.zeros(self.num_layers, batch_size, self.hidden).cuda(),
                       torch.zeros(self.num_layers, batch_size, self.hidden).cuda())
         else:

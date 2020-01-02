@@ -57,7 +57,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
         self.timer.start()
         self.model.train()
 
-        if self.model.train_on_gpu and self.config["networkConfig"]["useGPU"]:
+        if self.model.can_use_gpu and self.config["networkConfig"]["useGPU"]:
             self.model.cuda()
 
         counter = 0
@@ -74,7 +74,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                 counter += 1
                 inputs, targets = torch.from_numpy(x), torch.from_numpy(y)
 
-                if self.model.train_on_gpu and self.config["networkConfig"]["useGPU"]:
+                if self.model.can_use_gpu and self.config["networkConfig"]["useGPU"]:
                     inputs, targets = inputs.cuda(), targets.cuda()
 
                 # Creating new variables for the hidden state, otherwise
@@ -115,7 +115,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                         val_h = tuple([each.data for each in val_h])
 
                         inputs, targets = x, y
-                        if self.model.train_on_gpu and self.config["networkConfig"]["useGPU"]:
+                        if self.model.can_use_gpu and self.config["networkConfig"]["useGPU"]:
                             inputs, targets = inputs.cuda(), targets.cuda()
 
                         output, val_h = self.model(inputs, val_h)
@@ -165,7 +165,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             val_h = tuple([each.data for each in val_h])
 
             inputs, targets = x, y
-            if self.model.train_on_gpu and self.config["networkConfig"]["useGPU"]:
+            if self.model.can_use_gpu and self.config["networkConfig"]["useGPU"]:
                 inputs, targets = inputs.cuda(), targets.cuda()
 
             output, val_h = self.model(inputs, val_h)

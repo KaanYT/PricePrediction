@@ -10,6 +10,7 @@ from Archive.News.Organizer.NewsOrganizer import NewsOrganizer
 from Archive.Market.FinancialDataCollector import FDC
 
 from Predictor.NewsDnnGeneral.NewsDnnGeneralMain import NewsDnnGeneralMain
+from Predictor.NewsCnn.NewsCnnMain import NewsDnnGeneralMain as NewsCnnMain
 
 from Helper.LoggerHelper import LoggerHelper
 
@@ -41,6 +42,16 @@ def load_arg():
     return parser.parse_args()
 
 
+def get_news_type(dnn_type):
+    if dnn_type == "CNN":
+        return NewsCnnMain()
+    elif dnn_type == "RNN":
+        return NewsDnnGeneralMain()
+    else:  # Default RNN
+        LoggerHelper.error("DNN type is not found. Default RNN (NewsDnnGeneralMain) is used.")
+        return NewsDnnGeneralMain()
+
+
 def main():
     # Load Config
     load_config()
@@ -65,9 +76,9 @@ def main():
         collector.dnn_organizer_with_wiki_tweets()
         LoggerHelper.info("News Organizer Mode is ended.")
 
-    if args.news is not None:  # ToDo: Initialize based on dnn_type
+    if args.news is not None:
         LoggerHelper.info("Starting Stock Prediction Mode...")
-        news_dnn = NewsDnnGeneralMain()
+        news_dnn = get_news_type(args.news)
         news_dnn.train(print_every=int(Config.training.print_every))
         news_dnn.test()
         LoggerHelper.info("News Stock Prediction is ended.")
