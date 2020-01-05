@@ -95,48 +95,11 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                 nn.utils.clip_grad_norm_(self.model.parameters(), clip)
                 self.optimizer.step()
 
-                # loss stats
+                # Validate
                 if counter % print_every == 0:
                     timer = Timer()
                     timer.start()
-                    # Get validation loss
-                    val_h = self.model.init_hidden(self.reader.batch_size)
-                    val_losses = []
-                    self.model.eval()
-                    accuracy = 0
-                    for x, y in self.reader.get_data(NewsDnnGeneralDataReader.DictDataTerm["Validate"],
-                                                     NewsDnnGeneralDataReader.DictDataType[
-                                                         self.config["options"]["network_type"]]):
-                        # get_batches(val_data, batch_size, seq_length):
-                        x, y = torch.from_numpy(x), torch.from_numpy(y)
-
-                        # Creating new variables for the hidden state, otherwise
-                        # we'd backprop through the entire training history
-                        val_h = tuple([each.data for each in val_h])
-
-                        inputs, targets = x, y
-                        if self.model.can_use_gpu and self.config["networkConfig"]["useGPU"]:
-                            inputs, targets = inputs.cuda(), targets.cuda()
-
-                        output, val_h = self.model(inputs, val_h)
-                        val_loss = self.criterion(output, targets.long())
-
-                        val_losses.append(val_loss.item())
-                        accuracy += self.calculate_accuracy(output, targets)
-                    self.model.train()  # reset to train mode after iterationg through validation data
-                    LoggerHelper.info("Epoch: {}/{}...".format(e + 1, self.epochs) +
-                                      "Step: {}...".format(counter) +
-                                      "Loss: {:.4f}...".format(loss.item()) +
-                                      "Accuracy In Step: {:.4f}...".format(accuracy) +
-                                      "Val Count: {:.4f}...".format(self.validate_count) +
-                                      "Val Loss: {:.4f}".format(np.mean(val_losses)))
-                    df = df.append({
-                        'Epoch': "{}/{}".format(e + 1, self.epochs),
-                        'Step': counter,
-                        'Last Train Loss': loss.item(),
-                        'Mean Test Loss': np.mean(val_losses),
-                        'Accuracy In Step': accuracy,
-                    }, ignore_index=True)
+                    self.validate(df, e, counter, loss)
                     timer.stop(time_for="Validate")
                 self.model.train()
         self.timer.stop(time_for="Train")
@@ -144,6 +107,46 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
         self.current_date = DateHelper.get_current_date()
         Export.append_df_to_excel(df, self.current_date)
         Export.append_df_to_excel(self.get_info(), self.current_date)
+
+    def validate(self, df, epoch, counter, loss):
+        # Get Validation Loss
+        val_h = self.model.init_hidden(self.reader.batch_size)
+        val_losses = []
+        self.model.eval()
+        accuracy = 0
+        for x, y in self.reader.get_data(NewsDnnGeneralDataReader.DictDataTerm["Validate"],
+                                         NewsDnnGeneralDataReader.DictDataType[
+                                             self.config["options"]["network_type"]]):
+            # get_batches(val_data, batch_size, seq_length):
+            x, y = torch.from_numpy(x), torch.from_numpy(y)
+
+            # Creating new variables for the hidden state, otherwise
+            # we'd backprop through the entire training history
+            val_h = tuple([each.data for each in val_h])
+
+            inputs, targets = x, y
+            if self.model.can_use_gpu and self.config["networkConfig"]["useGPU"]:
+                inputs, targets = inputs.cuda(), targets.cuda()
+
+            output, val_h = self.model(inputs, val_h)
+            val_loss = self.criterion(output, targets.long())
+
+            val_losses.append(val_loss.item())
+            accuracy += self.calculate_accuracy(output, targets)
+        self.model.train()  # reset to train mode after iterationg through validation data
+        LoggerHelper.info("Epoch: {}/{}...".format(epoch + 1, self.epochs) +
+                          "Step: {}...".format(counter) +
+                          "Loss: {:.4f}...".format(loss.item()) +
+                          "Accuracy In Step: {:.4f}...".format(accuracy) +
+                          "Val Count: {:.4f}...".format(self.validate_count) +
+                          "Val Loss: {:.4f}".format(np.mean(val_losses)))
+        df = df.append({
+            'Epoch': "{}/{}".format(epoch + 1, self.epochs),
+            'Step': counter,
+            'Last Train Loss': loss.item(),
+            'Mean Test Loss': np.mean(val_losses),
+            'Accuracy In Step': accuracy,
+        }, ignore_index=True)
 
     def test(self):
         print("Test Started")

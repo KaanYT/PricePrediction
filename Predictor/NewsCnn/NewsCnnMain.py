@@ -36,7 +36,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
         self.validate_count = self.reader.get_count(NewsDnnBaseDataReader.DictDataTerm["Validate"])
         # Create Model
         self.model: NewsCnnModel = NewsCnnModel(
-            input_size=self.get_network_input_size(),
+            input_size=self.seq_length,
             lr=lr,
             use_gpu=self.use_gpu)
         # Optimizer
@@ -152,16 +152,11 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                                              self.config["options"]["network_type"]]):
             counter += 1
             x, y = torch.from_numpy(x), torch.from_numpy(y)
-
-            # Creating new variables for the hidden state, otherwise
-            # we'd backprop through the entire training history
-            val_h = tuple([each.data for each in val_h])
-
             inputs, targets = x, y
             if self.model.can_use_gpu and self.config["networkConfig"]["useGPU"]:
                 inputs, targets = inputs.cuda(), targets.cuda()
 
-            output, val_h = self.model(inputs, val_h)
+            output = self.model(inputs)
             val_loss = self.criterion(output, targets.long())
             val_losses.append(val_loss.item())
             accuracy += self.calculate_accuracy(output, targets)

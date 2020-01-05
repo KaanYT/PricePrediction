@@ -71,23 +71,23 @@
 	"networkConfig": {
 		"epochs": 5,
 		"batch_size": 20,
-		"sequence_length": 200,
+		"sequence_length": 100,
 		"hidden_size": -5,
 		"normalise": true,
 		"criterion":"NLLLoss",
 		"optimizer":"Adam",
-		"useGPU": false,
+		"useGPU": true,
 		"save_dir": "C:\\Users\\eksen\\Documents\\2_master\\models"
 	},
 	"options": {
-		"network_type":"WikiAndTweet",
+		"network_type":"News",
 		"wiki":{
-			"enabled": true,
+			"enabled": false,
 			"multiply_factors":50,
 			"wiki_column": "wiki_relatedness"
 		},
 		"twitter":{
-			"enabled": true,
+			"enabled": false,
 			"multiply_factors":50,
 			"tweet_column": "tweet_percentage"
 		}

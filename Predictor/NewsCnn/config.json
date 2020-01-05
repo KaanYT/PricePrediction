@@ -66,8 +66,8 @@
 		"size":100
 	},
 	"networkConfig": {
-		"epochs": 3,
-		"batch_size": 32,
+		"epochs": 1,
+		"batch_size": 100,
 		"sequence_length": 100,
 		"hidden_size": -5,
 		"normalise": true,
@@ -81,12 +81,12 @@
 		"wiki":{
 			"enabled": false,
 			"multiply_factors":1,
-			"skip": false,
-			"value": 50
+			"wiki_column": "wiki_relatedness"
 		},
 		"twitter":{
 			"enabled": false,
-			"multiply_factors":1
+			"multiply_factors":1,
+			"tweet_column": "tweet_percentage"
 		}
 	}
 }
