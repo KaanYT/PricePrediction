@@ -52,7 +52,9 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             print_every: Number of steps for printing training and validation loss
 
         """
-        df = pandas.DataFrame(columns=['Epoch', 'Step', 'Last Train Loss', 'Mean Test Loss'])
+        df = pandas.DataFrame(columns=['Epoch', 'Step',
+                                       'Train Mean Loss', 'Train Accuracy',
+                                       'Test Mean Loss', 'Test Accuracy'])
         self.timer.start()
         self.model.train()
 
@@ -121,17 +123,18 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                     self.model.train()  # reset to train mode after iterationg through validation data
                     LoggerHelper.info("Epoch: {}/{}...".format(e + 1, self.epochs) +
                                       "Step: {}...".format(counter) +
-                                      "Loss: {:.4f}...".format(np.mean(losses)) +
-                                      "Train Accuracy In Step: {:.4f}...".format(train_accuracy/print_every) +
-                                      "Accuracy In Step: {:.4f}...".format(accuracy) +
-                                      "Val Count: {:.4f}...".format(self.validate_count) +
-                                      "Val Loss: {:.4f}".format(np.mean(val_losses)))
+                                      "Train Loss (Cumulative): {:.4f}...".format(np.mean(losses)) +
+                                      "Train Accuracy : {:.4f}...".format(train_accuracy/print_every) +
+                                      "Val Loss: {:.4f}...".format(np.mean(val_losses)) +
+                                      "Val Accuracy In Step: {:.4f}...".format(accuracy/self.validate_count) +
+                                      "Val Count: {:.4f}...".format(self.validate_count))
                     df = df.append({
                         'Epoch': "{}/{}".format(e + 1, self.epochs),
                         'Step': counter,
-                        'Last Train Loss': loss.item(),
-                        'Mean Test Loss': np.mean(val_losses),
-                        'Accuracy In Step': accuracy,
+                        'Train Mean Loss Cumulative': np.mean(losses),
+                        'Train Accuracy': (train_accuracy/print_every),
+                        'Val Mean Loss': np.mean(val_losses),
+                        'Val Accuracy': (accuracy/self.validate_count),
                     }, ignore_index=True)
                     train_accuracy = 0
                     timer.stop(time_for="Validate")
@@ -148,7 +151,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
     def test(self):
         print("Test Started")
         self.timer.start()
-        df = pandas.DataFrame(columns=['Accuracy', 'Mean Test Loss'])
+        df = pandas.DataFrame(columns=['Accuracy', 'Test Accuracy', 'Mean Test Loss'])
         val_losses = []
         self.model.eval()
         counter = 0
@@ -168,6 +171,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             accuracy += self.calculate_accuracy(output, targets)
         df = df.append({
             'Accuracy': "{}/{}".format(accuracy, self.test_count),
+            'Test Accuracy': (accuracy/self.test_count),
             'Mean Test Loss': np.mean(val_losses)
         }, ignore_index=True)
 

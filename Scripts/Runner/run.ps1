@@ -29,7 +29,7 @@ Import-Module $PSScriptRoot\"ShoutdownModule.psm1";
     Change-Network-Settings -ConfigPath $ConfigPath -Epochs 5 -BatchSize 30 -SequenceLength 100 -Criterion "NLLLoss" -Optimizer "Adam" -HiddenSize -5 -UseGPU $false
     Change-Database -ConfigPath $ConfigPath -DatabaseName "FilteredNewsGeneralNoTagES" -Category $BussinesCategories
     Change-Price-Settings -ConfigPath $ConfigPath -Start "price_before" -End "price_after_hour" -BufferPercent 0.005
-    Run-Python-Script -ScriptPath $Location -CondaEnv $CondaEnvirment -CommandLineArguments "-n general" # -n,-o -v -w -f -h
+    Run-Python-Script -ScriptPath $Location -CondaEnv $CondaEnvirment -CommandLineArguments "-n CNN" # -n,-o -v -w -f -h
     ShutDown-With-Popup
 #>
 
