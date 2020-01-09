@@ -89,7 +89,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                 loss = self.criterion(output, targets.long())
                 loss.backward()
                 losses.append(loss.item())
-                train_accuracy += self.calculate_accuracy(output, targets.long())
+                train_accuracy += self.calculate_accuracy(output, targets)
 
                 # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
                 nn.utils.clip_grad_norm_(self.model.parameters(), clip)
@@ -177,7 +177,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
     @staticmethod
     def calculate_accuracy(output, targets):
         max_preds = output.argmax(dim=1, keepdim=True).long()  # get the index of the max probability
-        if torch.eq(max_preds, targets):
+        if torch.eq(max_preds, targets.long()):
             return 1
         else:
             return 0

@@ -2,6 +2,7 @@ import os
 import sys
 import platform
 import argparse
+import traceback
 
 from Managers.ConfigManager import Config
 
@@ -90,5 +91,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as exception:
+        LoggerHelper.error("Ex: " + str(exception))
+        LoggerHelper.error(traceback.format_exc())
     exit()
