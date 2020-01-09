@@ -26,7 +26,7 @@ class NewsCnnModel(nn.Module):
                  n_layers=2,
                  drop_prob=0.2,
                  n_filters=100,
-                 filter_sizes=[15, 30, 60],
+                 filter_sizes=[3, 4, 5],
                  lr=0.001,
                  output_size=3,
                  use_gpu=True):
@@ -37,13 +37,19 @@ class NewsCnnModel(nn.Module):
         self.num_layers = n_layers
         self.drop_prob = drop_prob
         self.lr = lr
-        # 1D Convolution Layer
-        self.convs = nn.ModuleList([
-            nn.Conv1d(in_channels=input_size,
-                      out_channels=n_filters,
-                      kernel_size=fs)
-            for fs in filter_sizes
-        ])
+
+        # 2D Convolution Layer
+        self.conv_0 = nn.Conv1d(in_channels=input_size,
+                                out_channels=n_filters,
+                                kernel_size=filter_sizes[0])
+
+        self.conv_1 = nn.Conv1d(in_channels=input_size,
+                                out_channels=n_filters,
+                                kernel_size=filter_sizes[1])
+
+        self.conv_2 = nn.Conv1d(in_channels=input_size,
+                                out_channels=n_filters,
+                                kernel_size=filter_sizes[2])
 
         # Additional Dropout Layer
         self.dropout = nn.Dropout(drop_prob)
@@ -65,12 +71,16 @@ class NewsCnnModel(nn.Module):
         ''' Forward pass through the network.
             These inputs are x, and the hidden/cell state `hidden`. '''
 
-        conved = [F.relu(conv(x)) for conv in self.convs]
+        conved_0 = F.relu(self.conv_0(x))
+        conved_1 = F.relu(self.conv_1(x))
+        conved_2 = F.relu(self.conv_2(x))
 
-        pooled = [F.max_pool1d(conv, conv.shape[2]).squeeze(2) for conv in conved]
+        pooled_0 = F.max_pool1d(conved_0, conved_0.shape[2]).squeeze(2)
+        pooled_1 = F.max_pool1d(conved_1, conved_1.shape[2]).squeeze(2)
+        pooled_2 = F.max_pool1d(conved_2, conved_2.shape[2]).squeeze(2)
 
         # Dropout layer
-        cat = self.dropout(torch.cat(pooled, dim=1))
+        cat = self.dropout(torch.cat((pooled_0, pooled_1, pooled_2), dim=1))
 
         # Fully-Connected Layer
         out = self.fc(cat)

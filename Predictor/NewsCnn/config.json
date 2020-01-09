@@ -67,11 +67,11 @@
 	},
 	"networkConfig": {
 		"epochs": 1,
-		"batch_size": 100,
+		"batch_size": 1,
 		"sequence_length": 100,
 		"hidden_size": -5,
 		"normalise": true,
-		"criterion":"NLLLoss",
+		"criterion":"CrossEntropyLoss",
 		"optimizer":"Adam",
 		"useGPU": false,
 		"save_dir": "saved_models"

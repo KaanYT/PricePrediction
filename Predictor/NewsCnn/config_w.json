@@ -70,11 +70,11 @@
 	},
 	"networkConfig": {
 		"epochs": 5,
-		"batch_size": 20,
+		"batch_size": 1,
 		"sequence_length": 100,
 		"hidden_size": -5,
 		"normalise": true,
-		"criterion":"NLLLoss",
+		"criterion":"CrossEntropyLoss",
 		"optimizer":"Adam",
 		"useGPU": true,
 		"save_dir": "C:\\Users\\eksen\\Documents\\2_master\\models"

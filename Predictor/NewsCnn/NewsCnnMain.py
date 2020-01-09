@@ -65,6 +65,8 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             print(self.config["options"]["network_type"])
             print(NewsDnnBaseDataReader.DictDataType[
                       self.config["options"]["network_type"]])
+            train_accuracy = 0
+            losses = []
             # Batch Loop
             for x, y in self.reader.get_data(fetch_type=NewsDnnBaseDataReader.DictDataTerm["Train"],
                                              data_type=NewsDnnBaseDataReader.DictDataType[self.config["options"]["network_type"]]):
@@ -84,8 +86,10 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                 output = self.model(inputs)  # Input Should Be 3-Dimensional: seq_len, batch, input_size
 
                 # calculate the loss and perform back propagation
-                loss = self.criterion(output.squeeze(), targets.long())
+                loss = self.criterion(output, targets.long())
                 loss.backward()
+                losses.append(loss.item())
+                train_accuracy += self.calculate_accuracy(output, targets.long())
 
                 # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
                 nn.utils.clip_grad_norm_(self.model.parameters(), clip)
@@ -117,7 +121,8 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                     self.model.train()  # reset to train mode after iterationg through validation data
                     LoggerHelper.info("Epoch: {}/{}...".format(e + 1, self.epochs) +
                                       "Step: {}...".format(counter) +
-                                      "Loss: {:.4f}...".format(loss.item()) +
+                                      "Loss: {:.4f}...".format(np.mean(losses)) +
+                                      "Train Accuracy In Step: {:.4f}...".format(train_accuracy/print_every) +
                                       "Accuracy In Step: {:.4f}...".format(accuracy) +
                                       "Val Count: {:.4f}...".format(self.validate_count) +
                                       "Val Loss: {:.4f}".format(np.mean(val_losses)))
@@ -128,6 +133,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                         'Mean Test Loss': np.mean(val_losses),
                         'Accuracy In Step': accuracy,
                     }, ignore_index=True)
+                    train_accuracy = 0
                     timer.stop(time_for="Validate")
                 self.model.train()
         self.timer.stop(time_for="Train")
@@ -170,13 +176,11 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
 
     @staticmethod
     def calculate_accuracy(output, targets):
-        accuracy = 0
-        for i, out in enumerate(output):
-            top_n, top_i = out.topk(1)
-            result = top_i[0].item()
-            if result == targets[i]:
-                accuracy = accuracy + 1
-        return accuracy
+        max_preds = output.argmax(dim=1, keepdim=True).long()  # get the index of the max probability
+        if torch.eq(max_preds, targets):
+            return 1
+        else:
+            return 0
 
     def get_info(self):
         info = pandas.DataFrame(columns=['Database',
