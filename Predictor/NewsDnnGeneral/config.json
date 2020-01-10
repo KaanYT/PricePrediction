@@ -63,12 +63,13 @@
 	},
 	"wordEmbedding":{
 		"path":"/Users/kaaneksen/Downloads/glove/GoogleNews-vectors-negative300.bin",
-		"size":100
+		"size":300
 	},
 	"networkConfig": {
 		"epochs": 1,
 		"batch_size": 32,
 		"sequence_length": 50,
+		"hidden_size": -5,
 		"normalise": true,
 		"criterion":"NLLLoss",
 		"optimizer":"Adam",
@@ -80,12 +81,12 @@
 		"wiki":{
 			"enabled": false,
 			"multiply_factors":1,
-			"skip": false,
-			"value": 50
+			"wiki_column": "wiki_relatedness"
 		},
 		"twitter":{
 			"enabled": false,
-			"multiply_factors":1
+			"multiply_factors":1,
+			"tweet_column": "tweet_percentage"
 		}
 	}
 }

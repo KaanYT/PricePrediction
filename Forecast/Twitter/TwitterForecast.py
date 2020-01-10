@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from datetime import timedelta
 from Managers.DatabaseManager.ElasticSearchDB import ElasticSearch
-from Predictor.NewsDnnGeneral.NewsDnnGeneralWordEmbedding import WordEmbedding
+from Predictor.NewsDnnBase.NewsDnnBaseWordEmbedding import WordEmbedding
 
 
 class TwitterForecast(object):
