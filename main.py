@@ -1,5 +1,4 @@
 import os
-import sys
 import platform
 import argparse
 import traceback
@@ -12,6 +11,8 @@ from Archive.Market.FinancialDataCollector import FDC
 
 from Predictor.NewsDnnGeneral.NewsDnnGeneralMain import NewsDnnGeneralMain
 from Predictor.NewsCnn.NewsCnnMain import NewsDnnGeneralMain as NewsCnnMain
+
+from WWW.WebManager import WebManager
 
 from Helper.LoggerHelper import LoggerHelper
 
@@ -39,6 +40,8 @@ def load_arg():
                         action="store_true")
     parser.add_argument("-n", "--news", help="Run News DNN to predict possible stock price.", metavar='general')
     parser.add_argument("-f", "--fdc", help="Run Financial Data Collector.", action="store_true")
+    parser.add_argument("-www", "--webservice", help="This is a web service with default startup page. "
+                                                     "You can edit news' metadata.", action="store_true")
     # Read Arguments
     return parser.parse_args()
 
@@ -88,6 +91,11 @@ def main():
                                 # batch_size=int(Config.training.batch_size),
                                 # seq_length=int(Config.training.sequence_length),
                                 # lr=float(Config.training.lr))
+    if args.webservice:
+        web_manager = WebManager()
+        web_manager.add_static_files()
+        web_manager.add_news_root()
+        web_manager.run()
 
 
 if __name__ == "__main__":

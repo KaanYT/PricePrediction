@@ -1,0 +1,9 @@
+{
+	"database": {
+        "collection": "FilteredNews",
+        "price": "Stock"
+	},
+    "elasticSearch": {
+		"maxSize": 100000
+    }
+}

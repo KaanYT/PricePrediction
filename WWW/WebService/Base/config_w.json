@@ -1,0 +1,8 @@
+{
+	"database": {
+        "collection": "FilteredNews"
+	},
+    "elasticSearch": {
+		"maxSize": 100000
+    }
+}
