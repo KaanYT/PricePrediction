@@ -24,17 +24,23 @@ class PriceService(BaseService):
         info = self.get_price_before_date(self.db, request['collection'], request['key'], date, request['range'])
         date_list = []
         open_list = []
+        high_list = []
+        low_list = []
         close_list = []
         volume_list = []
         for a in info:
             date_list.append(str(a.get('Date')))
             open_list.append(a.get('Open'))
+            high_list.append(a.get('High'))
+            low_list.append(a.get('Low'))
             close_list.append(a.get('Close'))
             volume_list.append(a.get('Volume'))
         res = {
             'Title': request['collection'] + " - " + request['key'],
             'PriceDate': date_list,
             'OpenPrice': open_list,
+            'HighPrice': high_list,
+            'LowPrice': low_list,
             'ClosePrice': close_list,
             'Volume': volume_list
         }
@@ -53,5 +59,5 @@ class PriceService(BaseService):
                 },
             "Key": key
         }
-        fields = {"Date": 1, "Open": 1, "Close": 1, "Volume": 1, "High": 1, "_id": 0}
+        fields = {"Date": 1, "Open": 1, "Close": 1, "Volume": 1, "High": 1, "Low": 1, "_id": 0}
         return db.get_data(collection, query, fields, sort=[('Date', -1)])

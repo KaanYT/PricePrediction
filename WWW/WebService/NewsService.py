@@ -11,13 +11,15 @@ class NewsService(BaseService):
     def __init__(self):
         super().__init__()
         self.news_collection = self.db.create_collection(self.config["database"]["collection"])
+        self.news_query = self.config["database"]["query"]
 
     def add_news(self, app):
         app.router.add_get('/random_news', self.__random_news_handler)
 
     async def __random_news_handler(self, request):
-        news = self.news_collection.find_one()
+        news = self.news_collection.find_one(self.news_query)
         res = {
+            'id': str(news.get('_id')),
             'title': news.get('title'),
             'summery': news.get('summery'),
             'category': news.get('category'),

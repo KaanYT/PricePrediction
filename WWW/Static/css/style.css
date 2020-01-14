@@ -229,7 +229,7 @@ Form
   resize: vertical;
   overflow: auto;
 }
-.cd-form input[type="submit"] {
+.cd-form input[type="button"] {
   /* button style */
   border: none;
   background: #2c97de;
@@ -247,14 +247,14 @@ Form
   -o-appearance: none;
   appearance: none;
 }
-.no-touch .cd-form input[type="submit"]:hover {
+.no-touch .cd-form input[type="button"]:hover {
   background: #42a2e1;
 }
-.cd-form input[type="submit"]:focus {
+.cd-form input[type="button"]:focus {
   outline: none;
   background: #2b3e51;
 }
-.cd-form input[type="submit"]:active {
+.cd-form input[type="button"]:active {
   -webkit-transform: scale(0.9);
   -moz-transform: scale(0.9);
   -ms-transform: scale(0.9);

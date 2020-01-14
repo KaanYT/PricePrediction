@@ -92,6 +92,22 @@ function displayLineChart(data) {
 	});
 }
 
+function createCandleStickData(data) {
+	var new_data = [];
+	for (var i = 0; i < data.PriceDate.length; i++) {
+		new_data.push({
+			t: data.PriceDate[i],
+			o: data.OpenPrice[i],
+			h: data.HighPrice[i],
+			l: data.LowPrice[i],
+			c: data.ClosePrice[i],
+			v: data.Volume[i],
+		});
+	}
+	return new_data;
+}
+
+var news_id = "";
 function getRandomNews() {
 	//url: /source/random/:token/:date/:hash/:control
 	let base_url = window.location.origin;
@@ -101,6 +117,7 @@ function getRandomNews() {
 			function(status, jqXHR) { // success callback
 				var data = jQuery.parseJSON(status);
 				gameData = data;
+				self.news_id = data.url;
 				setupNews(gameData);
 			}).done(function() { //Call Next Inform And Call Next Resource
 				informUser('Request done!');
@@ -131,6 +148,28 @@ function getPrice(date, collection, key, range) {
             informUser('failed, ' + ex);
     });
 }
+
+function getNewsDetails() {
+    var data = JSON.stringify({ object_id:self.news_id});
+    let base_url = window.location.origin;
+    let url = base_url + "/" + "wt";
+    console.log(data);
+    hideLoading(false);
+    $.post(url, // url
+        data, // data to be submit
+        function(data, status, jqXHR) { // success callback
+            console.log('status: ' + status + ', data: ' + data);
+            var data = jQuery.parseJSON(data);
+            console.log(data)
+        }).done(function() { //Call Next Inform And Call Next Resource
+        	hideLoading(true);
+            informUser('Request done!');
+        }).fail(function(jqxhr, settings, ex) {
+            hideLoading(true);
+            informUser('failed, ' + ex);
+    });
+}
+
 
 function hideLoading(hide) {
 	if(hide){
@@ -195,6 +234,19 @@ function setupNews(news) {
     self.selectedDate = news.news_date;
     self.getPrice(self.selectedDate, self.selectedProduct, self.selectedKey, self.selectedDateRange);
     checkNewsCategory(news.category);
+}
+
+/*
+	Buttons
+*/
+
+function nextNews(){
+	getRandomNews();
+	$('html, body').animate({ scrollTop: 0 }, 'fast');
+}
+
+function recordNews(){
+
 }
 
 /*

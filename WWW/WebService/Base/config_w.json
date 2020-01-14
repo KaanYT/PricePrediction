@@ -1,6 +1,35 @@
 {
 	"database": {
-        "collection": "FilteredNews"
+        "collection": "FilteredNews",
+        "price": "Stock",
+        "wiki_tweet" : "FilteredNewsWikiAndTweetForDnn2",
+        "query": {
+            "$or":
+            [
+                {
+                    "date":
+                    {
+                        "$gte": {
+                            "__type__": "date", "year": 2014, "month": 2, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                        },
+                        "$lt": {
+                            "__type__": "date", "year": 2015, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                        }
+                    }
+                },
+                {
+                    "date":
+                    {
+                        "$gte": {
+                            "__type__": "date", "year": 2015, "month": 3, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                        },
+                        "$lt": {
+                            "__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                        }
+                    }
+                }
+            ]
+        }
 	},
     "elasticSearch": {
 		"maxSize": 100000
