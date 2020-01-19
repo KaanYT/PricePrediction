@@ -44,12 +44,13 @@ def load_arg():
 
 
 def get_news_type(dnn_type):
+    dnn_type = dnn_type.strip()
     if dnn_type == "CNN":
         return NewsCnnMain()
     elif dnn_type == "RNN":
         return NewsDnnGeneralMain()
     else:  # Default RNN
-        LoggerHelper.error("DNN type is not found. Default RNN (NewsDnnGeneralMain) is used.")
+        LoggerHelper.error("DNN type (" + dnn_type + ") is not found. Default RNN (NewsDnnGeneralMain) is used.")
         return NewsDnnGeneralMain()
 
 
