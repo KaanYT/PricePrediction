@@ -1,6 +1,5 @@
-import sys
 import time
-import os, os.path
+import os
 import logging
 import logging.handlers
 

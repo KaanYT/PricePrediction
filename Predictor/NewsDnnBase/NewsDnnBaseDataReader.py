@@ -2,7 +2,7 @@ import numpy as np
 from Helper.LoggerHelper import LoggerHelper
 from Helper.ListHelper import ListHelper
 from Managers.DatabaseManager.MongoDB import Mongo
-from Predictor.NewsDnnGeneral.NewsDnnGeneralWordEmbedding import WordEmbedding
+from Predictor.NewsDnnBase.NewsDnnBaseWordEmbedding import WordEmbedding
 
 
 class NewsDnnBaseDataReader(object):
@@ -203,8 +203,8 @@ class NewsDnnBaseDataReader(object):
         total = float(start["Open"]) + float(end["Open"]) / 2
         percentage = (diff/total)*100
         if percentage > buffer_percent:
-            return 0  #
+            return 2  # Increase
         elif percentage < -buffer_percent:
-            return 1
+            return 1  # Decrease
         else:
-            return 2
+            return 0  # Same Value

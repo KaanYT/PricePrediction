@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="css/bootstrap.min.css"> <!-- CSS reset -->
+	<link rel="stylesheet" href="css/reset.css"> <!-- CSS reset -->
+	<link rel="stylesheet" href="css/style.css"> <!-- Resource style -->
+	<link rel="stylesheet" href="css/snackbar.css"/>
+	<link rel="stylesheet" href="css/costume.css"/>
+
+	<script src="js/modernizr.js"></script> <!-- Modernizr -->
+  	
+	<title>News Validation</title>
+</head>
+<body>
+	<!-- Loading GIF -->
+	<div id="loading">
+		<img id="loading-image" src="img/spinner.gif" alt="Loading..." />
+	</div>
+	<form class="cd-form floating-labels" id="myForm">
+		<fieldset>
+			<legend>News Information</legend>
+			<table class="prop-table width-100%" aria-label="Property Table Example">
+			  <tbody class="prop-table__body">
+			  	<tr class="prop-table__row">
+				  <th class="prop-table__cell prop-table__cell--th">Title</th>
+				  <td class="prop-table__cell"><a id="news_title" href="#">heading</a></td>
+				</tr>
+				<tr class="prop-table__row">
+				  <th class="prop-table__cell prop-table__cell--th">ID</th>
+				  <td class="prop-table__cell"><a id="news_id"> </a></td>
+				</tr>
+				<tr class="prop-table__row">
+				  <th class="prop-table__cell prop-table__cell--th">Summery</th>
+				  <td class="prop-table__cell" id="news_summery"> </td>
+				</tr>
+				<tr class="prop-table__row">
+				  <th class="prop-table__cell prop-table__cell--th">Category</th>
+				  <td class="prop-table__cell" id="news_category"> </td>
+				</tr>
+				<tr class="prop-table__row">
+				  <th class="prop-table__cell prop-table__cell--th">Authors</th>
+				  <td class="prop-table__cell" id="news_authors" > </td>
+				</tr>
+			  	<tr class="prop-table__row">
+				  <th class="prop-table__cell prop-table__cell--th">Date</th>
+				  <td class="prop-table__cell" id="news_date" > </td>
+				</tr>
+			  	<tr class="prop-table__row">
+				  <th class="prop-table__cell prop-table__cell--th">Wiki Relatedness <i class="material-icons" id='info-icon' onclick="info()">info</i></th>
+				  <td class="prop-table__cell" id="news_wiki" > </td>
+				</tr>
+			  	<tr class="prop-table__row">
+				  <th class="prop-table__cell prop-table__cell--th">Tweet Percent <i class="material-icons" id='info-icon' onclick="info()">info</i> </th>
+				  <td class="prop-table__cell" id="news_tweet_percent" > </td>
+				</tr>
+			  	<tr class="prop-table__row">
+				  <th class="prop-table__cell prop-table__cell--th">Tweet Count <i class="material-icons" id='info-icon' onclick="info()">info</i> </th>
+				  <td class="prop-table__cell" id="news_tweet_count" > </td>
+				</tr>
+			  </tbody>
+			</table>
+
+			<br/><br/>
+			<h4>News Content</h4>
+			<div id="news_article" style="overflow-y:scroll; height:400px; background:rgb(250,250,250);">
+  				Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+ 			</div>
+
+			<div>
+				<h4>Date Buffer</h4>
+				<p class="cd-select icon">
+					<select class="daterange" onchange='changeDateBuffer(this.value)'>>
+						<option value="1">1 Day</option>
+						<option value="3">3 Day</option>
+						<option value="5">5 Day</option>
+					</select>
+				</p>
+				<br/>
+				<h4>Product</h4>
+				<p class="cd-select icon">
+					<select class="business" onchange='changeProduct(this.value)'>>
+						<option value="Stock">Stock</option>
+						<option value="Product">Product</option>
+						<option value="Index">Index</option>
+						<option value="Currency">Currency</option>
+					</select>
+				</p>
+				<br/>
+				<h4>Type</h4>
+				<p class="cd-select icon">
+					<select id="productKey" class="monetization" onchange='changeKey(this.value)'>>
+						<option value="TXN">Texas Instruments Incorporated</option>
+						<option value="MSFT">Microsoft Corporation</option>
+						<option value="SBUX">Starbucks Corporation</option>
+						<option value="NKE">Nike Inc</option>
+					</select>
+				</p>
+			</div>
+			<div id="graph-container">
+				<canvas id="myChart" width="400" height="200"></canvas>
+			</div>
+		</fieldset>
+
+		<fieldset>
+			<legend>News Outputs</legend>
+			<div>
+				<h2 id="check_for"></h2>
+			</div>
+			<div>
+				<h4>Effect on Price Change</h4>
+
+				<ul class="cd-form-list">
+					<li>
+						<input type="radio" name="radio-button" value="-1" id="cd-radio-1" checked>
+						<label for="cd-radio-1">Yok</label>
+					</li>
+						
+					<li>
+						<input type="radio" name="radio-button" value="0" id="cd-radio-2">
+						<label for="cd-radio-2">Çok Az</label>
+					</li>
+
+					<li>
+						<input type="radio" name="radio-button" value="1" id="cd-radio-3">
+						<label for="cd-radio-3">Az</label>
+					</li>
+
+					<li>
+						<input type="radio" name="radio-button" value="2" id="cd-radio-4">
+						<label for="cd-radio-3">Orta</label>
+					</li>
+
+					<li>
+						<input type="radio" name="radio-button" value="3" id="cd-radio-5">
+						<label for="cd-radio-3">Fazla</label>
+					</li>
+
+					<li>
+						<input type="radio" name="radio-button" value="4" id="cd-radio-6">
+						<label for="cd-radio-3">Çok Fazla</label>
+					</li>
+				</ul>
+			</div>
+
+			<div>
+				<h4>Category</h4>
+				<ul class="cd-form-list"> <!--required-->
+					<li>
+						<input type="checkbox" id="cd-checkbox-1" value="News">
+						<label for="cd-checkbox-1">News</label>
+					</li>
+
+					<li>
+						<input type="checkbox" id="cd-checkbox-2" value="Politics">
+						<label for="cd-checkbox-2">Politics</label>
+					</li>
+
+					<li>
+						<input type="checkbox" id="cd-checkbox-3" value="World">
+						<label for="cd-checkbox-3">World</label>
+					</li>
+
+					<li>
+						<input type="checkbox" id="cd-checkbox-4" value="Business">
+						<label for="cd-checkbox-4">Business</label>
+					</li>
+
+					<li>
+						<input type="checkbox" id="cd-checkbox-5" value="Economy">
+						<label for="cd-checkbox-5">Economy</label>
+					</li>
+
+					<li>
+						<input type="checkbox" id="cd-checkbox-6" value="Economy">
+						<label for="cd-checkbox-6">Economics</label>
+					</li>
+
+					<li>
+						<input type="checkbox" id="cd-checkbox-7" value="News">
+						<label for="cd-checkbox-7">News_</label>
+					</li>
+
+					<li>
+						<input type="checkbox" id="cd-checkbox-8" value="Tech">
+						<label for="cd-checkbox-8">Tech</label>
+					</li>
+
+					<li>
+						<input type="checkbox" id="cd-checkbox-9" value="Kaggle">
+						<label for="cd-checkbox-9">Kaggle</label>
+					</li>
+
+					<li>
+						<input type="checkbox" id="cd-checkbox-10" value="Money">
+						<label for="cd-checkbox-10">Money</label>
+					</li>
+
+					<li>
+						<input type="checkbox" id="cd-checkbox-11" value="Technology">
+						<label for="cd-checkbox-11">Technology</label>
+					</li>
+
+					<li>
+						<input type="checkbox" id="cd-checkbox-12" value="Energy">
+						<label for="cd-checkbox-12">Energy</label>
+					</li>
+
+					<li>
+						<input type="checkbox" id="cd-checkbox-13" value="Bonds">
+						<label for="cd-checkbox-13">Bonds</label>
+					</li>
+				</ul>
+			</div>
+
+			<div class="icon">
+				<label class="cd-label" for="cd-textarea">Comment</label>
+      			<textarea class="message" name="cd-textarea" id="cd-textarea"></textarea>
+			</div>
+
+			<div>
+				<input type="button" value="Bilgileri Kaydet" onclick="recordNews()">
+		      	<input type="button" value="Başka Haber" onclick="nextNews()" style="background-color:#626262; margin-right:5px;">
+				<input type="button" value="Hatalı Haber" onclick="incorrectNews()" style="background-color:#DC143C; margin-right:5px;">
+		    </div>
+
+			<!-- Toast -->
+			<div id="snackbar">Some text some message..</div>
+
+		</fieldset>
+	</form>
+	<!-- PupUp -->
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+			<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Calculation Info</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				</button>
+			</div>
+			<div class="modal-body">
+				<p id="info-wiki"><b>Wiki Relatedness :</b> How Wiki Page of Product Related to News</p><br/>
+				<p id="info-tweet-percent"><b>Tweet Percent :</b> News Title and tweet content compared.
+					If similarity larger then 70 percent. (Tweet Count > 70)/(Total Tweet Count) </p><br/>
+				<p id="info-tweet-count"><b>Tweet Count :</b> Tweet Count  in "Tweet Percent"</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+			</div>
+		</div>
+	</div>
+<script src="js/jquery-2.1.1.js"></script>
+<script src="js/bootstrap.min.js"></script> <!-- Resource jQuery -->
+<script src="js/Chart.min.js"></script>
+<script src="js/main.js"></script> <!-- Resource jQuery -->
+
+</body>
+</html>

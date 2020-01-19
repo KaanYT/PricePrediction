@@ -53,8 +53,8 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
 
         """
         df = pandas.DataFrame(columns=['Epoch', 'Step',
-                                       'Train Mean Loss', 'Train Accuracy',
-                                       'Test Mean Loss', 'Test Accuracy'])
+                                       'Train Mean Loss Cumulative', 'Train Accuracy',
+                                       'Val Mean Loss', 'Val Accuracy'])
         self.timer.start()
         self.model.train()
 
@@ -97,59 +97,61 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                 nn.utils.clip_grad_norm_(self.model.parameters(), clip)
                 self.optimizer.step()
 
-                # loss stats
+                # Validate In Steps
                 if counter % print_every == 0:
                     timer = Timer()
                     timer.start()
-                    # Get validation loss
-                    val_losses = []
-                    self.model.eval()
-                    accuracy = 0
-                    for x, y in self.reader.get_data(NewsDnnBaseDataReader.DictDataTerm["Validate"],
-                                                     NewsDnnBaseDataReader.DictDataType[
-                                                         self.config["options"]["network_type"]]):
-                        # get_batches(val_data, batch_size, seq_length):
-                        x, y = torch.from_numpy(x), torch.from_numpy(y)
-
-                        inputs, targets = x, y
-                        if self.model.can_use_gpu and self.config["networkConfig"]["useGPU"]:
-                            inputs, targets = inputs.cuda(), targets.cuda()
-
-                        output = self.model(inputs)
-                        val_loss = self.criterion(output, targets.long())
-
-                        val_losses.append(val_loss.item())
-                        accuracy += self.calculate_accuracy(output, targets)
-                    self.model.train()  # reset to train mode after iterationg through validation data
-                    LoggerHelper.info("Epoch: {}/{}...".format(e + 1, self.epochs) +
-                                      "Step: {}...".format(counter) +
-                                      "Train Loss (Cumulative): {:.4f}...".format(np.mean(losses)) +
-                                      "Train Accuracy : {:.4f}...".format(train_accuracy/print_every) +
-                                      "Val Loss: {:.4f}...".format(np.mean(val_losses)) +
-                                      "Val Accuracy In Step: {:.4f}...".format(accuracy/self.validate_count) +
-                                      "Val Count: {:.4f}...".format(self.validate_count))
-                    df = df.append({
-                        'Epoch': "{}/{}".format(e + 1, self.epochs),
-                        'Step': counter,
-                        'Train Mean Loss Cumulative': np.mean(losses),
-                        'Train Accuracy': (train_accuracy/print_every),
-                        'Val Mean Loss': np.mean(val_losses),
-                        'Val Accuracy': (accuracy/self.validate_count),
-                    }, ignore_index=True)
-                    train_accuracy = 0
+                    df = self.validate(df, e, counter, losses, train_accuracy, print_every)
+                    train_accuracy = 0  # Clear Train Accuracy
                     timer.stop(time_for="Validate")
-                self.model.train()
+                    self.model.train()
         self.timer.stop(time_for="Train")
         self.save_model()
         self.current_date = DateHelper.get_current_date()
         Export.append_df_to_excel(df, self.current_date)
         Export.append_df_to_excel(self.get_info(), self.current_date)
 
-    def validate(self):
-        print("Test")
+    def validate(self, df, epoch, counter, losses, train_accuracy, print_every):
+        LoggerHelper.info("Validation Started...")
+        # Get validation loss
+        val_losses = []
+        self.model.eval()
+        accuracy = 0
+        for x, y in self.reader.get_data(NewsDnnBaseDataReader.DictDataTerm["Validate"],
+                                         NewsDnnBaseDataReader.DictDataType[
+                                             self.config["options"]["network_type"]]):
+            # get_batches(val_data, batch_size, seq_length):
+            x, y = torch.from_numpy(x), torch.from_numpy(y)
+
+            inputs, targets = x, y
+            if self.model.can_use_gpu and self.config["networkConfig"]["useGPU"]:
+                inputs, targets = inputs.cuda(), targets.cuda()
+
+            output = self.model(inputs)
+            val_loss = self.criterion(output, targets.long())
+
+            val_losses.append(val_loss.item())
+            accuracy += self.calculate_accuracy(output, targets)
+        self.model.train()  # reset to train mode after iterationg through validation data
+        LoggerHelper.info("Epoch: {}/{}...".format(epoch + 1, self.epochs) +
+                          "Step: {}...".format(counter) +
+                          "Train Loss (Cumulative): {:.4f}...".format(np.mean(losses)) +
+                          "Train Accuracy : {:.4f}...".format(train_accuracy / print_every) +
+                          "Val Loss: {:.4f}...".format(np.mean(val_losses)) +
+                          "Val Accuracy In Step: {:.4f}...".format(accuracy / self.validate_count) +
+                          "Val Count: {:.4f}...".format(self.validate_count))
+        df = df.append({
+            'Epoch': "{}/{}".format(epoch + 1, self.epochs),
+            'Step': counter,
+            'Train Mean Loss Cumulative': np.mean(losses),
+            'Train Accuracy': (train_accuracy / print_every),
+            'Val Mean Loss': np.mean(val_losses),
+            'Val Accuracy': (accuracy / self.validate_count),
+        }, ignore_index=True)
+        return df
 
     def test(self):
-        print("Test Started")
+        LoggerHelper.info("Test Started...")
         self.timer.start()
         df = pandas.DataFrame(columns=['Accuracy', 'Test Accuracy', 'Mean Test Loss'])
         val_losses = []

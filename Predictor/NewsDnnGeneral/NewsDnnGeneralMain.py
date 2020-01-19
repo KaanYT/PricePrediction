@@ -9,7 +9,7 @@ from Helper.Timer import Timer
 from Helper.DateHelper import DateHelper
 from Helper.LoggerHelper import LoggerHelper
 from Predictor.NewsDnnGeneral.NewsDnnGeneralModel import NewsDnnGeneralModel
-from Predictor.NewsDnnGeneral.NewsDnnGeneralDataReader import NewsDnnGeneralDataReader
+from Predictor.NewsDnnBase.NewsDnnBaseDataReader import NewsDnnBaseDataReader as NewsDnnGeneralDataReader
 from Predictor.NewsDnnBase.NewsDnnBaseMain import NewsDnnBaseMain
 from Managers.ExportManager.Export import Export
 import numpy as np
@@ -99,7 +99,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
                 if counter % print_every == 0:
                     timer = Timer()
                     timer.start()
-                    self.validate(df, e, counter, loss)
+                    df = self.validate(df, e, counter, loss)
                     timer.stop(time_for="Validate")
                 self.model.train()
         self.timer.stop(time_for="Train")
@@ -147,6 +147,7 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             'Mean Test Loss': np.mean(val_losses),
             'Accuracy In Step': accuracy,
         }, ignore_index=True)
+        return df
 
     def test(self):
         print("Test Started")

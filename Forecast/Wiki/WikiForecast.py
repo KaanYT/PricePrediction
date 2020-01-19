@@ -1,6 +1,6 @@
 from Managers.DatabaseManager.MongoDB import Mongo
 
-from Predictor.NewsDnnGeneral.NewsDnnGeneralWordEmbedding import WordEmbedding
+from Predictor.NewsDnnBase.NewsDnnBaseWordEmbedding import WordEmbedding
 
 
 class WikiForecast(object):

@@ -1,0 +1,46 @@
+{
+	"database": {
+        "collection": "FilteredNewsWikiAndTweetForDnn2",
+        "text_collection": "FilteredNews",
+        "wiki_tweet" : "FilteredNewsWikiAndTweetForDnn2",
+        "record_collection": "HandpickedNews",
+        "query": [
+            { "$sample": { "size": 1 } },
+            {
+                "$match":
+                {
+                    "$or":
+                    [
+                        {
+                            "date":
+                            {
+                                "$gte": {
+                                    "__type__": "date", "year": 2014, "month": 2, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                                },
+                                "$lt": {
+                                    "__type__": "date", "year": 2015, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                                }
+                            }
+                        },
+                        {
+                            "date":
+                            {
+                                "$gte": {
+                                    "__type__": "date", "year": 2015, "month": 3, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                                },
+                                "$lt": {
+                                    "__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                                }
+                            }
+                        }
+                    ],
+                    "is_controlled": { "$ne" : true }
+                }
+            }
+        ]
+	},
+    "check_for": "Brent Crude Oil",
+    "elasticSearch": {
+		"maxSize": 100000
+    }
+}

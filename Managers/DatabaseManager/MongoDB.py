@@ -64,12 +64,18 @@ class Mongo(object):
                 collection.create_indexes(indexes)
             return collection
 
-    def get_data(self, collection_name, query, fields=None, notimeout=False):
+    def get_data(self, collection_name, query, fields=None, notimeout=False, sort=None):
         collection = self.create_collection(collection_name)
         if fields:
-            return collection.find(query, fields, no_cursor_timeout=notimeout)
+            if sort:
+                return collection.find(query, fields, no_cursor_timeout=notimeout, sort=sort)
+            else:
+                return collection.find(query, fields, no_cursor_timeout=notimeout)
         else:
-            return collection.find(query, no_cursor_timeout=notimeout)
+            if sort:
+                return collection.find(query, no_cursor_timeout=notimeout, sort=sort)
+            else:
+                return collection.find(query, no_cursor_timeout=notimeout)
 
     def get_data_one(self, collection_name, query, fields=None, sort=None):
         collection = self.create_collection(collection_name)
@@ -80,6 +86,10 @@ class Mongo(object):
                 return collection.find_one(query, fields)
         else:
             return collection.find_one(query)
+
+    def get_aggregate(self, collection_name, pipeline):
+        collection = self.create_collection(collection_name)
+        return collection.aggregate(pipeline)
 
     def close(self):
         self.instance.client.close()

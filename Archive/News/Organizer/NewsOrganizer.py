@@ -21,7 +21,7 @@ from Managers.LogManager.Log import Logger
 from Forecast.Wiki.WikiForecast import WikiForecast
 from Forecast.Twitter.TwitterForecast import TwitterForecast
 
-from Predictor.NewsDnnGeneral.NewsDnnGeneralWordEmbedding import WordEmbedding
+from Predictor.NewsDnnBase.NewsDnnBaseWordEmbedding import WordEmbedding
 
 
 class NewsOrganizer(object):
