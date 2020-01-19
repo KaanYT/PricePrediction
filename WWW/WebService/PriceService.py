@@ -13,7 +13,6 @@ class PriceService(BaseService):
 
     def __init__(self):
         super().__init__()
-        self.price_collection = self.db.create_collection(self.config["database"]["price"])
 
     def add_price(self, app):
         app.router.add_post('/get_price', self.__price_handler)

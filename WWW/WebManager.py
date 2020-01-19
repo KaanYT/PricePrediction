@@ -4,6 +4,7 @@ from aiohttp import web
 from WWW.WebService.NewsService import NewsService
 from WWW.WebService.PriceService import PriceService
 from WWW.WebService.WikiTweetService import WikiTweetService
+from WWW.WebService.NewsRecordService import NewsRecordService
 # Mongo
 
 
@@ -14,6 +15,7 @@ class WebManager(object):
         self.news = NewsService()
         self.price = PriceService()
         self.wt = WikiTweetService()
+        self.record = NewsRecordService()
 
     def add_static_files(self):
         path = str(pathlib.Path(__file__).parent / 'Static')
@@ -28,6 +30,7 @@ class WebManager(object):
         self.news.add_news(self.app)
         self.price.add_price(self.app)
         self.wt.add_wt(self.app)
+        self.record.add_record(self.app)
 
     def run(self):
         web.run_app(self.app)

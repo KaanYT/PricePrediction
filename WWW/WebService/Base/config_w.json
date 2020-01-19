@@ -1,8 +1,9 @@
 {
 	"database": {
-        "collection": "FilteredNews",
-        "price": "Stock",
+        "collection": "FilteredNewsWikiAndTweetForDnn2",
+        "text_collection": "FilteredNews",
         "wiki_tweet" : "FilteredNewsWikiAndTweetForDnn2",
+        "record_collection": "HandpickedNews",
         "query": {
             "$or":
             [
@@ -28,9 +29,11 @@
                         }
                     }
                 }
-            ]
+            ],
+            "is_controlled": { "$ne" : true }
         }
 	},
+    "check_for": "Brent Crude Oil",
     "elasticSearch": {
 		"maxSize": 100000
     }

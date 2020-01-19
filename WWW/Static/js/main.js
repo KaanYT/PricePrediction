@@ -6,6 +6,11 @@ let value = {
 	Currency:{ key: ["USDCAD", "USDJPY", "GBPUSD", "EURUSD"], value: ["United States Dollar - Canadian Dollar", "United States Dollar - Japanese Yen", "Pound Sterling - United States Dollar", "Euro - United States Dollar"]}
 };
 
+var selectedPriceEffect = -1;
+
+/*
+	Did Page Load
+*/
 jQuery(document).ready(function($){
 	if( $('.floating-labels').length > 0 ) floatLabels();
 
@@ -24,15 +29,176 @@ jQuery(document).ready(function($){
 	function checkVal(inputField) {
 		( inputField.val() == '' ) ? inputField.prev('.cd-label').removeClass('float') : inputField.prev('.cd-label').addClass('float');
 	}
+	//Radio Button
+	$('#myForm input').on('change', function() {
+   		self.selectedPriceEffect = $('input[type=radio]:checked', '#myForm').val();
+	});
 
 	getRandomNews();
 });
+
+/*
+	Buttons
+*/
+
+function nextNews(){
+	getRandomNews();
+	$('html, body').animate({ scrollTop: 0 }, 'fast');
+}
+
+function recordNews(){
+	let categories = getNewsCategory();
+	let priceEffect = self.selectedPriceEffect;
+	let comment = $.trim($("#cd-textarea").val());
+	saveNewsDetails(categories,priceEffect,comment);
+}
+
+function incorrectNews(){
+	setIncorrectNews()
+}
 
 var selectedDateRange = 1;
 function changeDateBuffer(val){
 	selectedDateRange = parseInt(val);
 	self.getPrice(self.selectedDate, self.selectedProduct, self.selectedKey,self.selectedDateRange);
 }
+
+var selectedKey = "TXN";
+function changeKey(val){
+	selectedKey = val;
+	self.getPrice(self.selectedDate, self.selectedProduct, self.selectedKey, self.selectedDateRange);
+}
+
+
+/*
+	Service Requests
+*/
+
+var news_id = "";
+function getRandomNews() {
+	//url: /source/random/:token/:date/:hash/:control
+	let base_url = window.location.origin;
+	let url = base_url + "/" + "random_news";
+	hideLoading(false);
+	$.get(url,
+			function(status, jqXHR) { // success callback
+				var data = jQuery.parseJSON(status);
+				gameData = data;
+				self.news_id = data.url;
+				setupNews(gameData);
+			}).done(function() { //Call Next Inform And Call Next Resource
+				informUser('Request done!');
+				hideLoading(true);
+			}).fail(function(jqxhr, settings, ex) {
+				hideLoading(true);
+				informUser('failed, ' + ex);
+	});
+}
+
+function getPrice(date, collection, key, range) {
+    var data = JSON.stringify({ news_date:date, collection:collection , key: key, range:range});
+    let base_url = window.location.origin;
+    let url = base_url + "/" + "get_price";
+    console.log(url);
+    hideLoading(false);
+    $.post(url, // url
+        data, // data to be submit
+        function(data, status, jqXHR) { // success callback
+            console.log('status: ' + status + ', data: ' + data);
+            var data = jQuery.parseJSON(data);
+            self.displayLineChart(data);
+        }).done(function() { //Call Next Inform And Call Next Resource
+        	hideLoading(true);
+            informUser('Request done!');
+        }).fail(function(jqxhr, settings, ex) {
+            hideLoading(true);
+            informUser('failed, ' + ex);
+    });
+}
+
+function getNewsDetails() {
+    var data = JSON.stringify({ object_id:self.news_id});
+    let base_url = window.location.origin;
+    let url = base_url + "/" + "wt";
+    console.log(data);
+    hideLoading(false);
+    $.post(url, // url
+        data, // data to be submit
+        function(data, status, jqXHR) { // success callback
+            console.log('status: ' + status + ', data: ' + data);
+            var data = jQuery.parseJSON(data);
+            self.setupNewsDetails(data)
+        }).done(function() { //Call Next Inform And Call Next Resource
+        	hideLoading(true);
+            informUser('Request done!');
+        }).fail(function(jqxhr, settings, ex) {
+            hideLoading(true);
+            informUser('failed, ' + ex);
+    });
+}
+
+function setIncorrectNews() {
+    var data = JSON.stringify({ object_id:self.news_id});
+    let base_url = window.location.origin;
+    let url = base_url + "/" + "incorrect_news";
+    hideLoading(false);
+    $.post(url, // url
+        data, // data to be submit
+        function(data, status, jqXHR) { // success callback
+            console.log('status: ' + status + ', data: ' + data);
+            self.getRandomNews();
+			$('html, body').animate({ scrollTop: 0 }, 'fast');
+        }).done(function() { //Call Next Inform And Call Next Resource
+        	hideLoading(true);
+            informUser('Request done!');
+        }).fail(function(jqxhr, settings, ex) {
+            hideLoading(true);
+            informUser('failed, ' + ex);
+    });
+}
+
+function saveNewsDetails(categories,priceEffect,comment) {
+    var data = JSON.stringify({ object_id:self.news_id, categories:categories, effect:priceEffect, comment:comment});
+    let base_url = window.location.origin;
+    let url = base_url + "/" + "record_news";
+    console.log(data);
+    hideLoading(false);
+    $.post(url, // url
+        data, // data to be submit
+        function(data, status, jqXHR) { // success callback
+            self.getRandomNews()
+			$('html, body').animate({ scrollTop: 0 }, 'fast');
+        }).done(function() { //Call Next Inform And Call Next Resource
+        	hideLoading(true);
+            informUser('Request done!');
+        }).fail(function(jqxhr, settings, ex) {
+            hideLoading(true);
+            informUser('failed, ' + ex);
+    });
+}
+
+/*
+	Data Helper
+*/
+
+function createCandleStickData(data) {
+	var new_data = [];
+	for (var i = 0; i < data.PriceDate.length; i++) {
+		new_data.push({
+			t: data.PriceDate[i],
+			o: data.OpenPrice[i],
+			h: data.HighPrice[i],
+			l: data.LowPrice[i],
+			c: data.ClosePrice[i],
+			v: data.Volume[i],
+		});
+	}
+	return new_data;
+}
+
+/*
+	UI Setup
+*/
 
 var selectedProduct = "Stock";
 function changeProduct(val){
@@ -47,14 +213,6 @@ function changeProduct(val){
 	}
 	selectedKey = productKeys.key[0];
 	self.getPrice(self.selectedDate, self.selectedProduct, self.selectedKey,self.selectedDateRange);
-}
-
-
-
-var selectedKey = "TXN";
-function changeKey(val){
-	selectedKey = val;
-	self.getPrice(self.selectedDate, self.selectedProduct, self.selectedKey, self.selectedDateRange);
 }
 
 function displayLineChart(data) {
@@ -92,95 +250,6 @@ function displayLineChart(data) {
 	});
 }
 
-function createCandleStickData(data) {
-	var new_data = [];
-	for (var i = 0; i < data.PriceDate.length; i++) {
-		new_data.push({
-			t: data.PriceDate[i],
-			o: data.OpenPrice[i],
-			h: data.HighPrice[i],
-			l: data.LowPrice[i],
-			c: data.ClosePrice[i],
-			v: data.Volume[i],
-		});
-	}
-	return new_data;
-}
-
-var news_id = "";
-function getRandomNews() {
-	//url: /source/random/:token/:date/:hash/:control
-	let base_url = window.location.origin;
-	let url = base_url + "/" + "random_news";
-	hideLoading(false);
-	$.get(url,
-			function(status, jqXHR) { // success callback
-				var data = jQuery.parseJSON(status);
-				gameData = data;
-				self.news_id = data.url;
-				setupNews(gameData);
-			}).done(function() { //Call Next Inform And Call Next Resource
-				informUser('Request done!');
-				hideLoading(true);
-			}).fail(function(jqxhr, settings, ex) {
-				hideLoading(true);
-				informUser('failed, ' + ex);
-	});
-}
-
-function getPrice(date, collection, key, range) {
-    var data = JSON.stringify({ news_date:date, collection:collection , key: key, range:range});
-    let base_url = window.location.origin;
-    let url = base_url + "/" + "get_price";
-    console.log(url);
-    hideLoading(false);
-    $.post(url, // url
-        data, // data to be submit
-        function(data, status, jqXHR) { // success callback
-            console.log('status: ' + status + ', data: ' + data);
-            var data = jQuery.parseJSON(data);
-            self.displayLineChart(data)
-        }).done(function() { //Call Next Inform And Call Next Resource
-        	hideLoading(true);
-            informUser('Request done!');
-        }).fail(function(jqxhr, settings, ex) {
-            hideLoading(true);
-            informUser('failed, ' + ex);
-    });
-}
-
-function getNewsDetails() {
-    var data = JSON.stringify({ object_id:self.news_id});
-    let base_url = window.location.origin;
-    let url = base_url + "/" + "wt";
-    console.log(data);
-    hideLoading(false);
-    $.post(url, // url
-        data, // data to be submit
-        function(data, status, jqXHR) { // success callback
-            console.log('status: ' + status + ', data: ' + data);
-            var data = jQuery.parseJSON(data);
-            console.log(data)
-        }).done(function() { //Call Next Inform And Call Next Resource
-        	hideLoading(true);
-            informUser('Request done!');
-        }).fail(function(jqxhr, settings, ex) {
-            hideLoading(true);
-            informUser('failed, ' + ex);
-    });
-}
-
-
-function hideLoading(hide) {
-	if(hide){
-		$('#loading').css('display','none');
-		console.log("Hidden")
-	}else{
-		$('#loading').css('display','inline');
-	}
-}
-
-
 function checkNewsCategory(category) {
     if (category.localeCompare("News") == 0){
         $('#cd-checkbox-1').prop('checked', true);
@@ -211,18 +280,20 @@ function checkNewsCategory(category) {
     }
 }
 
-function uncheckboxes() {
-	var cbarray = $(':checkbox:checked');
-	for (var i = 0; i < cbarray.length; i++) {
-		$('#'+cbarray[i].id).prop('checked', false);
-	}
+function getNewsCategory(category) {
+	let checkboxes = [];
+    $('input[type=checkbox]').each(function () {
+    	let sThisVal = (this.checked ? $(this).val() : "");
+    	if (sThisVal != ''){
+    		checkboxes.push(sThisVal);
+		}
+	});
+    return checkboxes;
 }
-
-
-
 
 var selectedDate = null;
 function setupNews(news) {
+	self.clearInputBoxes();
     let news_title = $("#news_title");
 	news_title.text(news.title);
     news_title.attr("href", news.url);
@@ -231,22 +302,55 @@ function setupNews(news) {
     $("#news_authors").html(news.authors.join(', '));
     $("#news_article").html(news.article);
     $("#news_date").html(news.news_date);
+    $("#news_wiki").html(news.wiki_relatedness);
+    $("#news_tweet_percent").html(news.tweet_count);
+    $("#news_tweet_count").html(news.tweet_percentage);
+    $("#check_for").html("Check For : " + news.check_for);
+    $("#news_id").html(news.id);
     self.selectedDate = news.news_date;
     self.getPrice(self.selectedDate, self.selectedProduct, self.selectedKey, self.selectedDateRange);
     checkNewsCategory(news.category);
 }
 
-/*
-	Buttons
-*/
-
-function nextNews(){
-	getRandomNews();
-	$('html, body').animate({ scrollTop: 0 }, 'fast');
+function setupNewsDetails(news_detail) {
+	console.log(news_detail);
+    $("#news_wiki").html(news_detail.wiki_relatedness);
+    $("#news_tweet_percent").html(news_detail.tweet_count);
+    $("#news_tweet_count").html(news_detail.tweet_percentage);
 }
 
-function recordNews(){
+function info() {
+	$('#exampleModal').modal('show');
+}
 
+/*
+	UI Helper
+*/
+
+function hideLoading(hide) {
+	if(hide){
+		$('#loading').css('display','none');
+		console.log("Hidden")
+	}else{
+		$('#loading').css('display','inline');
+	}
+}
+
+function uncheckboxes() {
+	var cbarray = $(':checkbox:checked');
+	for (var i = 0; i < cbarray.length; i++) {
+		$('#'+cbarray[i].id).prop('checked', false);
+	}
+}
+
+function resetRadioButton() { //
+	$('input[type=radio]:checked', '#myForm').prop('checked', false);
+	$('#cd-radio-1').prop('checked', true);
+}
+
+function clearInputBoxes() {
+	self.uncheckboxes();
+	self.resetRadioButton();
 }
 
 /*

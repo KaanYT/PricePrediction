@@ -10,28 +10,35 @@ class NewsService(BaseService):
 
     def __init__(self):
         super().__init__()
-        self.news_collection = self.db.create_collection(self.config["database"]["collection"])
+        self.collection = self.db.create_collection(self.config["database"]["collection"])
+        self.text_collection = self.config["database"]["text_collection"]
         self.news_query = self.config["database"]["query"]
+        self.check_for = self.config["check_for"]
 
     def add_news(self, app):
         app.router.add_get('/random_news', self.__random_news_handler)
 
     async def __random_news_handler(self, request):
-        news = self.news_collection.find_one(self.news_query)
+        filtered_news = self.collection.find_one(self.news_query)
+        news_text = self.get_news_data(self.db, self.text_collection, filtered_news["url"])
         res = {
-            'id': str(news.get('_id')),
-            'title': news.get('title'),
-            'summery': news.get('summery'),
-            'category': news.get('category'),
-            'article': news.get('article'),
-            'url': news.get('url'),
-            'authors': news.get('authors'),
-            'news_date': str(news.get('date'))
+            'id': str(news_text.get('_id')),
+            'title': news_text.get('title'),
+            'summery': news_text.get('summery'),
+            'category': news_text.get('category'),
+            'article': news_text.get('article'),
+            'url': news_text.get('url'),
+            'authors': news_text.get('authors'),
+            'news_date': str(news_text.get('date')),
+            'wiki_relatedness': filtered_news.get('wiki_relatedness'),
+            'tweet_count': filtered_news.get('tweet_count'),
+            'tweet_percentage': filtered_news.get('tweet_percentage'),
+            'check_for': self.check_for
         }
         res = JSONEncoder().encode(res)
         return web.json_response(res)
 
     @staticmethod
-    async def __save_updated_news(request):
-        res = {"q": "qqq", "a": "aaa"}
-        return web.json_response(res)
+    def get_news_data(db, collection, object_id):
+        query = {"url": object_id}
+        return db.get_data_one(collection, query)

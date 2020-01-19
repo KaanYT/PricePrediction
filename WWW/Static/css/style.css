@@ -376,6 +376,10 @@ Custom icons
   background: url("../img/cd-icon-message.svg") no-repeat 16px 16px, url("../img/cd-required.svg") no-repeat top right;
 }
 
+.cd-form .icon input, .cd-form .icon select, .cd-form .icon textarea {
+  padding-left: 54px !important;
+}
+
 /* -------------------------------- 
 
 FLoating labels 
