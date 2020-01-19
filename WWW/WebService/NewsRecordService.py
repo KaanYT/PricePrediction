@@ -69,6 +69,8 @@ class NewsRecordService(BaseService):
                     "wiki_relatedness": default["wiki_relatedness"],
                     "tweet_count": default["tweet_count"],
                     "tweet_percentage": default["tweet_percentage"],
+                    "wiki_relatedness_nor": default["wiki_relatedness_nor"],
+                    "tweet_count_nor": default["tweet_count_nor"],
                     "date": default["date"],
                     "authors": default["authors"],
                     "comment": request['comment'],

@@ -1,8 +1,8 @@
 {
 	"database": {
-        "collection": "FilteredNewsWikiAndTweetForDnn2",
+        "collection": "FilteredNewsGeneralNoTagES",
         "text_collection": "FilteredNews",
-        "wiki_tweet" : "FilteredNewsWikiAndTweetForDnn2",
+        "wiki_tweet" : "FilteredNewsGeneralNoTagES",
         "record_collection": "HandpickedNews",
         "query": [
             { "$sample": { "size": 1 } },
