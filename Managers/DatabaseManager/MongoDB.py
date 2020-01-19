@@ -87,6 +87,10 @@ class Mongo(object):
         else:
             return collection.find_one(query)
 
+    def get_aggregate(self, collection_name, pipeline):
+        collection = self.create_collection(collection_name)
+        return collection.aggregate(pipeline)
+
     def close(self):
         self.instance.client.close()
 

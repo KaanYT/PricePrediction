@@ -19,7 +19,7 @@ class NewsService(BaseService):
         app.router.add_get('/random_news', self.__random_news_handler)
 
     async def __random_news_handler(self, request):
-        filtered_news = self.collection.find_one(self.news_query)
+        filtered_news = list(self.collection.aggregate(self.news_query))[0]
         news_text = self.get_news_data(self.db, self.text_collection, filtered_news["url"])
         res = {
             'id': str(news_text.get('_id')),
