@@ -33,10 +33,19 @@ class NewsService(BaseService):
             'wiki_relatedness': filtered_news.get('wiki_relatedness'),
             'tweet_count': filtered_news.get('tweet_count'),
             'tweet_percentage': filtered_news.get('tweet_percentage'),
+            'wiki_relatedness_nor': self.get_key_from("wiki_relatedness_nor", filtered_news),
+            'tweet_count_nor': self.get_key_from("tweet_count_nor", filtered_news),
             'check_for': self.check_for
         }
         res = JSONEncoder().encode(res)
         return web.json_response(res)
+
+    @staticmethod
+    def get_key_from(key, array):
+        if key in array:
+            return array.get(key)
+        else:
+            return "Not Found"
 
     @staticmethod
     def get_news_data(db, collection, object_id):

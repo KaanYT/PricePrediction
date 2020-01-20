@@ -302,9 +302,9 @@ function setupNews(news) {
     $("#news_authors").html(news.authors.join(', '));
     $("#news_article").html(news.article);
     $("#news_date").html(news.news_date);
-    $("#news_wiki").html(news.wiki_relatedness);
-    $("#news_tweet_percent").html(news.tweet_count);
-    $("#news_tweet_count").html(news.tweet_percentage);
+    $("#news_wiki").html("{0} ({1})".format(news.wiki_relatedness,news.wiki_relatedness_nor));
+    $("#news_tweet_percent").html(news.tweet_percentage);
+    $("#news_tweet_count").html("{0} ({1})".format(news.tweet_count,news.tweet_count_nor));
     $("#check_for").html("Check For : " + news.check_for);
     $("#news_id").html(news.id);
     self.selectedDate = news.news_date;
@@ -363,4 +363,14 @@ var informUser = function getUrlParameter(info) {
     setTimeout(function() {
         x.className = x.className.replace("show", "");
     }, 3000);
+};
+
+/*
+	Helper Functions
+*/
+String.prototype.format = function () {
+        var args = [].slice.call(arguments);
+        return this.replace(/(\{\d+\})/g, function (a){
+            return args[+(a.substr(1,a.length-2))||0];
+        });
 };
