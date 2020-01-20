@@ -34,7 +34,8 @@
                             }
                         }
                     ],
-                    "is_controlled": { "$ne" : true }
+                    "is_controlled": { "$ne" : true },
+                    "summery": { "$in": ["crude", "oil","war","iran","iraq","middle","east", "saudi", "arabia","russia", "OPEC", "arab", "kuwait" ] }
                 }
             }
         ]
