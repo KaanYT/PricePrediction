@@ -5,7 +5,6 @@
         "wiki_tweet" : "FilteredNewsGeneralNoTagES",
         "record_collection": "HandpickedNews",
         "query": [
-            { "$sample": { "size": 1 } },
             {
                 "$match":
                 {
@@ -34,9 +33,12 @@
                             }
                         }
                     ],
-                    "is_controlled": { "$ne" : true }
+                    "is_controlled": { "$ne" : true },
+                    "summery": { "$in": ["crude", "oil", "war", "iran","iraq", "saudi", "arabia", "russia", "OPEC", "arab", "kuwait" ] },
+                    "category": {"$in":["Politics", "Business", "Economy", "Economy", "Kaggle", "Money", "Energy", "Bonds"]}
                 }
-            }
+            },
+            { "$sample": { "size": 1 } }
         ]
 	},
     "check_for": "Brent Crude Oil",
