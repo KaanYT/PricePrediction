@@ -346,6 +346,7 @@ function uncheckboxes() {
 function resetRadioButton() { //
 	$('input[type=radio]:checked', '#myForm').prop('checked', false);
 	$('#cd-radio-1').prop('checked', true);
+	self.selectedPriceEffect = -1;
 }
 
 function clearInputBoxes() {
