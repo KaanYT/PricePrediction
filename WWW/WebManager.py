@@ -21,10 +21,15 @@ class WebManager(object):
         path = str(pathlib.Path(__file__).parent / 'Static')
         self.app.router.add_static('/Static', path, show_index=True)
         self.app.router.add_get('/', self.home_redirect)
+        self.app.router.add_get('/favicon.ico', self.fav_redirect)
 
     @staticmethod
     async def home_redirect(request):
         return web.HTTPFound('/Static/index.html')  # Will not redirect for a few seconds.
+
+    @staticmethod
+    async def fav_redirect(request):
+        return web.HTTPFound('/Static/favicon.ico')  # Will not redirect for a few seconds.
 
     def add_news_root(self):
         self.news.add_news(self.app)

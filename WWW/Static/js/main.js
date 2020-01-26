@@ -26,6 +26,11 @@ jQuery(document).ready(function($){
 		});
 	}
 
+	$( function() {
+    	$( "#draggable" ).draggable();
+    	self.getDoneNewsCount()
+  	});
+
 	function checkVal(inputField) {
 		( inputField.val() == '' ) ? inputField.prev('.cd-label').removeClass('float') : inputField.prev('.cd-label').addClass('float');
 	}
@@ -92,6 +97,24 @@ function getRandomNews() {
 			}).fail(function(jqxhr, settings, ex) {
 				hideLoading(true);
 				informUser('failed, ' + ex);
+	});
+}
+
+var news_count = 0;
+function getDoneNewsCount() {
+	let base_url = window.location.origin;
+	let url = base_url + "/" + "recorded_news";
+	hideLoading(false);
+	$.get(url,
+			function(status, jqXHR) { // success callback
+				var data = jQuery.parseJSON(status);
+				news_count = parseInt(data.news_count, 10);
+				$( "#number_of_news" ).html(news_count);
+			}).done(function() { //Call Next Inform And Call Next Resource
+				hideLoading(true);
+			}).fail(function(jqxhr, settings, ex) {
+				$( "#number_of_news" ).html("NA");
+				hideLoading(true);
 	});
 }
 
@@ -166,11 +189,12 @@ function saveNewsDetails(categories,priceEffect,comment) {
     $.post(url, // url
         data, // data to be submit
         function(data, status, jqXHR) { // success callback
-            self.getRandomNews()
+            self.getRandomNews();
 			$('html, body').animate({ scrollTop: 0 }, 'fast');
         }).done(function() { //Call Next Inform And Call Next Resource
         	hideLoading(true);
             informUser('Request done!');
+            increase_new_count();
         }).fail(function(jqxhr, settings, ex) {
             hideLoading(true);
             informUser('failed, ' + ex);
@@ -352,6 +376,12 @@ function resetRadioButton() { //
 function clearInputBoxes() {
 	self.uncheckboxes();
 	self.resetRadioButton();
+}
+
+function increase_new_count() {
+	parseInt(news_count, 10);
+	news_count = news_count + 1;
+	$( "#number_of_news" ).html(news_count);
 }
 
 /*

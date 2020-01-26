@@ -20,6 +20,7 @@ class NewsRecordService(BaseService):
     def add_record(self, app):
         app.router.add_post('/record_news', self.__random_news_handler)
         app.router.add_post('/incorrect_news', self.__incorrect_news_handler)
+        app.router.add_get('/recorded_news', self.__news_count_handler)
 
     async def __incorrect_news_handler(self, request):
         request = await request.json()
@@ -94,6 +95,14 @@ class NewsRecordService(BaseService):
                 LoggerHelper.error(traceback.format_exc())
             res = JSONEncoder().encode(res)
             return web.json_response(res)
+
+    async def __news_count_handler(self, request):
+        news_count = self.toCollection.count()
+        res = {
+            'news_count': str(news_count)
+        }
+        res = JSONEncoder().encode(res)
+        return web.json_response(res)
 
     def record_one_field(self,collection_name, field):
         collection = self.db.create_collection(collection_name)

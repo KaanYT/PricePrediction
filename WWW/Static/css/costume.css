@@ -1,5 +1,35 @@
 #div.hide { display: none; }
 
+#draggable {
+    position: fixed;
+    top: 90%;
+    right: 10%;
+    z-index: 1000;
+}
+.numberCircle {
+    display:inline-block;
+    line-height:0px;
+
+    border-radius:50%;
+    border:0.1em solid #666;
+    background: white;
+    color: #666;
+    font-size:32px;
+}
+
+.numberCircle span {
+    display:inline-block;
+
+    padding-top:50%;
+    padding-bottom:50%;
+
+    margin-left:8px;
+    margin-right:8px;
+}
+
+
+
+
 #loading {
     top: 0;
     left: 0;
