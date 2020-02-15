@@ -113,7 +113,8 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
         val_h = self.model.init_hidden(self.reader.batch_size)
         val_losses = []
         self.model.eval()
-        accuracy = 0
+        result = np.asarray([])
+        result_expected = np.asarray([])
         for x, y in self.reader.get_data(NewsDnnGeneralDataReader.DictDataTerm["Validate"],
                                          NewsDnnGeneralDataReader.DictDataType[
                                              self.config["options"]["network_type"]]):
@@ -130,24 +131,13 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
 
             output, val_h = self.model(inputs, val_h)
             val_loss = self.criterion(output, targets.long())
-
             val_losses.append(val_loss.item())
-            accuracy += self.calculate_accuracy(output, targets)
+            # Sum and divide total value !
+            result = np.append(result, self.get_output(output))
+            result_expected = np.append(result_expected, targets.numpy())
         self.model.train()  # reset to train mode after iterationg through validation data
-        LoggerHelper.info("Epoch: {}/{}...".format(epoch + 1, self.epochs) +
-                          "Step: {}...".format(counter) +
-                          "Loss: {:.4f}...".format(loss.item()) +
-                          "Accuracy In Step: {:.4f}...".format(accuracy) +
-                          "Val Count: {:.4f}...".format(self.validate_count) +
-                          "Val Loss: {:.4f}".format(np.mean(val_losses)))
-        df = df.append({
-            'Epoch': "{}/{}".format(epoch + 1, self.epochs),
-            'Step': counter,
-            'Last Train Loss': loss.item(),
-            'Mean Test Loss': np.mean(val_losses),
-            'Accuracy In Step': accuracy,
-        }, ignore_index=True)
-        return df
+        scores = self.calculate_scores(result_expected, result)
+        return self.log_validate(df, epoch, counter, loss, val_losses, self.validate_count, scores)
 
     def test(self):
         print("Test Started")
@@ -158,6 +148,8 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
         self.model.eval()
         counter = 0
         accuracy = 0
+        result = np.asarray([])
+        result_expected = np.asarray([])
         for x, y in self.reader.get_data(NewsDnnGeneralDataReader.DictDataTerm["Test"],
                                          NewsDnnGeneralDataReader.DictDataType[
                                              self.config["options"]["network_type"]]):
@@ -176,11 +168,10 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
             val_loss = self.criterion(output, targets.long())
             val_losses.append(val_loss.item())
             accuracy += self.calculate_accuracy(output, targets)
-        df = df.append({
-            'Accuracy': "{}/{}".format(accuracy, self.test_count),
-            'Mean Test Loss': np.mean(val_losses)
-        }, ignore_index=True)
-
+            result = np.append(result, self.get_output(output))
+            result_expected = np.append(result_expected, targets.numpy())
+        scores = self.calculate_scores(result_expected, result)
+        df = self.log_test(df, accuracy, self.test_count, val_losses, scores)
         Export.append_df_to_excel(df, self.current_date)
         self.timer.stop(time_for="Test")
 

@@ -15,6 +15,12 @@ Master Thesis Application
 			* As a Service Start `net start MongoDB`
 			* As a Service Stop `net stop MongoDB`
 			
+## Data
+* Resources
+    * [OECD](https://data.oecd.org)
+    * Twitter
+    * Wikipedia  
+			
 ## Requirements
 
 ### Software

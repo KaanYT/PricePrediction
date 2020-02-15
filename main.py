@@ -8,9 +8,11 @@ from Managers.ConfigManager import Config
 from Archive.Wiki.WikiRecorder import WikiRecorder
 from Archive.News.Organizer.NewsOrganizer import NewsOrganizer
 from Archive.Market.FinancialDataCollector import FDC
+from Archive.Indicator.IndicatorsCollector import IndicatorsCollector
 
 from Predictor.NewsDnnGeneral.NewsDnnGeneralMain import NewsDnnGeneralMain
 from Predictor.NewsCnn.NewsCnnMain import NewsDnnGeneralMain as NewsCnnMain
+from Predictor.LstmTA.TaMain import TaMain
 
 from WWW.WebManager import WebManager
 
@@ -38,6 +40,9 @@ def load_arg():
                         version='Program Version is 0.1')
     parser.add_argument("-w", "--wiki", help="Run wiki recorder. Record Wikipedia pages to database collection.",
                         action="store_true")
+    parser.add_argument("-i", "--ind", help="Run Indicators Collector recorder. Record various resources to database "
+                                            "collection which contains economical information such as employment.",
+                        action="store_true")
     parser.add_argument("-n", "--news", help="Run News DNN to predict possible stock price.", metavar='general')
     parser.add_argument("-f", "--fdc", help="Run Financial Data Collector.", action="store_true")
     parser.add_argument("-www", "--webservice", help="This is a web service with default startup page. "
@@ -52,6 +57,8 @@ def get_news_type(dnn_type):
         return NewsCnnMain()
     elif dnn_type == "RNN":
         return NewsDnnGeneralMain()
+    elif dnn_type == "TA":
+        return TaMain()
     else:  # Default RNN
         LoggerHelper.error("DNN type (" + dnn_type + ") is not found. Default RNN (NewsDnnGeneralMain) is used.")
         return NewsDnnGeneralMain()
@@ -80,6 +87,15 @@ def main():
         collector = NewsOrganizer()
         collector.dnn_organizer_with_wiki_tweets()
         LoggerHelper.info("News Organizer Mode is ended.")
+
+    if args.ind is not None:
+        LoggerHelper.info("Starting Indicators Collector Mode...")
+        ind_collector = IndicatorsCollector()
+        if args.ind == "zip":
+            ind_collector.collect_from_zip()
+        else:
+            ind_collector.collect()
+        LoggerHelper.info("Indicators Collector Mode is ended.")
 
     if args.news is not None:
         LoggerHelper.info("Starting Stock Prediction Mode...")
