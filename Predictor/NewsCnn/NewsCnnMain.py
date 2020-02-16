@@ -278,4 +278,4 @@ class NewsDnnGeneralMain(NewsDnnBaseMain):
         if platform.system() == "Windows":
             return json.load(open(pwd + '/config_w.json', 'r'), cls=DateTimeDecoder)
         else:
-            return json.load(open(pwd + '/config.json', 'r'), cls=DateTimeDecoder)w
+            return json.load(open(pwd + '/config.json', 'r'), cls=DateTimeDecoder)
