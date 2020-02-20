@@ -4,8 +4,11 @@ from Helper.LoggerHelper import LoggerHelper
 
 class Timer(object):
 
-    def __init__(self):
-        self.start_dt = None
+    def __init__(self, start=False):
+        if start:
+            self.start_dt = dt.datetime.now()
+        else:
+            self.start_dt = None
 
     def start(self):
         self.start_dt = dt.datetime.now()

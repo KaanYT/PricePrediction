@@ -19,13 +19,14 @@ class NewsDnnBaseDataReader(object):
     # LSTM Applied On Sequential Data - It unrolls, In the Sequence Dimension
     # Batch Size :
     # Sequence Length : Memorize (Hidden and Cell State) -> Article Size
-    def __init__(self, config, batch_size, sequence_length):
+    def __init__(self, config, batch_size, sequence_length, word_emb_enabled=True):
         self.db = Mongo()
         self.configs = config
         self.batch_size = batch_size
         self.sequence_length = sequence_length
         self.clear_data()
-        self.word_embedding = WordEmbedding(path=self.configs["wordEmbedding"]["path"])
+        if word_emb_enabled:
+            self.word_embedding = WordEmbedding(path=self.configs["wordEmbedding"]["path"])
         self.__test_cursor = None
         self.test_count = 0
         self.__train_cursor = None
@@ -41,20 +42,23 @@ class NewsDnnBaseDataReader(object):
             self.__train_cursor = self.db.get_data(self.configs['database']['name'],
                                                    self.configs['database']['train']['query'],
                                                    self.configs['database']['fields'], notimeout=True)
-            self.__train_cursor = self.__train_cursor.sort(
-                ListHelper.convert_dict_list(self.configs['database']['sort']))
+            if self.configs['database']['sort'] is not None:
+                self.__train_cursor = self.__train_cursor.sort(
+                    ListHelper.convert_dict_list(self.configs['database']['sort']))
         elif fetch_type == NewsDnnBaseDataReader.DictDataTerm["Validate"]:
             self.__validate_cursor = self.db.get_data(self.configs['database']['name'],
                                                       self.configs['database']['validate']['query'],
                                                       self.configs['database']['fields'], notimeout=True)
-            self.__validate_cursor = self.__validate_cursor.sort(
-                ListHelper.convert_dict_list(self.configs['database']['sort']))
+            if self.configs['database']['sort'] is not None:
+                self.__validate_cursor = self.__validate_cursor.sort(
+                    ListHelper.convert_dict_list(self.configs['database']['sort']))
         elif fetch_type == NewsDnnBaseDataReader.DictDataTerm["Test"]:
             self.__test_cursor = self.db.get_data(self.configs['database']['name'],
                                                   self.configs['database']['test']['query'],
                                                   self.configs['database']['fields'], notimeout=True)
-            self.__test_cursor = self.__test_cursor.sort(
-                ListHelper.convert_dict_list(self.configs['database']['sort']))
+            if self.configs['database']['sort'] is not None:
+                self.__test_cursor = self.__test_cursor.sort(
+                    ListHelper.convert_dict_list(self.configs['database']['sort']))
         else:
             LoggerHelper.critical('Unable To Fetch')
 

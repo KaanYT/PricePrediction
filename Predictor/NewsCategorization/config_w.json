@@ -1,0 +1,85 @@
+{
+	"database": {
+        "name": "News",
+		"train": {
+			"query": {
+				"date": {
+					"$gte": {
+						"__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2016, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				}
+			}
+		},
+		"validate": {
+			"query": {
+				"date": {
+					"$gte": {
+						"__type__": "date", "year": 2016, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				}
+			}
+		},
+		"test": {
+			"query": {
+				"date": {
+					"$gte": {
+						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				}
+			}
+		},
+		"fields": {
+			"RSS_Title": 1,
+			"RSS_Date": 1,
+			"RSS_Summery": 1,
+			"RSS_Category": 1,
+			"Article": 1,
+			"Keywords_Generated": 1,
+			"Authors":1,
+			"Meta_Desc":1,
+			"_id": 0
+		},
+		"price": {
+			"start": "price_before",
+			"end": "price_after_hour",
+			"buffer_percent": 0.005
+		}
+	},
+	"wordEmbedding":{
+		"path":"I:\\Glove\\GoogleNews-vectors-negative300.bin",
+		"size":300
+	},
+	"networkConfig": {
+		"epochs": 5,
+		"batch_size": 1,
+		"sequence_length": 100,
+		"hidden_size": -5,
+		"normalise": true,
+		"criterion":"CrossEntropyLoss",
+		"optimizer":"Adam",
+		"useGPU": true,
+		"save_dir": "C:\\Users\\eksen\\Documents\\2_master\\models"
+	},
+	"options": {
+		"network_type":"News",
+		"wiki":{
+			"enabled": false,
+			"multiply_factors":50,
+			"wiki_column": "wiki_relatedness"
+		},
+		"twitter":{
+			"enabled": false,
+			"multiply_factors":50,
+			"tweet_column": "tweet_percentage"
+		}
+	}
+}

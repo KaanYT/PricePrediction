@@ -59,6 +59,7 @@ Master Thesis Application
         * `pip3 install newspaper3k` 
             * `conda install -c conda-forge newspaper3k`
             * `import nltk; nltk.download()`
+     * `pip install transformers`
 
 ## Test Environment
 

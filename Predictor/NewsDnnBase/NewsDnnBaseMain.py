@@ -8,7 +8,7 @@ import numpy as np
 
 class NewsDnnBaseMain(object):
 
-    def __init__(self, config, epochs=None, batch_size=None, seq_length=None, use_gpu=None, lr=0.005, hidden_size=None):
+    def __init__(self, config, epochs=None, batch_size=None, seq_length=None, use_gpu=None, lr=None, hidden_size=None):
         self.config = config
         if epochs is None:
             self.epochs = config["networkConfig"]["epochs"]
@@ -31,9 +31,12 @@ class NewsDnnBaseMain(object):
                 self.hidden_size = None
             else:
                 self.hidden_size = self.config["networkConfig"]["hidden_size"]
-
         else:
             self.hidden_size = hidden_size
+        if lr is None:
+            self.lr = self.config["networkConfig"]["learning_rate"]
+        else:
+            self.lr = lr
 
         self.timer = Timer()
         self.current_date = DateHelper.get_current_date()

@@ -12,6 +12,7 @@ from Archive.Indicator.IndicatorsCollector import IndicatorsCollector
 
 from Predictor.NewsDnnGeneral.NewsDnnGeneralMain import NewsDnnGeneralMain
 from Predictor.NewsCnn.NewsCnnMain import NewsDnnGeneralMain as NewsCnnMain
+from Predictor.NewsCategorization.NewsCateMain import NewsCateMain
 from Predictor.LstmTA.TaMain import TaMain
 
 from WWW.WebManager import WebManager
@@ -59,6 +60,8 @@ def get_news_type(dnn_type):
         return NewsDnnGeneralMain()
     elif dnn_type == "TA":
         return TaMain()
+    elif dnn_type == "CATE":
+        return NewsCateMain()
     else:  # Default RNN
         LoggerHelper.error("DNN type (" + dnn_type + ") is not found. Default RNN (NewsDnnGeneralMain) is used.")
         return NewsDnnGeneralMain()
@@ -88,7 +91,7 @@ def main():
         collector.dnn_organizer_with_wiki_tweets()
         LoggerHelper.info("News Organizer Mode is ended.")
 
-    if args.ind is not None:
+    if args.ind:
         LoggerHelper.info("Starting Indicators Collector Mode...")
         ind_collector = IndicatorsCollector()
         if args.ind == "zip":
