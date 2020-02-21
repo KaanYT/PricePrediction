@@ -1,6 +1,6 @@
 {
 	"database": {
-        "name": "News",
+        "name": "HandpickedNews_Fix2",
 		"train": {
 			"query": {
 				"date": {
@@ -8,7 +8,7 @@
 						"__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
 					"$lt": {
-						"__type__": "date", "year": 2016, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2016, "month": 9, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					}
 				}
 			}
@@ -17,10 +17,10 @@
 			"query": {
 				"date": {
 					"$gte": {
-						"__type__": "date", "year": 2016, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2016, "month": 9, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
 					"$lt": {
-						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2016, "month": 9, "day": 9, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					}
 				}
 			}
@@ -29,7 +29,7 @@
 			"query": {
 				"date": {
 					"$gte": {
-						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2016, "month": 9, "day": 9, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
 					"$lt": {
 						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
@@ -37,15 +37,19 @@
 				}
 			}
 		},
+		"sort": [
+			{"date":1}
+		],
 		"fields": {
-			"RSS_Title": 1,
-			"RSS_Date": 1,
-			"RSS_Summery": 1,
-			"RSS_Category": 1,
-			"Article": 1,
-			"Keywords_Generated": 1,
-			"Authors":1,
-			"Meta_Desc":1,
+			"title": 1,
+			"title_o": 1,
+			"summery": 1,
+			"summery_o": 1,
+			"article": 1,
+			"article_0": 1,
+			"url": 1,
+			"date":1,
+			"price_effect":1,
 			"_id": 0
 		},
 		"price": {
@@ -54,12 +58,8 @@
 			"buffer_percent": 0.005
 		}
 	},
-	"wordEmbedding":{
-		"path":"I:\\Glove\\GoogleNews-vectors-negative300.bin",
-		"size":300
-	},
 	"networkConfig": {
-		"epochs": 5,
+		"epochs": 1,
 		"batch_size": 1,
 		"sequence_length": 100,
 		"hidden_size": -5,
@@ -67,7 +67,9 @@
 		"criterion":"CrossEntropyLoss",
 		"optimizer":"Adam",
 		"useGPU": true,
-		"save_dir": "C:\\Users\\eksen\\Documents\\2_master\\models"
+		"save_dir": "C:\\Users\\eksen\\Documents\\2_master\\models",
+		"text_column": "summery_o",
+		"cate_column": "price_effect"
 	},
 	"options": {
 		"network_type":"News",

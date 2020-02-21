@@ -13,6 +13,13 @@
             }
         }
 	},
+    "handpicked":{
+		"collection": "HandpickedNews_Fix",
+        "destination": "HandpickedNews_Fix2",
+        "text_collection": "FilteredNews",
+        "query": {
+        }
+    },
 	"wordEmbedding":{
 		"path":"/Users/kaaneksen/Downloads/glove/glove.6B.100d.w2v.txt",
 		"size":100

@@ -159,6 +159,55 @@ class NewsOrganizer(object):
                 processed += 1
                 print("Lost cursor. Retry with skip")
 
+    def dnn_organizer_for_handpicked_news(self):
+        db = Mongo()
+        collection = self.config["handpicked"]["text_collection"]
+        news_collection = db.create_collection(self.config["handpicked"]["collection"])
+        news_filtered = db.create_collection(self.config["handpicked"]["destination"], NewsOrganizer.get_index_models())
+        count = 0
+        processed = 0
+        while True:
+            try:
+                cursor = news_collection.find(self.config["handpicked"]["query"], no_cursor_timeout=True).skip(processed)
+                for news in cursor:
+                    try:
+                        url = news.get('url')
+                        text = self.get_news_for_link(db, collection, url)
+                        news_filtered.insert({
+                            "_id": news.get('_id'),
+                            "title": news.get('title'),
+                            "title_o": text.get('title'),
+                            "summery": news.get('summery'),
+                            "summery_o": text.get('summery'),
+                            "article": news.get('article'),
+                            "article_o": text.get('article'),
+                            "url": url,
+                            "category": news.get('category'),
+                            "price_after_minute": news.get('price_after_minute'),
+                            "price_after_hour": news.get('price_after_hour'),
+                            "price_after_day": news.get('price_after_day'),
+                            "price_before": news.get('price_before'),
+                            "wiki_relatedness": news.get('wiki_relatedness'),
+                            "tweet_count": news.get('tweet_count'),
+                            "tweet_percentage": news.get('tweet_percentage'),
+                            "date": news.get('date'),
+                            "authors": news.get('authors'),
+                            "comment": news.get('comment'),
+                            "price_effect": news.get('price_effect')
+                        })
+                    except Exception as exception:
+                        Logger().get_logger().error(type(exception).__name__, exc_info=True)
+                        traceback.print_exc()
+                    count = count + 1
+                    if count % 500 == 0:
+                        print(count)
+                    processed += 1
+                cursor.close()
+                break
+            except CursorNotFound:
+                processed += 1
+                print("Lost cursor. Retry with skip")
+
     @staticmethod
     def get_index_models():
         return [IndexModel("url", name="index_url", unique=True),
@@ -275,6 +324,14 @@ class NewsOrganizer(object):
         }
         fields = {"Date": 1, "Open": 1, "Volume": 1, "High": 1, "_id": 0}
         return db.get_data_one(collection, query, fields, sort=[('Date', -1)])
+
+    @staticmethod
+    def get_news_for_link(db, collection, url):
+        query = {
+            "url": url
+        }
+        fields = {"title": 1, "summery": 1, "article": 1, "_id": 0}
+        return db.get_data_one(collection, query, fields)
 
     @staticmethod
     def get_config():

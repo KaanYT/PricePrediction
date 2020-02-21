@@ -14,17 +14,19 @@ class NewsCateDataReader(NewsDnnBaseDataReader):
         NEWS
     '''
     def get_data_news(self, cursor):
+        text_key = self.configs['networkConfig']['text_column']
+        label_key = self.configs['networkConfig']['cate_column']
         label = []
         input_ids = []
         attention_mask = []
         for row in cursor:
             encoded_sent = self.tokenizer.encode_plus(
-                row["RSS_Title"],  # Sentence to encode.
+                row[text_key],  # Sentence to encode.
                 add_special_tokens=True,  # Add '[CLS]' and '[SEP]'
                 pad_to_max_length=True,
                 max_length=128,
             )
-            label.append(self.get_label(row["RSS_Category"]))
+            label.append(self.get_label(row[label_key]))
             input_ids.append(encoded_sent['input_ids'])
             attention_mask.append(encoded_sent['attention_mask'])
         # Move Data to Tensors
@@ -39,7 +41,7 @@ class NewsCateDataReader(NewsDnnBaseDataReader):
 
     @staticmethod
     def get_label(label):
-        if label == "News":
+        if label == -1:
             return 0
         else:
             return 1

@@ -1,47 +1,55 @@
 {
 	"database": {
-        "name": "News",
+        "name": "HandpickedNews_Fix2",
 		"train": {
 			"query": {
-				"RSS_Category": {"$exists":true}
+				"date": {
+					"$gte": {
+						"__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2016, "month": 9, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				}
 			}
 		},
 		"validate": {
 			"query": {
-				"RSS_Date": {
+				"date": {
 					"$gte": {
-						"__type__": "date", "year": 2013, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2016, "month": 9, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
 					"$lt": {
-						"__type__": "date", "year": 2016, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2016, "month": 9, "day": 9, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					}
 				}
 			}
 		},
 		"test": {
 			"query": {
-				"RSS_Date": {
+				"date": {
 					"$gte": {
-						"__type__": "date", "year": 2013, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2016, "month": 9, "day": 9, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
 					"$lt": {
-						"__type__": "date", "year": 2016, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					}
 				}
 			}
 		},
 		"sort": [
-			{"RSS_Date":1}
+			{"date":1}
 		],
 		"fields": {
-			"RSS_Title": 1,
-			"RSS_Date": 1,
-			"RSS_Summery": 1,
-			"RSS_Category": 1,
-			"Article": 1,
-			"Keywords_Generated": 1,
-			"Authors":1,
-			"Meta_Desc":1,
+			"title": 1,
+			"title_o": 1,
+			"summery": 1,
+			"summery_o": 1,
+			"article": 1,
+			"article_0": 1,
+			"url": 1,
+			"date":1,
+			"price_effect":1,
 			"_id": 0
 		},
 		"price": {
@@ -49,10 +57,6 @@
 			"end": "price_after_hour",
 			"buffer_percent": 0.005
 		}
-	},
-	"wordEmbedding":{
-		"path":"/Users/kaaneksen/Downloads/glove/glove.6B.100d.w2v.txt",
-		"size":100
 	},
 	"networkConfig": {
 		"epochs": 1,
@@ -63,18 +67,20 @@
 		"criterion":"CrossEntropyLoss",
 		"optimizer":"Adam",
 		"useGPU": false,
-		"save_dir": "saved_models"
+		"save_dir": "saved_models",
+		"text_column": "summery_o",
+		"cate_column": "price_effect"
 	},
 	"options": {
 		"network_type":"News",
 		"wiki":{
 			"enabled": false,
-			"multiply_factors":1,
+			"multiply_factors":50,
 			"wiki_column": "wiki_relatedness"
 		},
 		"twitter":{
 			"enabled": false,
-			"multiply_factors":1,
+			"multiply_factors":50,
 			"tweet_column": "tweet_percentage"
 		}
 	}

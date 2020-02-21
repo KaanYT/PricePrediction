@@ -88,7 +88,7 @@ def main():
     if args.organize:
         LoggerHelper.info("Starting News Organizer Mode...")
         collector = NewsOrganizer()
-        collector.dnn_organizer_with_wiki_tweets()
+        collector.dnn_organizer_for_handpicked_news()
         LoggerHelper.info("News Organizer Mode is ended.")
 
     if args.ind:

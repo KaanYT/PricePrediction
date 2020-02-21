@@ -30,6 +30,13 @@
             ]
         }
 	},
+    "handpicked":{
+		"collection": "HandpickedNews_Fix",
+        "destination": "HandpickedNews_Fix2",
+        "text_collection": "FilteredNews",
+        "query": {
+        }
+    },
 	"wordEmbedding":{
 		"path":"I:\\Glove\\GoogleNews-vectors-negative300.bin",
 		"size":300
