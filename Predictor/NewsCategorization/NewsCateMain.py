@@ -3,19 +3,29 @@ import platform
 import json
 import torch
 import random
+import traceback
+import numpy as np
+import datetime as dt
+import pandas
+from pymongo.errors import CursorNotFound
+
 from Helper.JsonDateHelper import DateTimeDecoder
 from Helper.DateHelper import DateHelper
 from Helper.LoggerHelper import LoggerHelper
 from Helper.FileHelper import FileHelper
 from Helper.Timer import Timer
+
 from Predictor.NewsCategorization.NewsCateDataReader import NewsCateDataReader
 from Predictor.NewsDnnBase.NewsDnnBaseMain import NewsDnnBaseMain
+
+from Managers.DatabaseManager.MongoDB import Mongo
+from Managers.LogManager.Log import Logger
 from Managers.ExportManager.Export import Export
+
+from Archive.News.Organizer.NewsOrganizer import NewsOrganizer
+
 from transformers import BertForSequenceClassification, BertTokenizer, AdamW  # Models
 from transformers import get_linear_schedule_with_warmup
-import numpy as np
-import datetime as dt
-import pandas
 
 
 class NewsCateMain(NewsDnnBaseMain):
@@ -221,6 +231,62 @@ class NewsCateMain(NewsDnnBaseMain):
         Export.append_df_to_excel(df, self.current_date)
         self.timer.stop(time_for="Test")
 
+    def evaluate(self):
+        LoggerHelper.info("Evaluation Started...")
+        self.load_model(self.config["evaluation"]["load"])
+        self.model.eval()
+        self.timer.start()
+        db = Mongo()
+        news_collection = db.create_collection(self.config["evaluation"]["collection"])
+        news_filtered = db.create_collection(self.config["evaluation"]["destination"], NewsOrganizer.get_index_models())
+        count = 0
+        processed = 0
+        while True:
+            try:
+                cursor = news_collection.find(self.config["evaluation"]["query"], no_cursor_timeout=True).skip(
+                    processed)
+                for news in cursor:
+                    try:
+                        summery = news.get('summery')
+                        b_input_ids, b_input_mask = self.reader.get_one_news(summery)
+                        outputs = self.model(b_input_ids, token_type_ids=None,
+                                             attention_mask=b_input_mask)
+                        logits = outputs[0].detach().cpu().numpy()  # Move result to CPU
+                        result = np.argmax(logits, axis=1).flatten()  #
+                        if result[0] == 1:
+                            news_filtered.insert({
+                                "_id": news.get('_id'),
+                                "title": news.get('title'),
+                                "summery": news.get('summery'),
+                                "article": news.get('article'),
+                                "url": news.get('url'),
+                                "category": news.get('category'),
+                                "price_after_minute": news.get('price_after_minute'),
+                                "price_after_hour": news.get('price_after_hour'),
+                                "price_after_day": news.get('price_after_day'),
+                                "price_before": news.get('price_before'),
+                                "wiki_relatedness": news.get('wiki_relatedness'),
+                                "tweet_count": news.get('tweet_count'),
+                                "tweet_percentage": news.get('tweet_percentage'),
+                                "date": news.get('date'),
+                                "authors": news.get('authors'),
+                                "comment": news.get('comment'),
+                                "price_effect": news.get('price_effect')
+                            })
+                    except Exception as exception:
+                        Logger().get_logger().error(type(exception).__name__, exc_info=True)
+                        traceback.print_exc()
+                    count = count + 1
+                    if count % 500 == 0:
+                        print(count)
+                    processed += 1
+                cursor.close()
+                break
+            except CursorNotFound:
+                processed += 1
+                print("Lost cursor. Retry with skip")
+        self.timer.stop(time_for="Evaluation")
+
     @staticmethod
     def set_seed_value(seed_val=42):
         random.seed(seed_val)
@@ -294,15 +360,11 @@ class NewsCateMain(NewsDnnBaseMain):
         LoggerHelper.info("Model Saved to disk")
 
     def load_model(self, path):
-        self.model = self.model.from_pretrained(path)  # re-load
-        self.tokenizer = BertTokenizer.from_pretrained(path)  # re-load
+        self.model = BertForSequenceClassification.from_pretrained(path)  # re-load
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')  # re-load
         LoggerHelper.info("**Model Info**"
                           + "\nbatch_size : " + str(self.reader.batch_size)
-                          + "\nsequence_length : " + str(self.reader.sequence_length)
-                          + "\ninput_size : " + str(self.model.input_size)
-                          + "\nnum_layers : " + str(self.model.num_layers)
-                          + "\ndrop_prob : " + str(self.model.drop_prob)
-                          + "\nlr : " + str(self.model.lr))
+                          + "\nsequence_length : " + str(self.reader.sequence_length))
         LoggerHelper.info("Model loaded from disk")
 
     def get_network_input_size(self):

@@ -39,6 +39,15 @@ class NewsCateDataReader(NewsDnnBaseDataReader):
         train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=self.batch_size)
         return train_dataloader
 
+    def get_one_news(self, text):
+        encoded_sent = self.tokenizer.encode_plus(
+            text,  # Sentence to encode.
+            add_special_tokens=True,  # Add '[CLS]' and '[SEP]'
+            pad_to_max_length=True,
+            max_length=128,
+        )
+        return torch.tensor([encoded_sent['input_ids']]), torch.tensor([encoded_sent['attention_mask']])
+
     @staticmethod
     def get_label(label):
         if label == -1:

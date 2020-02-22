@@ -83,5 +83,12 @@
 			"multiply_factors":50,
 			"tweet_column": "tweet_percentage"
 		}
+	},
+	"evaluation": {
+		"load": "/Users/kaaneksen/Desktop/MSIM/oldModel",
+		"collection": "FilteredNews",
+        "destination": "DNNFilteredNews",
+        "query": {
+        }
 	}
 }
