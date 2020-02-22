@@ -109,6 +109,28 @@ class NewsDnnBaseMain(object):
         }, ignore_index=True)
         return df
 
+    def log_validate_without_loss(self, df, epoch, counter, validate_count, scores):
+        LoggerHelper.info("Epoch: {}/{}...".format(epoch + 1, self.epochs) +
+                          "Step: {}...".format(counter) +
+                          "Accuracy In Step: {:.4f}...".format(scores["accuracy"]) +
+                          "F1 : {:.4f}...".format(scores["f1"]) +
+                          "Precision : {:.4f}...".format(scores["precision"]) +
+                          "Recall : {:.4f}...".format(scores["recall"]) +
+                          "Hamming : {:.4f}...".format(scores["hamming"]) +
+                          "Jaccard : {:.4f}...".format(scores["jaccard"]) +
+                          "Val Count: {:.4f}...".format(validate_count))
+        df = df.append({
+            'Epoch': "{}/{}".format(epoch + 1, self.epochs),
+            'Step': counter,
+            'Accuracy In Step': scores["accuracy"],
+            'F1 In Step': scores["f1"],
+            'Precision In Step': scores["precision"],
+            'Recall In Step': scores["recall"],
+            'Hamming In Step': scores["hamming"],
+            'Jaccard In Step': scores["jaccard"]
+        }, ignore_index=True)
+        return df
+
     def log_test(self, df, accuracy, test_count, val_losses, scores):
         df = df.append({
             'Accuracy': "{}/{}".format(accuracy, test_count),

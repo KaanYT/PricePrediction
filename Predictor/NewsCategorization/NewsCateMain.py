@@ -164,19 +164,19 @@ class NewsCateMain(NewsDnnBaseMain):
                 logits = logits.detach().cpu().numpy()
                 label_ids = b_labels.to('cpu').numpy()
                 # Calculate the accuracy for this batch of test sentences.
-                tmp_eval_accuracy = self.calculate_accuracy(logits, label_ids)
+                label, tmp_eval_accuracy = self.calculate_accuracy(logits, label_ids)
                 # Accumulate the total accuracy.
                 accuracy += tmp_eval_accuracy
                 # Track the number of batches
                 steps += 1
                 # Store predictions and true labels
-                predictions.append(logits)
+                predictions.append(label)
                 true_labels.append(label_ids)
         # Report the final accuracy for this validation run.
         LoggerHelper.info("Accuracy: {0:.2f}".format(accuracy / steps))
         scores = self.calculate_scores(predictions, true_labels)
         self.model.train()  # reset to train mode after iterationg through validation data
-        return self.log_validate(df, epoch, 0, losses, val_losses, self.validate_count, scores)
+        return self.log_validate_without_loss(df, epoch, 0, self.validate_count, scores)
 
     def test(self):
         LoggerHelper.info("Test Started...")
@@ -210,10 +210,11 @@ class NewsCateMain(NewsDnnBaseMain):
                 label_ids = b_labels.to('cpu').numpy()
 
                 # Calculate the accuracy for this batch of test sentences.
-                accuracy += self.calculate_accuracy(logits, label_ids)
+                label, acc = self.calculate_accuracy(logits, label_ids)
+                accuracy += acc
 
                 # Store predictions and true labels
-                predictions.append(logits)
+                predictions.append(label)
                 true_labels.append(label_ids)
         scores = self.calculate_scores(predictions, true_labels)
         df = self.log_test(df, accuracy, self.test_count, val_losses, scores)
@@ -230,7 +231,8 @@ class NewsCateMain(NewsDnnBaseMain):
     def calculate_accuracy(preds, labels):
         pred_flat = np.argmax(preds, axis=1).flatten()
         labels_flat = labels.flatten()
-        return np.sum(pred_flat == labels_flat) / len(labels_flat)
+        accuracy = np.sum(pred_flat == labels_flat) / len(labels_flat)
+        return labels_flat, accuracy
 
     def get_info(self):
         info = pandas.DataFrame(columns=['Database',

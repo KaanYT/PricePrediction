@@ -38,7 +38,7 @@
         }
     },
 	"wordEmbedding":{
-		"path":"I:\\Glove\\GoogleNews-vectors-negative300.bin",
+		"path":"G:\\Glove\\GoogleNews-vectors-negative300.bin",
 		"size":300
 	},
 	"log": {

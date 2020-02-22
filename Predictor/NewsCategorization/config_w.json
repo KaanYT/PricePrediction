@@ -59,7 +59,7 @@
 		}
 	},
 	"networkConfig": {
-		"epochs": 1,
+		"epochs": 5,
 		"batch_size": 1,
 		"sequence_length": 100,
 		"hidden_size": -5,
