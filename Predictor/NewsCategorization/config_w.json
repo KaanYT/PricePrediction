@@ -85,7 +85,7 @@
 		}
 	},
 	"evaluation": {
-		"load": "/Users/kaaneksen/Desktop/MSIM/oldModel/",
+		"load": "C:\\Users\\eksen\\Documents\\2_master\\models\\22022020-003701-e5(HandpickedNews_Fix2)",
 		"collection": "FilteredNews",
         "destination": "DNNFilteredNews",
         "query": {
