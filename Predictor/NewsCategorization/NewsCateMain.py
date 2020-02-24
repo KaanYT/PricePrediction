@@ -26,6 +26,7 @@ from Archive.News.Organizer.NewsOrganizer import NewsOrganizer
 
 from transformers import BertForSequenceClassification, BertTokenizer, AdamW  # Models
 from transformers import get_linear_schedule_with_warmup
+from transformers import pipeline
 
 
 class NewsCateMain(NewsDnnBaseMain):
@@ -233,6 +234,7 @@ class NewsCateMain(NewsDnnBaseMain):
 
     def evaluate(self):
         LoggerHelper.info("Evaluation Started...")
+        nlp = pipeline('sentiment-analysis')
         self.load_model(self.config["evaluation"]["load"])
         self.model.eval()
         self.timer.start()
@@ -249,10 +251,12 @@ class NewsCateMain(NewsDnnBaseMain):
                     try:
                         summery = news.get('summery')
                         b_input_ids, b_input_mask = self.reader.get_one_news(summery)
+                        b_input_ids, b_input_mask = b_input_ids.to(self.device), b_input_mask.to(self.device)
                         outputs = self.model(b_input_ids, token_type_ids=None,
                                              attention_mask=b_input_mask)
                         logits = outputs[0].detach().cpu().numpy()  # Move result to CPU
                         result = np.argmax(logits, axis=1).flatten()  #
+                        sentiment = nlp(summery)
                         if result[0] == 1:
                             news_filtered.insert({
                                 "_id": news.get('_id'),
@@ -264,6 +268,7 @@ class NewsCateMain(NewsDnnBaseMain):
                                 "price_after_minute": news.get('price_after_minute'),
                                 "price_after_hour": news.get('price_after_hour'),
                                 "price_after_day": news.get('price_after_day'),
+                                "sentiment": sentiment,
                                 "price_before": news.get('price_before'),
                                 "wiki_relatedness": news.get('wiki_relatedness'),
                                 "tweet_count": news.get('tweet_count'),
