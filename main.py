@@ -43,7 +43,7 @@ def load_arg():
                         action="store_true")
     parser.add_argument("-i", "--ind", help="Run Indicators Collector recorder. Record various resources to database "
                                             "collection which contains economical information such as employment.",
-                        action="store_true")
+                        metavar='zip')
     parser.add_argument("-n", "--news", help="Run News DNN to predict possible stock price.", metavar='general')
     parser.add_argument("-f", "--fdc", help="Run Financial Data Collector.", action="store_true")
     parser.add_argument("-www", "--webservice", help="This is a web service with default startup page. "

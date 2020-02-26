@@ -1,6 +1,11 @@
 {
 	"file": {
 		"csv_path": "/Users/kaaneksen/Documents/2-Project/GitHub/MScThesis/DataFiles",
-		"csv_info_text": "/Users/kaaneksen/Documents/2-Project/GitHub/MScThesis/DataFiles"
+		"csv_info_text": "/Users/kaaneksen/Downloads/INTLIND_csv_2/README_SERIES_ID_SORT.txt",
+		"csv_zips": "C:\\Users\\eksen\\Downloads\\info",
+		"zip_info_file_name":"README_SERIES_ID_SORT.txt"
+	},
+	"db": {
+		"name": "EconomicalIndicator"
 	}
 }
