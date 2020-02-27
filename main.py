@@ -9,6 +9,9 @@ from Archive.Wiki.WikiRecorder import WikiRecorder
 from Archive.News.Organizer.NewsOrganizer import NewsOrganizer
 from Archive.Market.FinancialDataCollector import FDC
 from Archive.Indicator.IndicatorsCollector import IndicatorsCollector
+from Archive.Statistics.Statistics import Statistics
+
+from Test.Transformers.TransformersTest import TransformersTest
 
 from Predictor.NewsDnnGeneral.NewsDnnGeneralMain import NewsDnnGeneralMain
 from Predictor.NewsCnn.NewsCnnMain import NewsDnnGeneralMain as NewsCnnMain
@@ -48,6 +51,10 @@ def load_arg():
     parser.add_argument("-f", "--fdc", help="Run Financial Data Collector.", action="store_true")
     parser.add_argument("-www", "--webservice", help="This is a web service with default startup page. "
                                                      "You can edit news' metadata.", action="store_true")
+    parser.add_argument("-s", "--statistics", help="This is statistic collector. Give information about "
+                                                   "collection statistic.", action="store_true")
+    parser.add_argument("-t", "--test", help="Run Financial Data Collector.", action="store_true")
+
     # Read Arguments
     return parser.parse_args()
 
@@ -88,7 +95,7 @@ def main():
     if args.organize:
         LoggerHelper.info("Starting News Organizer Mode...")
         collector = NewsOrganizer()
-        collector.dnn_organizer_for_handpicked_news()
+        collector.dnn_organizer_for_dnn_filtered_news()
         LoggerHelper.info("News Organizer Mode is ended.")
 
     if args.ind:
@@ -110,7 +117,17 @@ def main():
         # news_dnn = NewsDnnMain(epochs=int(Config.training.epochs),
                                 # batch_size=int(Config.training.batch_size),
                                 # seq_length=int(Config.training.sequence_length),
-                                # lr=float(Config.training.lr))
+                                # lr=float(Config.training.lr))3
+    if args.statistics:
+        LoggerHelper.info("Starting Statistic Collection Mode...")
+        Statistics().collect()
+        LoggerHelper.info("Statistic Collection is ended...")
+
+    if args.test:
+        LoggerHelper.info("Starting Test Mode...")
+        TransformersTest.sentiment_analysis_test()
+        LoggerHelper.info("Test Mode is ended...")
+
     if args.webservice:
         web_manager = WebManager()
         web_manager.add_static_files()

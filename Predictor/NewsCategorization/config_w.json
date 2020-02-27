@@ -87,8 +87,16 @@
 	"evaluation": {
 		"load": "C:\\Users\\eksen\\Documents\\2_master\\models\\22022020-003701-e5(HandpickedNews_Fix2)",
 		"collection": "FilteredNews",
-        "destination": "DNNFilteredNews",
+        "destination": "DNNFilteredNews2",
         "query": {
+			"date": {
+					"$gte": {
+						"__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				}
         }
 	}
 }

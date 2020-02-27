@@ -37,6 +37,22 @@
         "query": {
         }
     },
+    "dnnfiltered":{
+		"collection": "DNNFilteredNews",
+        "destination": "DNNFilteredNews_Fix",
+        "text_collection": "FilteredNewsGeneralNoTagES",
+        "query": {
+          "date":
+                    {
+                        "$gte": {
+                            "__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                        },
+                        "$lt": {
+                            "__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+                        }
+                    }
+        }
+    },
 	"wordEmbedding":{
 		"path":"G:\\Glove\\GoogleNews-vectors-negative300.bin",
 		"size":300
