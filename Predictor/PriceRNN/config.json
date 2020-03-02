@@ -1,0 +1,95 @@
+{
+	"database": {
+        "name": "Product",
+		"train": {
+			"query": {
+				"date": {
+					"$gte": {
+						"__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2016, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				},
+				"Key" : "BRTUSD"
+			}
+		},
+		"validate": {
+			"query": {
+				"date": {
+					"$gte": {
+						"__type__": "date", "year": 2016, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				},
+				"Key" : "BRTUSD"
+			}
+		},
+		"test": {
+			"query": {
+				"date": {
+					"$gte": {
+						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				},
+				"Key" : "BRTUSD"
+			}
+		},
+		"sort": [
+			{"date":1}
+		],
+		"fields": {
+			"Name" : 1,
+			"Key" : 1,
+			"Date" : 1,
+			"Open" : 1,
+			"High" : 1,
+			"Low" : 1,
+			"Close" : 1,
+			"_id": 0
+		},
+		"price": {
+			"start": "price_before",
+			"end": "price_after_hour",
+			"buffer_percent": 0.005
+		}
+	},
+	"networkConfig": {
+		"epochs": 1,
+		"batch_size": 10,
+		"sequence_length": 100,
+		"hidden_size": -5,
+		"normalise": true,
+		"criterion":"MSELoss",
+		"optimizer":"Adam",
+		"useGPU": false,
+		"save_dir": "saved_models",
+		"text_column": "summery_o",
+		"cate_column": "price_effect"
+	},
+	"options": {
+		"network_type":"News",
+		"wiki":{
+			"enabled": false,
+			"multiply_factors":50,
+			"wiki_column": "wiki_relatedness"
+		},
+		"twitter":{
+			"enabled": false,
+			"multiply_factors":50,
+			"tweet_column": "tweet_percentage"
+		}
+	},
+	"evaluation": {
+		"load": "/Users/kaaneksen/Desktop/MSIM/oldModel",
+		"collection": "FilteredNews",
+        "destination": "DNNFilteredNews",
+        "query": {
+        }
+	}
+}

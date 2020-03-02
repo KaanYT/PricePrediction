@@ -16,6 +16,7 @@ from Test.Transformers.TransformersTest import TransformersTest
 from Predictor.NewsDnnGeneral.NewsDnnGeneralMain import NewsDnnGeneralMain
 from Predictor.NewsCnn.NewsCnnMain import NewsDnnGeneralMain as NewsCnnMain
 from Predictor.NewsCategorization.NewsCateMain import NewsCateMain
+from Predictor.PriceRNN.PriceRnnMain import PriceRnnMain
 from Predictor.LstmTA.TaMain import TaMain
 
 from WWW.WebManager import WebManager
@@ -67,6 +68,8 @@ def get_news_type(dnn_type):
         return NewsDnnGeneralMain()
     elif dnn_type == "TA":
         return TaMain()
+    elif dnn_type == "PriceRNN":
+        return PriceRnnMain()
     elif dnn_type == "CATE":
         return NewsCateMain()
     else:  # Default RNN
