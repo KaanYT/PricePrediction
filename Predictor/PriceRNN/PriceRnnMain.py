@@ -2,7 +2,6 @@ import os
 import platform
 import json
 import torch
-import ntpath
 from torch import nn, optim
 from Helper.JsonDateHelper import DateTimeDecoder
 from Helper.Timer import Timer
@@ -34,6 +33,7 @@ class PriceRnnMain(NewsDnnBaseMain):
         self.train_count = self.reader.get_count(PriceRnnDataReader.DictDataTerm["Train"])
         self.test_count = self.reader.get_count(PriceRnnDataReader.DictDataTerm["Test"])
         self.validate_count = self.reader.get_count(PriceRnnDataReader.DictDataTerm["Validate"])
+        self.maxmin = self.reader.get_max_min()
         # Create Model
         self.model: PriceRnnModel = PriceRnnModel(
             input_size=self.get_network_input_size(),
@@ -67,7 +67,8 @@ class PriceRnnMain(NewsDnnBaseMain):
         df = pandas.DataFrame(columns=['Epoch', 'Step', 'Last Train Loss', 'Mean Test Loss'])
         self.timer.start()
         self.model.train()
-        self.model.cuda(device=self.device)
+        if torch.cuda.is_available():
+            self.model.cuda(device=self.device)
 
         counter = 0
         h = None
@@ -97,7 +98,7 @@ class PriceRnnMain(NewsDnnBaseMain):
                 output, h = self.model(inputs, h)  # Input Should Be 3-Dimensional: seq_len, batch, input_size
 
                 # calculate the loss and perform back propagation
-                loss = self.criterion(output, targets.view(self.reader.batch_size * self.reader.sequence_length))
+                #loss = self.criterion(output, targets)
                 loss = self.criterion(output.squeeze(), targets.long())
                 loss.backward()
 
@@ -141,7 +142,7 @@ class PriceRnnMain(NewsDnnBaseMain):
 
             output, val_h = self.model(inputs, val_h)
             val_loss = self.criterion(output, targets.view(self.reader.batch_size * self.reader.sequence_length))
-            val_loss = self.criterion(output, targets.long())
+            #val_loss = self.criterion(output, targets.long())
             val_losses.append(val_loss.item())
             # Sum and divide total value !
             result = np.append(result, self.get_output(output))
@@ -176,11 +177,12 @@ class PriceRnnMain(NewsDnnBaseMain):
                 inputs, targets = inputs.cuda(), targets.cuda()
 
             output, val_h = self.model(inputs, val_h)
-            val_loss = self.criterion(output, targets.view(self.reader.batch_size * self.reader.sequence_length))
+            #val_loss = self.criterion(output, targets.view(self.reader.batch_size * self.reader.sequence_length))
             val_loss = self.criterion(output, targets.long())
             val_losses.append(val_loss.item())
-            accuracy += self.calculate_accuracy(output, targets)
-            result = np.append(result, self.get_output(output))
+            acc, res = self.calculate_accuracy(output, targets)
+            accuracy += acc
+            result = np.append(result, res)
             result_expected = np.append(result_expected, targets.numpy())
         scores = self.calculate_scores(result_expected, result)
         df = self.log_test(df, accuracy, self.test_count, val_losses, scores)
@@ -190,12 +192,14 @@ class PriceRnnMain(NewsDnnBaseMain):
     @staticmethod
     def calculate_accuracy(output, targets):
         accuracy = 0
+        results = []
         for i, out in enumerate(output):
             top_n, top_i = out.topk(1)
             result = top_i[0].item()
+            results.append(result)
             if result == targets[i]:
                 accuracy = accuracy + 1
-        return accuracy
+        return accuracy, results
 
     def get_info(self):
         info = pandas.DataFrame(columns=['Database',
@@ -239,7 +243,6 @@ class PriceRnnMain(NewsDnnBaseMain):
             'Validation Size': self.reader.validate_count,
             'Test Size': self.reader.test_count,
             'Price Buffer Percent': self.config['database']['price']['buffer_percent'],
-            'Word Vector': ntpath.basename(self.config["wordEmbedding"]["path"]),
             'Network Type': self.config["options"]["network_type"],
             'Wiki Column': self.config['options']['wiki']['wiki_column'],
             'Tweet Column': self.config['options']['twitter']['tweet_column']
@@ -286,7 +289,7 @@ class PriceRnnMain(NewsDnnBaseMain):
         LoggerHelper.info("Model loaded from disk")
 
     def get_network_input_size(self):
-        size = 4
+        size = 1
         LoggerHelper.info("Network Input Size :" + str(size))
         return size
 

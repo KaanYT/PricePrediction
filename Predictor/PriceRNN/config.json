@@ -3,12 +3,12 @@
         "name": "Product",
 		"train": {
 			"query": {
-				"date": {
+				"Date": {
 					"$gte": {
 						"__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
 					"$lt": {
-						"__type__": "date", "year": 2016, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2015, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					}
 				},
 				"Key" : "BRTUSD"
@@ -16,7 +16,7 @@
 		},
 		"validate": {
 			"query": {
-				"date": {
+				"Date": {
 					"$gte": {
 						"__type__": "date", "year": 2016, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
@@ -29,7 +29,7 @@
 		},
 		"test": {
 			"query": {
-				"date": {
+				"Date": {
 					"$gte": {
 						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
@@ -40,8 +40,28 @@
 				"Key" : "BRTUSD"
 			}
 		},
+		"max_min": {
+			"query": {
+				"Date": {
+					"$gte": {
+						"__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				},
+				"Key" : "BRTUSD"
+			},
+			"fields": {
+				"Date" : 1,
+				"Open" : 1,
+				"High" : 1,
+				"Low" : 1,
+				"Close" : 1
+			}
+		},
 		"sort": [
-			{"date":1}
+			{"Date":1}
 		],
 		"fields": {
 			"Name" : 1,
@@ -54,7 +74,7 @@
 			"_id": 0
 		},
 		"price": {
-			"start": "price_before",
+			"start": "Open",
 			"end": "price_after_hour",
 			"buffer_percent": 0.005
 		}
@@ -62,10 +82,10 @@
 	"networkConfig": {
 		"epochs": 1,
 		"batch_size": 10,
-		"sequence_length": 100,
+		"sequence_length": 10,
 		"hidden_size": -5,
 		"normalise": true,
-		"criterion":"MSELoss",
+		"criterion":"NLLLoss",
 		"optimizer":"Adam",
 		"useGPU": false,
 		"save_dir": "saved_models",

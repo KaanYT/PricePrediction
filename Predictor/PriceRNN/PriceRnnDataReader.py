@@ -17,20 +17,32 @@ class PriceRnnDataReader(NewsDnnBaseDataReader):
     def get_data_news(self, cursor):
         batch_count = 0
         sequence_count = 0
-        for row in self.__train_cursor:
-            self.x_sequence.append(np.asarray([row["Open"]], dtype=np.float32))
-            self.y_sequence.append(np.asarray([row["Open"]], dtype=np.float32))  # row["High"]
+        price_start = self.configs["database"]["price"]["start"]
+        for row in cursor:
+            nor_open = self.normalize_data(row[price_start], price_start)
+            self.x_sequence.append(np.asarray([nor_open], dtype=np.float32))
+            #self.y_sequence.append(np.asarray([nor_open], dtype=np.float32))  # row["High"]
             sequence_count += 1
             if sequence_count % (self.sequence_length + 1) == 0:
+                end = self.x_sequence[self.sequence_length]
                 self.x_sequence.pop()
-                self.y_sequence.pop(0)
+                start = self.x_sequence[self.sequence_length-1]
+                #self.y_sequence.pop(0)
                 self.x.append(np.asarray(self.x_sequence, dtype=np.float32))
-                self.y.append(np.asarray(self.y_sequence, dtype=np.float32))
+                self.y.append(self.get_classification(start[0],
+                                                      end[0],
+                                                      self.configs['database']['price']['buffer_percent']))
                 self.clear_sequence()
                 batch_count += 1
                 if batch_count % self.batch_size == 0:
                     yield np.asarray(self.x, dtype=np.float32), np.asarray(self.y, dtype=np.float32)
                     self.clear_data()
+
+    def normalize_data(self, value, field):
+        return (value - self.max_min[field]["min"][field])/(self.max_min[field]["max"][field]-self.max_min[field]["min"][field])
+
+    def de_normalize_data(self, value, field):
+        return value * (self.max_min[field]["max"][field] - self.max_min[field]["min"][field]) + self.max_min[field]["min"][field]
 
     def clear_data(self):
         self.x = []
@@ -47,3 +59,15 @@ class PriceRnnDataReader(NewsDnnBaseDataReader):
             return 0
         else:
             return 1
+
+    @staticmethod
+    def get_classification(start, end, buffer_percent):
+        diff = start - end
+        total = start + end / 2
+        percentage = (diff/total)*100
+        if percentage > buffer_percent:
+            return 2  # Increase
+        elif percentage < -buffer_percent:
+            return 1  # Decrease
+        else:
+            return 0  # Same Value
