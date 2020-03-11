@@ -72,7 +72,7 @@ class NewsDnnBaseMain(object):
         recall = metrics.recall_score(result_expected, result, average='weighted')
         accuracy = metrics.accuracy_score(result_expected, result)
         hamming = metrics.hamming_loss(result_expected, result)
-        jaccard = metrics.jaccard_score(result_expected, result)
+        jaccard = metrics.jaccard_score(result_expected, result, average='weighted')
         # roc_auc_score, matthews_corrcoef and zero_one_loss could be added.
         return {
             "f1": f1,

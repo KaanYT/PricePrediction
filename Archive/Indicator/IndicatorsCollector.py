@@ -64,6 +64,7 @@ class IndicatorsCollector(IndicatorsBase):
 
     @staticmethod
     def extract_financial_indicator(csv_file, file_info:InfoModel, collection):
+        name = os.path.splitext(ntpath.basename(csv_file))[0]
         with open(csv_file, 'r') as file:
             csv_reader = csv.reader(file, delimiter=',')
             for row in csv_reader:
@@ -72,6 +73,7 @@ class IndicatorsCollector(IndicatorsBase):
                 try:
                     collection.insert({
                         "title": file_info.Title,
+                        "ShortName": name,
                         "date": DateHelper.str2date(row[0]),
                         "value": float(row[1]),
                         "country": file_info.Country,

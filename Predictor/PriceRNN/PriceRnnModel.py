@@ -28,7 +28,7 @@ class PriceRnnModel(nn.Module):
                  drop_prob=0.2,
                  lr=0.001,
                  training_data_size=100000,
-                 output_size=1,
+                 output_size=3,
                  use_gpu=True):
         super().__init__()
         self.should_use_gpu = use_gpu
@@ -55,7 +55,10 @@ class PriceRnnModel(nn.Module):
         self.dropout = nn.Dropout(drop_prob)
 
         # Fully-Connected Output Layer
-        self.fc = nn.Linear(self.hidden, 1)
+        self.fc = nn.Linear(self.hidden, output_size)
+
+        # Sigmoid Layer
+        self.sig = nn.LogSoftmax(dim=1)
 
         # Check GPU Usage
         self.can_use_gpu = torch.cuda.is_available()
@@ -73,18 +76,19 @@ class PriceRnnModel(nn.Module):
 
         # New Hidden State From the LSTM
         r_output, hidden = self.lstm(x, hidden)
+        r_output = r_output[:, -1, :]  # Stack Up LSTM Outputs - Reshape the output
 
         # Dropout layer
         out = self.dropout(r_output)
 
-        # Stack Up LSTM Outputs - Reshape the output
-        out = out.contiguous().view(-1, self.hidden)
-
-        # Fully-Connected Layer
+        # Fully-Connected Output Layer
         out = self.fc(out)
 
+        # Sigmoid Layer
+        sig_out = self.sig(out)
+
         # return the final output and the hidden state
-        return out, hidden
+        return sig_out, hidden
 
     def init_hidden(self, batch_size):
         # Create two new tensors with sizes n_layers x batch_size x n_hidden,
@@ -99,7 +103,7 @@ class PriceRnnModel(nn.Module):
         return hidden
 
     def calculate_hidden_size(self):
-        samples_in_training_data = self.training_data_size
+        samples_in_training_data = 10000
         scaling_factor = 5
         input_neurons = self.input_size
         output_neurons = self.output_size

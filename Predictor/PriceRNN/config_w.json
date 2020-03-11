@@ -3,7 +3,7 @@
         "name": "Product",
 		"train": {
 			"query": {
-				"date": {
+				"Date": {
 					"$gte": {
 						"__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
@@ -16,7 +16,7 @@
 		},
 		"validate": {
 			"query": {
-				"date": {
+				"Date": {
 					"$gte": {
 						"__type__": "date", "year": 2016, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
@@ -29,9 +29,9 @@
 		},
 		"test": {
 			"query": {
-				"date": {
+				"Date": {
 					"$gte": {
-						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
 					"$lt": {
 						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
@@ -40,8 +40,30 @@
 				"Key" : "BRTUSD"
 			}
 		},
+		"max_min": {
+			"query": {
+				"Date": {
+					"$gte": {
+						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					},
+					"$lt": {
+						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+					}
+				},
+				"Key" : "BRTUSD"
+			},
+			"fields": {
+				"Name" : 1,
+				"Key" : 1,
+				"Date" : 1,
+				"Open" : 1,
+				"High" : 1,
+				"Low" : 1,
+				"Close" : 1,
+			}
+		},
 		"sort": [
-			{"date":1}
+			{"Date":1}
 		],
 		"fields": {
 			"Name" : 1,

@@ -33,6 +33,7 @@ class NewsDnnBaseDataReader(object):
         self.train_count = 0
         self.__validate_cursor = None
         self.validate_count = 0
+        self.max_min = None
 
     '''
         Data Fetch
@@ -108,6 +109,25 @@ class NewsDnnBaseDataReader(object):
         else:
             LoggerHelper.critical('Unknown Data Type (data_type)')
             return None
+
+    '''
+        Get Max Min
+    '''
+    def get_max_min(self):
+        data = {}
+        for field in self.configs['database']['max_min']['fields']:
+            fields = {field: 1, "_id": 0}
+            min = self.db.get_data_one(self.configs['database']['name'],
+                                       self.configs['database']['max_min']['query'],
+                                       fields=fields,
+                                       sort=[(field, +1)])
+            max = self.db.get_data_one(self.configs['database']['name'],
+                                       self.configs['database']['max_min']['query'],
+                                       fields=fields,
+                                       sort=[(field, -1)])
+            data[field] = {"max": max, "min": min}
+        self.max_min = data
+        return data
 
     '''
         NEWS
