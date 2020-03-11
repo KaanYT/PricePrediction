@@ -30,7 +30,7 @@ class NewsOrganizer(object):
         self.config = self.get_config()
         if word_embedding_path is None:
             word_embedding_path = self.config["wordEmbedding"]["path"]
-        self.embedding = WordEmbedding(word_embedding_path)
+        #self.embedding = WordEmbedding(word_embedding_path)
 
     def organize(self):
         db = Mongo()
@@ -172,7 +172,12 @@ class NewsOrganizer(object):
                 for news in cursor:
                     try:
                         url = news.get('url')
+                        date = news.get('date')
                         text = self.get_news_for_link(db, collection, url)
+                        before = self.get_price_before_date(db, "Product", "BRTUSD", date)
+                        minute = self.get_price_at_date(db, "Product", "BRTUSD", date)
+                        hour = self.get_price_at_date(db, "Product", "BRTUSD", date, minutes=60)
+                        day = self.get_price_at_date(db, "Product", "BRTUSD", date, add_day=True)
                         news_filtered.insert({
                             "_id": news.get('_id'),
                             "title": news.get('title'),
@@ -183,14 +188,14 @@ class NewsOrganizer(object):
                             "article_o": text.get('article'),
                             "url": url,
                             "category": news.get('category'),
-                            "price_after_minute": news.get('price_after_minute'),
-                            "price_after_hour": news.get('price_after_hour'),
-                            "price_after_day": news.get('price_after_day'),
-                            "price_before": news.get('price_before'),
+                            "price_after_minute": minute,
+                            "price_after_hour": hour,
+                            "price_after_day": day,
+                            "price_before": before,
                             "wiki_relatedness": news.get('wiki_relatedness'),
                             "tweet_count": news.get('tweet_count'),
                             "tweet_percentage": news.get('tweet_percentage'),
-                            "date": news.get('date'),
+                            "date": date,
                             "authors": news.get('authors'),
                             "comment": news.get('comment'),
                             "price_effect": news.get('price_effect')
@@ -221,27 +226,32 @@ class NewsOrganizer(object):
                 for news in cursor:
                     try:
                         url = news.get('url')
+                        date = news.get('date')
+                        before = self.get_price_before_date(db, "Product", "BRTUSD", date)
+                        minute = self.get_price_at_date(db, "Product", "BRTUSD", date)
+                        hour = self.get_price_at_date(db, "Product", "BRTUSD", date, minutes=60)
+                        day = self.get_price_at_date(db, "Product", "BRTUSD", date, add_day=True)
                         info = self.get_news_for_link(db, collection, url, fields=None)
                         if info is None:
-                            count = count + 1
-                            processed += 1
-                            print(news.get('date'))
-                            continue
+                            info = {}
                         news_filtered.insert({
-                            "_id": info.get('_id'),
-                            "title": info.get('title'),
-                            "summery": info.get('summery'),
-                            "article": info.get('article'),
+                            "_id": news.get('_id'),
+                            "title": news.get('title'),
+                            "title_o": info.get('title'),
+                            "summery": news.get('title'),
+                            "summery_o": info.get('summery'),
+                            "article": news.get('article'),
+                            "article_o": info.get('article'),
                             "url": url,
                             "category": info.get('category'),
-                            "price_after_minute": info.get('price_after_minute'),
-                            "price_after_hour": info.get('price_after_hour'),
-                            "price_after_day": info.get('price_after_day'),
-                            "price_before": info.get('price_before'),
+                            "price_after_minute": minute,
+                            "price_after_hour": hour,
+                            "price_after_day": day,
+                            "price_before": before,
                             "wiki_relatedness": info.get('wiki_relatedness'),
                             "tweet_count": info.get('tweet_count'),
                             "tweet_percentage": info.get('tweet_percentage'),
-                            "date": info.get('date'),
+                            "date": date,
                             "authors": info.get('authors'),
                             "comment": info.get('comment'),
                             "wiki_relatedness_nor": info.get('wiki_relatedness_nor'),
