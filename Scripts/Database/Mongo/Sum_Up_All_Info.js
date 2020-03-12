@@ -12,6 +12,7 @@ function addMonthsToDates(date, month){
 function getCollection(toCollectionName){
     if (!db.getCollectionNames().indexOf(toCollectionName) > -1) {
         db.createCollection(toCollectionName, null);
+        db.getCollection(toCollectionName).createIndex({"Date" : -1},{"name" : "Index_Date"});
     }
     return db.getCollection(toCollectionName);
 }
@@ -28,7 +29,7 @@ function getEconomicalIndicator(collection, date){
 
 function getCurrency(collection, date){
     let endDate = new Date(date.getTime());
-    endDate.addHours(-1)
+    endDate.addHours(-1);
     return collection.find({
         Date: {
             $gt: ISODate(endDate.toISOString()),
@@ -39,7 +40,7 @@ function getCurrency(collection, date){
 
 function getIndex(collection, date){
     let endDate = new Date(date.getTime());
-    endDate.addHours(-1)
+    endDate.addHours(-1);
     return collection.find({
         Date: {
             $gt: ISODate(endDate.toISOString()),
@@ -52,7 +53,8 @@ function getIndex(collection, date){
 var toCollection = getCollection("Summary");
 
 //Get Product Collection
-var collection = db.getCollection("Product");
+let collection = db.getCollection("Product");
+let productFilter = {"Key" : "BRTUSD"};
 
 //Get Economical Indicator Collection
 var infoCollection = db.getCollection("EconomicalIndicator");
@@ -64,7 +66,7 @@ var infoCurrency = db.getCollection("Currency");
 var infoIndex = db.getCollection("Index");
 
 //Reset Controlled Items
-collection.find().forEach(function (news) {
+collection.find(productFilter).forEach(function (news) {
     let eidata= {};
     let cdata= {};
     let idata= {};
