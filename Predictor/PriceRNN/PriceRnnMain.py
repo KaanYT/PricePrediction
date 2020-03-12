@@ -126,6 +126,8 @@ class PriceRnnMain(NewsDnnBaseMain):
         self.model.eval()
         result = np.asarray([])
         result_expected = np.asarray([])
+        accuracy = 0
+        counter = 0
         for x, y in self.reader.get_data(PriceRnnDataReader.DictDataTerm["Validate"],
                                          PriceRnnDataReader.DictDataType[
                                              self.config["options"]["network_type"]]):
@@ -141,11 +143,13 @@ class PriceRnnMain(NewsDnnBaseMain):
                 inputs, targets = inputs.cuda(), targets.cuda()
 
             output, val_h = self.model(inputs, val_h)
-            val_loss = self.criterion(output, targets.view(self.reader.batch_size * self.reader.sequence_length))
-            #val_loss = self.criterion(output, targets.long())
+            val_loss = self.criterion(output, targets.long())
             val_losses.append(val_loss.item())
+            acc, res = self.calculate_accuracy(output, targets)
+            accuracy += acc
+            counter += len(targets)
             # Sum and divide total value !
-            result = np.append(result, self.get_output(output))
+            result = np.append(result, res)
             result_expected = np.append(result_expected, targets.numpy())
         self.model.train()  # reset to train mode after iterationg through validation data
         scores = self.calculate_scores(result_expected, result)
@@ -159,6 +163,7 @@ class PriceRnnMain(NewsDnnBaseMain):
         val_losses = []
         self.model.eval()
         counter = 0
+        counter_r = 2
         accuracy = 0
         result = np.asarray([])
         result_expected = np.asarray([])
@@ -182,10 +187,11 @@ class PriceRnnMain(NewsDnnBaseMain):
             val_losses.append(val_loss.item())
             acc, res = self.calculate_accuracy(output, targets)
             accuracy += acc
+            counter_r += len(targets)
             result = np.append(result, res)
             result_expected = np.append(result_expected, targets.numpy())
         scores = self.calculate_scores(result_expected, result)
-        df = self.log_test(df, accuracy, self.test_count, val_losses, scores)
+        df = self.log_test(df, accuracy, counter_r, val_losses, scores)
         Export.append_df_to_excel(df, self.current_date)
         self.timer.stop(time_for="Test")
 
