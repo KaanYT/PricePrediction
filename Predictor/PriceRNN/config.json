@@ -1,43 +1,40 @@
 {
 	"database": {
-        "name": "Product",
+        "name": "Summary",
 		"train": {
 			"query": {
 				"Date": {
 					"$gte": {
-						"__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2010, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
 					"$lt": {
-						"__type__": "date", "year": 2015, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					}
-				},
-				"Key" : "BRTUSD"
+				}
 			}
 		},
 		"validate": {
 			"query": {
 				"Date": {
 					"$gte": {
-						"__type__": "date", "year": 2016, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
 					"$lt": {
-						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2017, "month": 6, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					}
-				},
-				"Key" : "BRTUSD"
+				}
 			}
 		},
 		"test": {
 			"query": {
 				"Date": {
 					"$gte": {
-						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2017, "month": 6, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
 					"$lt": {
-						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2019, "month": 4, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					}
-				},
-				"Key" : "BRTUSD"
+				}
 			}
 		},
 		"max_min": {
@@ -49,8 +46,7 @@
 					"$lt": {
 						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					}
-				},
-				"Key" : "BRTUSD"
+				}
 			},
 			"fields": {
 				"Date" : 1,
@@ -71,12 +67,15 @@
 			"High" : 1,
 			"Low" : 1,
 			"Close" : 1,
+			"EI" : 1,
+			"Cur" : 1,
+			"Inx" : 1,
 			"_id": 0
 		},
 		"price": {
 			"start": "Open",
 			"end": "price_after_hour",
-			"buffer_percent": 0.005
+			"buffer_percent": 0.05
 		}
 	},
 	"networkConfig": {
