@@ -44,7 +44,7 @@
 			"query": {
 				"Date": {
 					"$gte": {
-						"__type__": "date", "year": 2016, "month": 5, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
+						"__type__": "date", "year": 2014, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
 					},
 					"$lt": {
 						"__type__": "date", "year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0
@@ -59,7 +59,7 @@
 				"Open" : 1,
 				"High" : 1,
 				"Low" : 1,
-				"Close" : 1,
+				"Close" : 1
 			}
 		},
 		"sort": [
@@ -76,21 +76,23 @@
 			"_id": 0
 		},
 		"price": {
-			"start": "price_before",
+			"start": "Open",
 			"end": "price_after_hour",
 			"buffer_percent": 0.005
 		}
 	},
 	"networkConfig": {
-		"epochs": 6,
+		"epochs": 5,
 		"batch_size": 10,
-		"sequence_length": 100,
+		"sequence_length": 10,
 		"hidden_size": -5,
 		"normalise": true,
-		"criterion":"MSELoss",
+		"criterion":"NLLLoss",
 		"optimizer":"Adam",
 		"useGPU": true,
-		"save_dir": "C:\\Users\\eksen\\Documents\\2_master\\models"
+		"save_dir": "C:\\Users\\eksen\\Documents\\2_master\\models",
+		"text_column": "summery_o",
+		"cate_column": "price_effect"
 	},
 	"options": {
 		"network_type":"News",

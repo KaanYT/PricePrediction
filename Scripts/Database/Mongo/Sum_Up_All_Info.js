@@ -1,10 +1,10 @@
-Date.prototype.addHours = function(h) {
-  this.setTime(this.getTime() + (h*60*60*1000));
+Date.prototype.addHours = function(hours) {
+  this.setTime(this.getTime() + (hours*60*60*1000));
   return this;
-}
+};
 
 function addMonthsToDates(date, month){
-    var newDate = new Date(date.getTime());
+    let newDate = new Date(date.getTime());
     newDate.setMonth(newDate.getMonth() + month);
     return newDate;
 }
@@ -19,30 +19,30 @@ function getCollection(toCollectionName){
 function getEconomicalIndicator(collection, date){
     return db.getCollection("EconomicalIndicator").find({
         date: {
-            $gte: ISODate(addMonthsToDates(date,-1).toISOString()),
-            $lt: ISODate(date.toISOString())
+            $gt: ISODate(addMonthsToDates(date,-1).toISOString()),
+            $lte: ISODate(date.toISOString())
         },
         country_code : "USA"
     })
 }
 
 function getCurrency(collection, date){
-    endDate = new Date(date.getTime());
+    let endDate = new Date(date.getTime());
     endDate.addHours(-1)
     return collection.find({
         Date: {
-            $gte: ISODate(endDate.toISOString()),
+            $gt: ISODate(endDate.toISOString()),
             $lte: ISODate(date.toISOString())
         }
     })
 }
 
 function getIndex(collection, date){
-    endDate = new Date(date.getTime());
+    let endDate = new Date(date.getTime());
     endDate.addHours(-1)
     return collection.find({
         Date: {
-            $gte: ISODate(endDate.toISOString()),
+            $gt: ISODate(endDate.toISOString()),
             $lte: ISODate(date.toISOString())
         }
     })
@@ -65,9 +65,9 @@ var infoIndex = db.getCollection("Index");
 
 //Reset Controlled Items
 collection.find().forEach(function (news) {
-    var eidata= {}
-    var cdata= {}
-    var idata= {}
+    let eidata= {};
+    let cdata= {};
+    let idata= {};
     getEconomicalIndicator(infoCollection,news.Date).forEach(function (ei) {
         eidata[ei.title] = ei.value
     });
@@ -80,8 +80,8 @@ collection.find().forEach(function (news) {
         idata[ei.Key] = parseFloat(ei.Open)
     });
 
-    var doc = {}
-    doc._id = news._id
+    let doc = {};
+    doc._id = news._id;
     doc.Open = Number(news.Open); // parseFloat, parseInt, Number
     doc.High = Number(news.High);
     doc.Low = Number(news.Low);
