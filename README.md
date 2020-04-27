@@ -92,10 +92,10 @@ Wikipedia and Twitter is used to obtain more accurate results.
 * Glove and Google's Word2Vec are used for vectorization.
 
 *  Cosine Similarity (CS)
-![Cosine Similarity](images/CosSimilarity.png)
+    ![Cosine Similarity](images/CosSimilarity.png)
   
 *  Word Mover's Distance (WMD)
-![Word Mover's Distance (WMD)](images/wmd.png)
+    ![Word Mover's Distance (WMD)](images/wmd.png)
      * For mode detail go to [link](https://markroxor.github.io/gensim/static/notebooks/WMD_tutorial.html) 
 * **CS** and **WMD** has been tested. There was no major effect on results.   
 
