@@ -13,6 +13,6 @@ var result = collection.aggregate({
 // Normalize
 collection.find({}).forEach(
 function (elem) {
-    elem.tweet_count_nor = ((elem.tweet_count - result[0].tweetMin)/(result[0].tweetMax-result[0].tweetMin))
+    elem.tweet_count_nor = ((elem.tweet_count - result[0].tweetMin)/(result[0].tweetMax-result[0].tweetMin));
     collection.save(elem);
 });
