@@ -12,18 +12,25 @@ Prediction Based on News, Twitter and Wikipedia for;
 
 This application trying to predict the price of oil or stock with following steps;
 1. [Information Gathering (News, Stock Price, Tweets etc.)](#1-information-gathering)
+    1. [Find News](#11-find-news)
+    2. [Find Stock Price](#12-find-stock-price)
+    3. [Find Tweets](#13-find-tweets)
+    4. [Find Wikipedia Information](#14-find-wikipedia-information)
 2. [Data Normalization](#2-data-normalization)
 3. [Knowledge Extraction from Wikipedia and Twitter](#3-knowledge-extraction-from-wikipedia-and-twitter)
+    1. [Vector Similarity Calculation](#31-vector-similarity-calculation)
+        1. [Wikipedia](#311-wikipedia)
+        2. [Twitter](#312-twitter)
 4. [Predict Price Using DNN](#4-predict-price-using-dnn)
 
 ### 1. Information Gathering 
 
 Information gathering has three phase;
 
-1. [Find News](#1-find-news)
-2. [Find Stock Price](#2-find-stock-price)
-3. [Find Tweets](#3-find-tweets)
-4. [Find Wikipedia Information](#4-find-wikipedia-information)
+1. [Find News](#11-find-news)
+2. [Find Stock Price](#12-find-stock-price)
+3. [Find Tweets](#13-find-tweets)
+4. [Find Wikipedia Information](#14-find-wikipedia-information)
 
 #### 1.1. Find News
 
@@ -99,7 +106,7 @@ Wikipedia and Twitter is used to obtain more accurate results.
 * **CS** and **WMD** has been tested. There was no major effect on results.   
 
 
-#### 3.1.2 Wikipedia
+#### 3.1.1 Wikipedia
 
 Wikipedia is used to understand how **related** news to the asset to be estimated.
 
@@ -107,7 +114,7 @@ Wikipedia is used to understand how **related** news to the asset to be estimate
 
 * News and assets wikipedia summaries used for vector similarity calculation. 
 
-#### 3.1.3 Twitter 
+#### 3.1.2 Twitter 
 
 ![Twitter Architecture](images/Twitter.png) 
 
@@ -151,7 +158,124 @@ There are 4 different models. Each model has its own configuration(config.json).
 
 ## Results 
 
-* 
+### News Statistics
+
+* We used 2014-2016 interval since it has largest set. You can see detail of data in below;
+
+|                  | 2014   | 2015   | 2016   | Total   |
+|------------------|--------|--------|--------|---------|
+| Bussines Related | 32,345 | 17,005 | 31,185 | 80,535  |
+| Unknown          | 42,683 | 23,885 | 44,459 | 111,027 |
+| Ratio            | -24%   | -29%   | -30%   | -28%    |
+| Total            | 75,028 | 40,890 | 75,644 | 191,562 |
+| Avg Mnt          | 6,252  | 3,408  | 6,304  | -       |
+| Avg Day          | 208    | 114    | 210    | -       |
+| Avg Hour         | 9      | 5      | 9      | -       |
+
+* Business related info decided based on news agency category.
+    * Bussines Related (Category) : business, politics, economy, money
+    * Unknown (Category) : world, news, tech
+
+### Results
+
+#### Categorization
+* BERT was also used to categorization of news. This was only used for detecting Oil related news. 
+* We hand pick 2525 news from our database which is used to train BERT. I achieved **93%** success in the test. You can find details of training in below;
+
+| HandPick | Train | Validate  | Test | Total  |
+|----------|-------|-----------|------|--------|
+| Positif  | 123   | 3         | 21   | 147    |
+| Negatif  | 1827  | 41        | 486  | 2378   |
+| Total    | 1950  | 44        | 507  | 2525   |
+
+* After Training, In all of our database BERT recognized **2546** oil related news. You can find detailed results in below;
+
+|          | All News | 2014-2017 |
+|----------|----------|-----------|
+| Positif  | 2.548    | 864       |
+| Negatif  | 562.253  | 190.698   |
+
+* BERT categorized (2014-2017) are feed to NewsDnnGeneralMain 
+
+| Accuracy | Mean Test Loss | Accuracy Score | F1      | Hamming | Jaccard | Precision | Recall | Epoch | With         |
+|----------|----------------|----------------|---------|---------|---------|-----------|--------|-------|--------------|
+| 0.428    | 0.731679       | 0.45           | 0.27931 | 0.55    | 0       | 0.2025    | 0.45   | 10    | Tweet & Wiki |
+| 0.428    | 0.715534       | 0.45           | 0.27931 | 0.55    | 0       | 0.2025    | 0.45   | 15    | -            |
+
+
+* BERT categorized are feed to Bert (Train Size : 1215)
+
+| Accuracy | F1       | Hamming  | Jaccard | Precision | Recall   | Epoch |
+|----------|----------|----------|---------|-----------|----------|-------|
+| 0.429    | 0.640884 | 0.528455 | 0       | 1         | 0.471545 | 6     |
+
+
+
+
+Example results:
+```
+* "Energy giant BP is delaying critical tests on a new cap which is supposed to stop the oil from pouring out of a damaged well in the Gulf of Mexico."
+* "A key test to see if the Gulf of Mexico oil spill can be stopped was delayed to allow experts more time to review its safety and effectiveness."
+```
+
+#### Test Results
+
+* Key Info (Agency Category)
+    * Bussines(P) : 'Business', 'Economics', 'Money', 'Economy', 'Politics'
+    * Bussines(W) : 'Business', 'Economics', 'Money', 'Economy', 'World'
+    * Bussines(E) : 'Business', 'Economics', 'World'
+    * All : All Tags
+
+##### 1. NewsDnnGeneralMain
+* This is our first network results. 
+    * **Cosine Similarity** is used for Wiki and Twitter.
+    * There are no replicated result in network input. Ex: [Text(100) + Wiki(1) + Twitter(1)]
+
+| #  | Test            | Accuracy     | Mean Test Loss | Database                       | Key                                                             | Batch Size | Sequence Length | Input Size | Hidden | Number of Layers | Dropout Prob | Learning Rate | Test Size | Train Size | Validation Size | Stock                 | Info                                                 |
+|----|-----------------|--------------|----------------|--------------------------------|-----------------------------------------------------------------|------------|-----------------|------------|--------|------------------|--------------|---------------|-----------|------------|-----------------|-----------------------|------------------------------------------------------|
+| 1  | 24102019-231340 | 0.4903262163 | 0.73420977     | FilteredNewsForDnn             | Bussines(E)                     | 10         | 200             | 100        | 2      | 2                | 0.2          | 0.001         |           |            |                 | Starbucks Corporation |                                                      |
+| 2  | 25102019-073205 | 0.4873142626 | 0.730376       | FilteredNewsForDnn             | Bussines(W) | 10         | 200             | 100        | 2      | 2                | 0.2          | 0.005         |           |            |                 | Starbucks Corporation |                                                      |
+| 3  | 25102019-175105 | 0.4890572527 | 0.738844       | FilteredNewsForDnn             | All                                                             | 10         | 200             | 100        | 2      | 2                | 0.2          | 0.001         |           |            |                 | Starbucks Corporation |                                                      |
+| 4  | 31102019-150925 | 0.4888950178 | 0.728865       | FilteredNewsForDnn             | All                                                             | 20         | 200             | 100        | 2      | 2                | 0.2          | 0.005         | 61639     | 133848     | 7255            | Starbucks Corporation |                                                      |
+| 5  | 31102019-204219 | 0.4879216081 | 0.727302       | FilteredNewsForDnn             | All                                                             | 100        | 200             | 100        | 2      | 2                | 0.2          | 0.005         | 61639     | 133848     | 7255            | Starbucks Corporation |                                                      |
+| 6  | 01112019-055327 | 0.5016791317 | 0.738031159    | FilteredNewsWikiForDnn         | All                                                             | 20         | 200             | 101        | 2      | 2                | 0.2          | 0.005         | 61639     | 133848     | 7255            | Brent Crude           | Wiki Percentage Added                                |
+| 7  | 01112019-160058 | 0.2780220315 | 0.7339391309   | FilteredNewsWikiForDnn         | All                                                             | 20         | 200             | 101        | 2      | 2                | 0.2          | 0.005         | 61639     | 133848     | 7255            | Brent Crude           | Wiki Percentage Added - Less than 50 percent removed |
+| 8  | 06112019-125944 | 0.5016791317 | 0.7380401356   | FilteredNewsWikiForDnn         | All                                                             | 20         | 200             | 100        | 2      | 2                | 0.2          | 0.005         | 61639     | 133848     | 7255            | Brent Crude           | Only News                                            |
+| 9  | 06112019-152011 | 0.5212271303 | 0.725981371    | FilteredNewsWikiForDnn         | Bussines(W) | 20         | 200             | 100        | 2      | 2                | 0.2          | 0.005         | 19786     | 54697      | 2687            | Brent Crude           | Filtered News                                        |
+| 10 | 06112019-191923 | 0.5210755079 | 0.726327       | FilteredNewsWikiForDnn         | Bussines(W) | 20         | 200             | 101        | 2      | 2                | 0.2          | 0.005         | 19786     | 54697      | 2687            | Brent Crude           | Wiki Percentage Added                                |
+| 11 | 09112019-142055 | 0.5016791317 | 0.738033       | FilteredNewsWikiAndTweetForDnn | All                                                             | 20         | 200             | 102        | 2      | 2                | 0.2          | 0.005         | 61639     | 125771     | 7255            | Brent Crude           | Wiki Percentage / Twitter Added                      |
+| 12 | 09112019-184826 | 0.5257654499 | 0.725818       | FilteredNewsWikiAndTweetForDnn | Bussines(E)                     | 20         | 200             | 102        | 2      | 2                | 0.2          | 0.005         | 15971     | 38703      | 2096            | Brent Crude           | Wiki Percentage / Twitter Added                      |
+| 13 | 10112019-060853 | 0.5016791317 | 0.738031       | FilteredNewsWikiAndTweetForDnn | All                                                             | 20         | 200             | 101        | 2      | 2                | 0.2          | 0.005         | 61639     | 125771     | 7255            | Brent Crude           | Only Twitter Added                                   |
+
+
+##### 2. NewsDnnGeneralMain
+
+* This is our improved network results (More dinamic).
+    * **Word Mover's Distance (WMD)** is used for Wiki and Twitter.
+    * Twitter and Wiki inputs are dynamic. Ex: [Text(100) + Wiki(50) + Twitter(50)]
+    * 7. Test result shows that filtering baced on Wiki percentage(Relatedness of News) result in less accuracy.
+        * Wiki should not be used ? - Revisit wiki percentage extraction.
+
+| #  | Test            | Accuracy     | Mean Test Loss | Database                   | Key                                                                | Batch Size | Sequence Length | Input Size | Hidden | Number of Layers | Dropout Prob | Learning Rate | Test Size | Train Size | Validation Size | Price Buffer Percent       | Info                                                   |
+|----|-----------------|--------------|----------------|----------------------------|--------------------------------------------------------------------|------------|-----------------|------------|--------|------------------|--------------|---------------|-----------|------------|-----------------|-------------|--------------------------------------------------------|
+| 1  | 16122019-092015 | 0.5011275329 | 0.761404       | FilteredNewsGeneral        | All                                                                | 20         | 200             | 125        | 1      | 2                | 0.2          | 0.005         | 61639     | 116874     | 7255            | - | Wiki * 25 - Glove 100                                  |
+| 2  | 16122019-140720 | 0.5011275329 | 0.761388       | FilteredNewsGeneral        | All                                                                | 20         | 200             | 150        | 1      | 2                | 0.2          | 0.005         | 61639     | 116874     | 7255            | - | Wiki * 50 - Glove 100                                  |
+| 3  | 17122019-020753 | 0.5011275329 | 0.761395       | FilteredNewsGeneral        | All                                                                | 20         | 200             | 350        | 2      | 2                | 0.2          | 0.005         | 61639     | 116874     | 7255            | - | Wiki * 50 - w2v300                                     |
+| 4  | 23122019-034552 | 0.5013145266 | 0.76148218     | FilteredNewsGeneralNoTagES | Bussines(P) | 30         | 200             | 400        | 57     | 2                | 0,2          | 0.005         | 46947     | 2687       | 23963           | 0.005       | Wiki * 50 - Tweet 50 - w2v300                          |
+| 5  | 23122019-042555 | 0.5013145266 | 0.76128497     | FilteredNewsGeneralNoTagES | Bussines(P) | 30         | 200             | 450        | 51     | 2                | 0,2          | 0.005         | 46947     | 2687       | 23963           | 0.005       | Wiki * 75 - Tweet 75 - w2v300                          |
+| 6  | 23122019-051338 | 0.5001043275 | 0.761840785    | FilteredNewsGeneralNoTagES | Bussines(P) | 30         | 200             | 400        | 100    | 2                | 0.2          | 0.005         | 46947     | 2687       | 23963           | 0.005       | Wiki * 50 - Tweet 50 - w2v300                          |
+| 7  | 23122019-055407 | 0.5013145266 | 0.761498145    | FilteredNewsGeneralNoTagES | Bussines(P) | 30         | 200             | 400        | 57     | 2                | 0.2          | 0.005         | 46947     | 2687       | 23963           | 0.005       | Wiki * 50 - Tweet 50 - w2v300 - Tweet Normilized Count |
+| 8  | 23122019-064208 | 0.5013145266 | 0.762820776    | FilteredNewsGeneralNoTagES | Bussines(P) | 30         | 200             | 400        | 100    | 2                | 0.2          | 0.005         | 46947     | 2687       | 23963           | 0.005       | Wiki * 50 - Tweet 50 - w2v300 - Tweet Normilized Count |
+| 9  | 23122019-083438 | 0.5011521111 | 0.771138144    | FilteredNewsGeneralNoTagES | All                                                                | 30         | 200             | 400        | 57     | 2                | 0.2          | 0.005         | 116852    | 7254       | 61626           | 0.005       | Wiki * 50 - Tweet 50 - w2v300 - Tweet Normilized Count |
+| 10 | 23122019-091919 | 0.4909652381 | 0.811634951    | FilteredNewsGeneralNoTagES | Bussines(P) | 30         | 200             | 400        | 57     | 2                | 0.2          | 0.005         | 46947     | 2687       | 23963           | 0.010       | Wiki * 50 - Tweet 50 - w2v300 - Tweet Normilized Count |
+| 11 | 23122019-095959 | 0.4415974628 | 1.002935975    | FilteredNewsGeneralNoTagES | Bussines(P) | 30         | 200             | 400        | 57     | 2                | 0.2          | 0.005         | 46947     | 2687       | 23963           | 0.050       | Wiki * 50 - Tweet 50 - w2v300 - Tweet Normilized Count |
+
+
+##### 3. NewsCnnMain
+* There was no significant improvement in results.
+
+##### 4. BERT
+* There was no significant improvement in results. Accuracy is between 0.55 and 0.49.
 
 ## Database 
 * Mongo DB
