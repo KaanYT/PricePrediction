@@ -9,6 +9,7 @@ Prediction Based on News, Twitter and Wikipedia for;
 **Warning**: Tests were done only for the crude oil price.
 
 ## Overview
+![Cosine Similarity](images/GeneralView.png)
 
 This application trying to predict the price of oil or stock with following steps;
 1. [Information Gathering (News, Stock Price, Tweets etc.)](#1-information-gathering)
@@ -22,6 +23,8 @@ This application trying to predict the price of oil or stock with following step
         1. [Wikipedia](#311-wikipedia)
         2. [Twitter](#312-twitter)
 4. [Predict Price Using DNN](#4-predict-price-using-dnn)
+
+* [Other general informations can be found in here](docs/General.md)
 
 ### 1. Information Gathering 
 
